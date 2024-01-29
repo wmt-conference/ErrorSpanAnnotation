@@ -1,20 +1,28 @@
 <div style="height: 70px;">
     <img src="img/flag_de.svg" style="height: 50px; margin-bottom: -15px; margin-left: 40px;">
-    {{SRC}}
+    <b>Source:</b> <em>{{SRC}}</em>
 </div>
 <div style="height: 70px;">
     <img src="img/flag_en.svg" style="height: 50px; margin-bottom: -15px; margin-left: 40px;">
-    {{TGT}}
+    <b>Translation:</b> <em>{{TGT}}</em>
 </div>
 <div style="height: 70px;">
     <img src="img/robot.svg" style="height: 50px; margin-bottom: -15px; margin-left: 40px;">
+    The AI suggests
     <input type="range" min="1" max="5" value="{{AI_PREDICTION_VALUE}}" disabled>
-    <label>{{AI_PREDICTION_VALUE}}</label>
+    <label class="range_label_shift">{{AI_PREDICTION_VALUE}}</label>
+    <span style="margin-left: -10px;">and is {{AI_PREDICTION_CONF}} confident.</span>
 </div>
 
+
+<br><br>
+
+
 What is the quality of the translation?
-<input id="human_answer_val" type="range" min="1" max="5" value="3">
-<label id="human_answer_label">3</label>
+<img src="img/flag_en.svg" style="height: 30px; position: relative; left: -70px; top: -10px">
+<!-- pre-fill with AI value -->
+<input id="human_answer_val" type="range" min="1" max="5" value="{{AI_PREDICTION_VALUE}}">
+<label id="human_answer_label" class="range_label_shift">{{AI_PREDICTION_VALUE}}</label>
 
 <br><br>
 <input type="button" value="Submit" id="button_submit">

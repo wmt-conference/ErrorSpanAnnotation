@@ -50,7 +50,9 @@ export async function setup_main_question() {
     let html = await get_html("main_task.html")
     html = html.replace("{{SRC}}", globalThis.data_now["src"])
     html = html.replace("{{TGT}}", globalThis.data_now["tgt"])
-    html = html.replaceAll("{{AI_PREDICTION_VALUE}}", globalThis.data_now["ai"]["overall"])
+    let [ai_val, ai_conf] = globalThis.data_now["ai"]["overall"]
+    html = html.replaceAll("{{AI_PREDICTION_VALUE}}", ai_val)
+    html = html.replaceAll("{{AI_PREDICTION_CONF}}", `${ai_conf*100}%`)
 
     main_text_area.html(html)
     await timer(10)
@@ -78,9 +80,7 @@ async function load_thankyou() {
 
     let html_text = `Thank you for participating in our study. For any further questions about this project or your data, <a href="mailto:vilem.zouhar@inf.ethz.ch">send us a message</a>.`;
     console.log("PID", globalThis.prolific_pid)
-    if (globalThis.prolific_pid != null) {
-        html_text += `<br>Please click <a class="button_like" href="https://app.prolific.com/submissions/complete?cc=C6XCI3SV">this link</a> to go back to Prolific. `
-        html_text += `Alternatively use this code <em>C6XCI3SV</em>.`
-    }
+    html_text += `<br>Please click <a class="button_like" href="https://app.prolific.com/submissions/complete?cc=C6XCI3SV">this link</a> to go back to Prolific. `
+    html_text += `Alternatively use this code <em>C6XCI3SV</em>.`
     main_text_area.html(html_text);
 }

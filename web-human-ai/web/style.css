@@ -40,6 +40,17 @@ body {
     width: 1cm;
 }
 
+.range_label_shift {
+    position: relative;
+    left: -60px;
+    top: -12px
+}
+
+input[type="range"] {
+    width: 100px;
+    margin-bottom: -10px;
+}
+
 /* button default */
 input[type="button"], .button_like {
     background-color: #ddd;
