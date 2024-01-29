@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <title>Human-AI MT Evaluation</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <link rel="stylesheet" href='https://fonts.googleapis.com/css?family=Roboto&display=swap'>
+    <link rel='stylesheet' type='text/css' href='style.css?r=14'> 
+</head>
+
+<body>
+    <div style="margin-left: auto; margin-right: auto; font-size: x-large; position: absolute; z-index: -100; text-align: left;">
+        Human-AI MT Evaluation
+    </div>
+
+    <div id="text_score" style="font-size: 15pt;"></div>
+    <div id="main_text_area"></div>
+    <br>
+    <div id="short_instructions">
+        Short instructions.
+    </div>
+
+    <script id="nocachescript"></script>
+    <script>
+        var randomNum = String((Math.floor(Math.random() * 10e10)));
+        document.getElementById('nocachescript').src = "web-source.js?t=" + randomNum;
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,72 @@
+* {
+    font-family: Roboto, Arial, Helvetica, sans-serif;
+}
+
+#main_text_area, #short_instructions {
+    vertical-align: top;
+    margin-top: 30px;
+    border: 2px solid black;
+    border-radius: 5px;
+    padding: 20px;
+    background-color: #fff;
+    display: inline-block;
+
+    width: 1000px;
+    height: 400px;
+    font-size: 1.1em;
+    text-align: justify;
+    position: relative;
+}
+
+#short_instructions {
+    height: 200px;
+    width: 1000px;
+    overflow-y: scroll;
+    font-size: 10pt;
+}
+
+a {
+    color: black;
+    font-weight: bold;
+}
+
+body {
+    text-align: center;
+    margin-bottom: 20px;
+    background-color: #eed;
+}
+
+.star {
+    width: 1cm;
+}
+
+/* button default */
+input[type="button"], .button_like {
+    background-color: #ddd;
+    border: none;
+    border-radius: 3px;
+    box-sizing: border-box;
+    color: #24292E;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 900;
+    line-height: 20px;
+    padding: 6px 16px;
+    vertical-align: middle;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+input[type="button"]:hover:not(:disabled) {
+    background-color: #ccc;
+}
+
+input[type="button"]:active {
+    background-color: #ddd;
+}
+
+input[type="button"]:disabled {
+    background-color: #bbb;
+    color: #455;
+    cursor: not-allowed;
+}

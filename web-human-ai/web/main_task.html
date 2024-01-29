@@ -1,0 +1,20 @@
+<div style="height: 70px;">
+    <img src="img/flag_de.svg" style="height: 50px; margin-bottom: -15px; margin-left: 40px;">
+    {{SRC}}
+</div>
+<div style="height: 70px;">
+    <img src="img/flag_en.svg" style="height: 50px; margin-bottom: -15px; margin-left: 40px;">
+    {{TGT}}
+</div>
+<div style="height: 70px;">
+    <img src="img/robot.svg" style="height: 50px; margin-bottom: -15px; margin-left: 40px;">
+    <input type="range" min="1" max="5" value="{{AI_PREDICTION_VALUE}}" disabled>
+    <label>{{AI_PREDICTION_VALUE}}</label>
+</div>
+
+What is the quality of the translation?
+<input id="human_answer_val" type="range" min="1" max="5" value="3">
+<label id="human_answer_label">3</label>
+
+<br><br>
+<input type="button" value="Submit" id="button_submit">
