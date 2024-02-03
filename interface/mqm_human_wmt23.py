@@ -29,55 +29,79 @@ sources = [
     open("data/mt-metrics-eval-v2/wmt23.sent/sources/en-de.txt", "r")
 ]
 
-queue_all = []
-
-
 print(len(sources), "sources")
+systems = list(data_mqm.keys())
 for sys in data_mqm.keys():
-    if sys not in {"ONLINE-B"}:
-        continue
     print(len(data_mqm[sys]), "of", sys)
     targets = [
         x.strip() for x in
-        open(f"data/mt-metrics-eval-v2/wmt23.sent/system-outputs/en-de/{sys}.txt", "r")
+        open(
+            f"data/mt-metrics-eval-v2/wmt23.sent/system-outputs/en-de/{sys}.txt", "r")
     ]
-    _obj_i_hack = 0
-    for obj_i, (obj, target, source) in enumerate(zip(data_mqm[sys], targets, sources)):
-        if not obj["mqm"]:
-            continue
-        if _obj_i_hack == 100:
-            break
+    for seg_i, (obj, target, source) in enumerate(zip(data_mqm[sys], targets, sources)):
         obj["sourceID"] = "wmt23.sent"
         obj["targetID"] = f"wmt23.sent.{sys}"
-        # TODO: unsure what this does exactly
         obj["itemType"] = "TGT" if sys != "refA" else "REF"
         obj["sourceText"] = source
         obj["targetText"] = target
-        obj["itemID"] = _obj_i_hack
-        _obj_i_hack += 1
-    
-        queue_all.append(obj)
-
-random.Random(123456).shuffle(queue_all)
-
-_block = 0
-for obj_i, obj in enumerate(queue_all):
-    obj["_item"] = obj_i
-    # TODO: unsure what this does exactly
-    obj["_block"] = _block//10
-    _block += 1
+        # essentially source ID
+        obj["itemID"] = seg_i
 
 
-dump_obj = [{
-    "items": queue_all,
-    "task": {
-      "batchNo": 1,
-      "batchSize": math.ceil(_block/10),
-      "randomSeed": 123456,
-      "requiredAnnotations": 1,
-      "sourceLanguage": "eng",
-      "targetLanguage": "deu"
+# make sure that we have as many sources as all systems
+assert all([len(v) == len(sources) for v in data_mqm.values()])
+
+# throw away sys source structure
+data_mqm = [
+    [val[i] for val in data_mqm.values()]
+    for i in range(len(sources))
+]
+
+# TODO: use only 300 sentences for now
+data_mqm = data_mqm[:300]
+
+r = random.Random(123)
+
+# shuffle the source order
+r.shuffle(data_mqm)
+
+tasks = []
+
+for source_section_i in range(len(data_mqm) // 100):
+    source_section_a = 100 * source_section_i
+    source_section_b = 100 * (source_section_i + 1)
+    data = data_mqm[source_section_a:source_section_b]
+
+    tasks_local = [[] for _ in systems]
+    for line in data:
+        # shuffle the system order
+        r.shuffle(line)
+        for sys_i, obj in enumerate(line):
+            # TODO
+            obj["_item"] = 0
+            obj["_block"] = 0
+            tasks_local[sys_i].append(obj)
+
+    tasks += tasks_local
+
+print("Created", len(tasks), "tasks because we have", len(systems), "systems")
+
+dump_obj = []
+for task_i, task in enumerate(tasks):
+    obj = {
+        "items": task,
+        "task": {
+            "batchNo": task_i+1,
+            "batchSize": 1,
+            "randomSeed": 123456,
+            "requiredAnnotations": 1,
+            "sourceLanguage": "eng",
+            "targetLanguage": "deu"
+        }
     }
-}]
+    dump_obj.append(obj)
+
+# use redundancy of 2 for now
+print(f'["eng", "deu", "uniform",  {2*len(systems)*(len(data_mqm)//100)}, {len(systems)*(len(data_mqm)//100)}]')
 
 json.dump(dump_obj, open("data/batches.json", "w"), indent=2)
