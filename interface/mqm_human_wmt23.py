@@ -4,11 +4,13 @@
 import collections
 import json
 import random
-import math
+
+# TODO:
+# no need for one person to not see multiple translations of the same document
 
 data_mqm = collections.defaultdict(list)
 
-for line in open("data/mt-metrics-eval-v2/wmt23.sent/human-scores/en-de.mqm.merged.seg.rating", "r"):
+for line in open("data/mt-metrics-eval-v2/wmt23/human-scores/en-de.mqm.merged.seg.rating", "r"):
     sys, mqm = line.strip().split("\t")
     if mqm == "None":
         mqm = []
@@ -24,9 +26,14 @@ for line in open("data/mt-metrics-eval-v2/wmt23.sent/human-scores/en-de.mqm.merg
     ]
     data_mqm[sys].append({"mqm": mqm})
 
+
 sources = [
     x.strip() for x in
-    open("data/mt-metrics-eval-v2/wmt23.sent/sources/en-de.txt", "r")
+    open("data/mt-metrics-eval-v2/wmt23/sources/en-de.txt", "r")
+]
+documents = [
+    x.strip().split("\t")[1] for x in
+    open("data/mt-metrics-eval-v2/wmt23/documents/en-de.docs", "r")
 ]
 
 print(len(sources), "sources")
@@ -36,9 +43,10 @@ for sys in data_mqm.keys():
     targets = [
         x.strip() for x in
         open(
-            f"data/mt-metrics-eval-v2/wmt23.sent/system-outputs/en-de/{sys}.txt", "r")
+            f"data/mt-metrics-eval-v2/wmt23/system-outputs/en-de/{sys}.txt", "r")
     ]
-    for seg_i, (obj, target, source) in enumerate(zip(data_mqm[sys], targets, sources)):
+    for seg_i, (obj, target, source, document) in enumerate(zip(data_mqm[sys], targets, sources, documents)):
+        obj["documentID"] = document
         obj["sourceID"] = "wmt23.sent"
         obj["targetID"] = f"wmt23.sent.{sys}"
         obj["itemType"] = "TGT" if sys != "refA" else "REF"
@@ -46,6 +54,7 @@ for sys in data_mqm.keys():
         obj["targetText"] = target
         # essentially source ID
         obj["itemID"] = seg_i
+        obj["isCompleteDocument"] = False
 
 
 # make sure that we have as many sources as all systems
@@ -57,13 +66,10 @@ data_mqm = [
     for i in range(len(sources))
 ]
 
-# TODO: use only 300 sentences for now
-data_mqm = data_mqm[:300]
+# TODO: use only 200 sentences for now
+data_mqm = data_mqm[:200]
 
 r = random.Random(123)
-
-# shuffle the source order
-r.shuffle(data_mqm)
 
 tasks = []
 
@@ -74,10 +80,8 @@ for source_section_i in range(len(data_mqm) // 100):
 
     tasks_local = [[] for _ in systems]
     for line in data:
-        # shuffle the system order
-        r.shuffle(line)
         for sys_i, obj in enumerate(line):
-            # TODO
+            # TODO do _item and _block matter for anything?
             obj["_item"] = 0
             obj["_block"] = 0
             tasks_local[sys_i].append(obj)
