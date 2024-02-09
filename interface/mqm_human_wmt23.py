@@ -81,12 +81,20 @@ for source_section_i in range(len(data_mqm) // 100):
     tasks_local = [[] for _ in systems]
     for line in data:
         for sys_i, obj in enumerate(line):
-            # TODO do _item and _block matter for anything?
-            obj["_item"] = 0
-            obj["_block"] = 0
             tasks_local[sys_i].append(obj)
 
     tasks += tasks_local
+
+for task in tasks:
+    _block = -1
+    _cur_doc = None
+
+    for obj_i, obj in enumerate(task):
+        if _cur_doc != obj["documentID"]:
+            _block += 1
+            _cur_doc = obj["documentID"]
+        obj["_block"] = _block
+        obj["_item"] = obj_i
 
 print("Created", len(tasks), "tasks because we have", len(systems), "systems")
 
