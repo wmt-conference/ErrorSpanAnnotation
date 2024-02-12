@@ -1,12 +1,26 @@
 # wget https://storage.googleapis.com/mt-metrics-eval/mt-metrics-eval-v2.tgz
-# and put it in data
+# and put it in `data/`
+
+# TODO:
+# no need for one person to not see multiple translations of the same document
+
+# TODO (needed)
+# each user needs to see the same number of systems
 
 import collections
 import json
 import random
+import argparse
+import copy
 
-# TODO:
-# no need for one person to not see multiple translations of the same document
+args = argparse.ArgumentParser()
+args.add_argument("--tutorial", default="en-de")
+args = args.parse_args()
+
+if args.tutorial:
+    tutorial = json.load(open(f"data/tutorial/{args.tutorial}.json", "r"))
+else:
+    tutorial = []
 
 data_mqm = collections.defaultdict(list)
 
@@ -49,12 +63,10 @@ for sys in data_mqm.keys():
         obj["documentID"] = document
         obj["sourceID"] = "wmt23.sent"
         obj["targetID"] = f"wmt23.sent.{sys}"
-        obj["itemType"] = "TGT" if sys != "refA" else "REF"
         obj["sourceText"] = source
         obj["targetText"] = target
         # essentially source ID
         obj["itemID"] = seg_i
-        obj["isCompleteDocument"] = False
 
 
 # make sure that we have as many sources as all systems
@@ -73,9 +85,10 @@ r = random.Random(123)
 
 tasks = []
 
-for source_section_i in range(len(data_mqm) // 100):
-    source_section_a = 100 * source_section_i
-    source_section_b = 100 * (source_section_i + 1)
+true_segments_count = 100-len(tutorial)
+for source_section_i in range(len(data_mqm) // true_segments_count):
+    source_section_a = true_segments_count * source_section_i
+    source_section_b = true_segments_count * (source_section_i + 1)
     data = data_mqm[source_section_a:source_section_b]
 
     tasks_local = [[] for _ in systems]
@@ -85,9 +98,13 @@ for source_section_i in range(len(data_mqm) // 100):
 
     tasks += tasks_local
 
+tasks_new = []
 for task in tasks:
     _block = -1
     _cur_doc = None
+
+    # add tutorial to the front
+    task = copy.deepcopy(tutorial) + task
 
     for obj_i, obj in enumerate(task):
         if _cur_doc != obj["documentID"]:
@@ -95,11 +112,17 @@ for task in tasks:
             _cur_doc = obj["documentID"]
         obj["_block"] = _block
         obj["_item"] = obj_i
+        # everything is TGT, though not sure what that means
+        obj["itemType"] = "TGT"
+        # mandatory for Appraise backward compatibility
+        obj["isCompleteDocument"] = False
+
+    tasks_new.append(task)
 
 print("Created", len(tasks), "tasks because we have", len(systems), "systems")
 
 dump_obj = []
-for task_i, task in enumerate(tasks):
+for task_i, task in enumerate(tasks_new):
     obj = {
         "items": task,
         "task": {
