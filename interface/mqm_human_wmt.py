@@ -1,13 +1,6 @@
 # wget https://storage.googleapis.com/mt-metrics-eval/mt-metrics-eval-v2.tgz
 # and put it in `data/`
 
-# python3 interface/mqm_human_wmt.py --year wmt23 --redundancy 20 --langs en-de --no-mqm --tasks-per-section 1 --systems "ONLINE-Y" "refA"
-# python3 interface/mqm_human_wmt.py --year wmt23 --redundancy 20 --langs de-en --no-mqm --tasks-per-section 1 --systems "ONLINE-Y" "refA"
-# python3 interface/mqm_human_wmt.py --year wmt23 --redundancy 20 --langs en-cs --no-mqm --tasks-per-section 1 --systems "ONLINE-Y" "refA"
-# python3 interface/mqm_human_wmt.py --year wmt22 --redundancy 20 --langs en-hr --no-mqm --tasks-per-section 1 --systems "Online-A" "refA"
-# python3 interface/mqm_human_wmt.py --year wmt20 --redundancy 20 --langs en-pl --no-mqm --tasks-per-section 1 --systems "Online-A.1576" "ref"
-
-
 import collections
 import json
 import random
@@ -136,8 +129,9 @@ for source_section_i in range(len(data_mqm) // EFFECTIVE_SECTION_SIZE):
         # add tutorial to the front
         task = copy.deepcopy(tutorial) + data_local[:100 - len(tutorial)]
         # if we are missing at most 5 samples, fill them from the beginning
+        # but skip the tutorial, which would mess it up
         if len(task) >= 95:
-            task = task + copy.deepcopy(task[:100 - len(task)])
+            task = task + copy.deepcopy(task[len(tutorial):100 - len(task)+len(tutorial)])
         if len(task) != 100:
             raise Exception("Tried to add a task without exactly 100 segments")
         tasks.append(task)
@@ -174,6 +168,9 @@ print(
     "because you requested", args.sections, "sections"
 )
 
+
+lang1, lang2 = args.langs.split("-")
+lang1l, lang2l = utils.LANG_2_TO_3[lang1], utils.LANG_2_TO_3[lang2]
 dump_obj = []
 for task_i, task in enumerate(tasks_new):
     obj = {
@@ -183,21 +180,20 @@ for task_i, task in enumerate(tasks_new):
             "batchSize": 1,
             "randomSeed": 123456,
             "requiredAnnotations": 1,
-            "sourceLanguage": "eng",
-            "targetLanguage": "deu"
+            "sourceLanguage": lang1l,
+            "targetLanguage": lang2l,
         }
     }
     dump_obj.append(obj)
 
-lang1, lang2 = args.langs.split("-")
 print("Put this in your manifest:")
 print(
     json.dumps(
         [
-            utils.LANG_2_TO_3[lang1],
-            utils.LANG_2_TO_3[lang2],
+            lang1l,
+            lang2l,
             "uniform",
-            args.redundancy*len(tasks),
+            args.redundancy * len(tasks),
             len(tasks)
         ]
     )

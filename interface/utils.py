@@ -3,5 +3,5 @@ LANG_2_TO_3 = {
     "de": "deu",
     "cs": "ces",
     "hr": "hrv",
-    "pl": "pli",
+    "pl": "plk",
 }
