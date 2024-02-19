@@ -177,7 +177,6 @@ for task_i, task in enumerate(tasks_new):
         "items": task,
         "task": {
             "batchNo": task_i + 1,
-            "batchSize": 1,
             "randomSeed": 123456,
             "requiredAnnotations": 1,
             "sourceLanguage": lang1l,
