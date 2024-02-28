@@ -3,7 +3,7 @@
 rm -rf static appraise.log db.sqlite3 Batches;
 
 python3 manage.py migrate;
-DJANGO_SUPERUSER_USERNAME=test DJANGO_SUPERUSER_EMAIL="" DJANGO_SUPERUSER_PASSWORD=test python manage.py createsuperuser --noinput;
+DJANGO_SUPERUSER_USERNAME=test DJANGO_SUPERUSER_PASSWORD=test python manage.py createsuperuser --noinput --email="test@test.test";
 python3 manage.py collectstatic --no-post-process;
 
 python3 manage.py StartNewCampaign Examples/DirectMQM/manifest_ondrej_demo.json \
