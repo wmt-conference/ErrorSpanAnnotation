@@ -4,4 +4,6 @@ LANG_2_TO_3 = {
     "cs": "ces",
     "hr": "hrv",
     "pl": "plk",
+    "ru": "rus",
+    "zh": "zho",
 }
