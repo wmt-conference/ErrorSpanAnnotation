@@ -87,7 +87,7 @@ for sys in systems:
         obj["sourceText"] = source
         obj["targetText"] = target
         # essentially source ID
-        obj["itemID"] = seg_i
+        # obj["itemID"] = seg_i
 
 
 # make sure that we have as many sources as all systems
@@ -146,8 +146,7 @@ for task in tasks:
         if _cur_doc != obj["documentID"]:
             _block += 1
             _cur_doc = obj["documentID"]
-        obj["_block"] = _block
-        obj["_item"] = obj_i
+        obj["itemID"] = obj_i
         # everything is TGT, though not sure what that means
         obj["itemType"] = "TGT"
         # mandatory for Appraise backward compatibility
