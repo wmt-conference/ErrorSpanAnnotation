@@ -9,7 +9,7 @@ import os
 
 args = argparse.ArgumentParser()
 args.add_argument("--tutorial", default="en-de")
-args.add_argument("--no-mqm", action="store_true")
+args.add_argument("--mqm", default=None)
 args.add_argument("--year", default="wmt23")
 args.add_argument("--langs", default="en-de")
 args.add_argument("--systems", nargs="+", default=None)
@@ -17,6 +17,7 @@ args.add_argument("--systems", nargs="+", default=None)
 args.add_argument("--tasks-per-section", type=int, default=2)
 args.add_argument("--sections", type=int, default=1)
 args.add_argument("--redundancy", type=int, default=2)
+args.add_argument("--suffix", default="")
 args = args.parse_args()
 
 
@@ -43,9 +44,9 @@ documents = [
 print(len(sources), "sources")
 
 data_mqm = collections.defaultdict(list)
-if not args.no_mqm:
+if args.mqm:
     for line in open(
-        find_file(f"{args.year}/human-scores/{args.langs}.mqm.merged.seg.rating"),
+        find_file(f"{args.year}/{args.mqm}.seg.rating"),
         "r",
     ):
         sys, mqm = line.strip().split("\t")
@@ -54,7 +55,10 @@ if not args.no_mqm:
         if mqm == "None":
             mqm = []
         else:
-            mqm = json.loads(mqm)["errors"]
+            mqm = json.loads(mqm)
+            # Tom/Gemba does not provide the same format but that's fine
+            if "errors" in mqm:
+                mqm = mqm["errors"]
         mqm = [
             {
                 "start_i": x["start"],
@@ -66,16 +70,14 @@ if not args.no_mqm:
         data_mqm[sys].append({"mqm": mqm})
     systems = list(data_mqm.keys())
 else:
-    systems = [
-        sys.removeprefix(
-            f"data/mt-metrics-eval-v2/{args.year}/system-outputs/{args.langs}/"
-        ).removesuffix(".txt")
-        for sys in glob.glob(
-            f"data/mt-metrics-eval-v2/{args.year}/system-outputs/{args.langs}/*.txt"
-        )
-    ]
-    systems = [sys for sys in systems if not args.systems or sys in args.systems]
-    data_mqm = {sys: [{"mqm": []} for _ in sources] for sys in systems}
+    # use any metrics rating to get _item
+    _file = glob.glob(f"data/mt-metrics-eval-v2/{args.year}/metric-scores/{args.langs}/*.seg.score")[0]
+    for line in open(_file, "r",):
+        sys, mqm = line.strip().split("\t")
+        if args.systems and sys not in args.systems:
+            continue
+        data_mqm[sys].append({"mqm": []})
+    systems = list(data_mqm.keys())
 
 for sys in systems:
     print(len(data_mqm[sys]), "of", sys)
@@ -94,6 +96,7 @@ for sys in systems:
         obj["targetID"] = f"{args.year}.{sys}"
         obj["sourceText"] = source
         obj["targetText"] = target
+        obj["_item"] = f"{sys} | {seg_i}"
 
 # make sure that we have as many sources as all systems
 assert all([len(v) == len(sources) for v in data_mqm.values()])
@@ -194,4 +197,4 @@ for task_i, task in enumerate(tasks_new):
 print("Put this in your manifest:")
 print(json.dumps([lang1l, lang2l, "uniform", args.redundancy * len(tasks), len(tasks)]))
 
-json.dump(dump_obj, open(f"data/batches_{args.year}_{args.langs}.json", "w"), indent=2)
+json.dump(dump_obj, open(f"data/batches_{args.year}_{args.langs}{args.suffix}.json", "w"), indent=2)

@@ -6,7 +6,7 @@ python3 manage.py migrate;
 DJANGO_SUPERUSER_USERNAME=test DJANGO_SUPERUSER_PASSWORD=test python manage.py createsuperuser --noinput --email="test@test.test";
 python3 manage.py collectstatic --no-post-process;
 
-python3 manage.py StartNewCampaign Examples/DirectMQM/manifest_ondrej_demo.json \
+python3 manage.py StartNewCampaign Examples/DirectMQM/manifest_wmt_demo.json \
     --batches-json \
         Examples/DirectMQM/batches_wmt23_en-de.json \
         Examples/DirectMQM/batches_wmt23_de-en.json \
