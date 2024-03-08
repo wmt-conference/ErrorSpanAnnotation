@@ -91,12 +91,12 @@ for sys in systems:
     for seg_i, (obj, target, source, document) in enumerate(
         zip(data_mqm[sys], targets, sources, documents)
     ):
-        obj["documentID"] = document
+        obj["documentID"] = document+"#"+sys
         obj["sourceID"] = f"{args.year}"
         obj["targetID"] = f"{args.year}.{sys}"
         obj["sourceText"] = source
         obj["targetText"] = target
-        obj["_item"] = f"{sys} | {seg_i}"
+        obj["_item"] = f"{sys} | {seg_i} | {document}"
 
 # make sure that we have as many sources as all systems
 assert all([len(v) == len(sources) for v in data_mqm.values()])
@@ -128,12 +128,14 @@ for source_section_i in range(len(data_mqm) // EFFECTIVE_SECTION_SIZE):
         # each Appraise section is strictly 100 segments
 
         # add tutorial to the front
-        task = copy.deepcopy(tutorial) + data_local[: 100 - len(tutorial)]
+        local_task = data_local[: 100 - len(tutorial)]
+        local_task.sort(key=lambda x: x["documentID"])
+        task = copy.deepcopy(tutorial) + local_task
         # if we are missing at most 5 samples, fill them from the beginning
         # but skip the tutorial, which would mess it up
         if len(task) >= 95:
             task = task + copy.deepcopy(
-                task[len(tutorial) : 100 - len(task) + len(tutorial)]
+                local_task[: 100 - len(task)]
             )
         if len(task) != 100:
             raise Exception("Tried to add a task without exactly 100 segments")
@@ -142,8 +144,10 @@ for source_section_i in range(len(data_mqm) // EFFECTIVE_SECTION_SIZE):
 
 tasks_new = []
 for task in tasks:
+    # make sure that documents are together
     for obj_i, obj in enumerate(task):
-        obj["itemID"] = obj_i
+        # Appraise needs positive integer
+        obj["itemID"] = obj_i+1
         # everything is TGT, though not sure what that means
         obj["itemType"] = "TGT"
         # mandatory for Appraise backward compatibility

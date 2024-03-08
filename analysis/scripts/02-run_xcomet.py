@@ -151,6 +151,14 @@ sbatch \
 ;
 
 
+srun \
+    --gpus=2 \
+    --mem-per-cpu=6G \
+    --ntasks=20 \
+    --time=0-4 \
+    --pty bash \
+;
+
 # Note: unsure if this works
 sbatch \
     --gpus=2 \
