@@ -1,0 +1,19 @@
+{
+    "CAMPAIGN_URL": "http://172.211.57.127:80/dashboard/sso/",
+    "CAMPAIGN_NAME": "wmt01lqm",
+    "CAMPAIGN_KEY": "wmt01lqm",
+    "CAMPAIGN_NO": 1,
+    "REDUNDANCY": 10,
+    "TASKS_TO_ANNOTATORS": [
+        ["eng", "deu", "uniform", 10, 1],
+        ["deu", "eng", "uniform", 10, 1],
+        ["eng", "ces", "uniform", 10, 1],
+        ["eng", "hrv", "uniform", 10, 1],
+        ["eng", "plk", "uniform", 10, 1],
+        ["eng", "rus", "uniform", 10, 1],
+        ["eng", "zho", "uniform", 10, 1]
+    ],
+
+    "TASK_TYPE": "Document",
+    "TASK_OPTIONS": "LQM;StaticContext"
+}
