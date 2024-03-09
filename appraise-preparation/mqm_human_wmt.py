@@ -129,7 +129,8 @@ for source_section_i in range(len(data_mqm) // EFFECTIVE_SECTION_SIZE):
 
         # add tutorial to the front
         local_task = data_local[: 100 - len(tutorial)]
-        local_task.sort(key=lambda x: x["documentID"])
+        # using hash so that it's a stable ordering but that two translations of the same document aren't together
+        local_task.sort(key=lambda x: hash(x["documentID"]))
         task = copy.deepcopy(tutorial) + local_task
         # if we are missing at most 5 samples, fill them from the beginning
         # but skip the tutorial, which would mess it up
