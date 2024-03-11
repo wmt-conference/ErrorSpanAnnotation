@@ -1,7 +1,7 @@
 {
     "CAMPAIGN_URL": "http://172.211.57.127:80/dashboard/sso/",
-    "CAMPAIGN_NAME": "wmt01lqm",
-    "CAMPAIGN_KEY": "wmt01lqm",
+    "CAMPAIGN_NAME": "wmt01esa",
+    "CAMPAIGN_KEY": "wmt01esa",
     "CAMPAIGN_NO": 1,
     "REDUNDANCY": 10,
     "TASKS_TO_ANNOTATORS": [
@@ -15,5 +15,5 @@
     ],
 
     "TASK_TYPE": "Document",
-    "TASK_OPTIONS": "LQM;StaticContext"
+    "TASK_OPTIONS": "ESA;StaticContext"
 }

@@ -1,12 +1,12 @@
 {
     "CAMPAIGN_URL": "http://172.211.57.127:80/dashboard/sso/",
-    "CAMPAIGN_NAME": "ai02lqm",
-    "CAMPAIGN_KEY": "ai02lqm",
+    "CAMPAIGN_NAME": "ai02esa",
+    "CAMPAIGN_KEY": "ai02esa",
     "CAMPAIGN_NO": 2,
     "REDUNDANCY": 10,
     "TASKS_TO_ANNOTATORS": [
         ["eng", "ces", "uniform", 10, 1]
     ],
     "TASK_TYPE": "Document",
-    "TASK_OPTIONS": "LQM;StaticContext"
+    "TASK_OPTIONS": "ESA;StaticContext"
 }
