@@ -2,7 +2,7 @@
     {
         "mqm": {
             "tutorial": {
-                "instruction": "The word <u>\"walked\"</u> is incorrect. Mark it minor error (yellow) using the instructions above.",
+                "instruction": "The word <u>\"walked\"</u> is incorrect. Mark it minor error (light pink) using the instructions above.",
                 "mqm_target": [
                     {
                         "start_i": 8,
@@ -46,7 +46,7 @@
     {
         "mqm": {
             "tutorial": {
-                "instruction": "While the translation is technically correct, it does not sound very natural. Mark the erroneous words but at the end, use the slider to evaluate the overall translation quality to around 7 out of 10.",
+                "instruction": "While the translation is technically correct, it does not sound very natural. Mark the erroneous words but at the end, use the slider to evaluate the overall translation quality to around 70%.",
                 "score_target": 70
             },
             "payload": []
