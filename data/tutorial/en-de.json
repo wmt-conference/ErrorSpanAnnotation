@@ -24,12 +24,12 @@
     {
         "mqm": {
             "tutorial": {
-                "instruction": "The words <u>\"stayed inside\"</u> are critically wrong. Mark them using the instructions and raise its severity to <u>critical</u>.",
+                "instruction": "The words <u>\"stayed inside\"</u> are very wrong. Mark them using the instructions and raise its severity to <u>major</u>.",
                 "mqm_target": [
                     {
                         "start_i": 8,
                         "end_i": 21,
-                        "severity": "critical"
+                        "severity": "major"
                     }
                 ]
             },
@@ -62,12 +62,12 @@
     {
         "mqm": {
             "tutorial": {
-                "instruction": "The word <u>\"Hund\" (dog)</u> is not present in the translation. Mark the <u>[MISSING]</u> text with critical severity.",
+                "instruction": "The word <u>\"Hund\" (dog)</u> is not present in the translation. Mark the <u>[MISSING]</u> text with major severity.",
                 "mqm_target": [
                     {
                         "start_i": "missing",
                         "end_i": "missing",
-                        "severity": "critical"
+                        "severity": "major"
                     }
                 ]
             },
