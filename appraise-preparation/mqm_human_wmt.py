@@ -129,15 +129,27 @@ for source_section_i in range(len(data_mqm) // EFFECTIVE_SECTION_SIZE):
 
         # add tutorial to the front
         local_task = data_local[: 100 - len(tutorial)]
-        # using hash so that it's a stable ordering but that two translations of the same document aren't together
-        local_task.sort(key=lambda x: hash(x["documentID"]))
+      
+
         task = copy.deepcopy(tutorial) + local_task
         # if we are missing at most 5 samples, fill them from the beginning
         # but skip the tutorial, which would mess it up
         if len(task) >= 95:
-            task = task + copy.deepcopy(
+            task_addition = copy.deepcopy(
                 local_task[: 100 - len(task)]
             )
+            for item in task_addition:
+                item["documentID"] += "#duplicate"
+            task = task + task_addition
+
+        # shuffle documents on document level
+        local_task_doc = collections.defaultdict(list)
+        for item in local_task:
+            local_task_doc[item["documentID"]].append(item)
+        local_task_doc = list(local_task_doc.values())
+        r.shuffle(local_task_doc)
+        local_task = [item for doc in local_task_doc for item in doc]
+
         if len(task) != 100:
             raise Exception("Tried to add a task without exactly 100 segments")
         tasks.append(task)
