@@ -14,8 +14,7 @@ args.add_argument("--year", default="wmt23")
 args.add_argument("--langs", default="en-de")
 args.add_argument("--systems", nargs="+", default=None)
 # Appraise section is "exactly" 100 segments
-args.add_argument("--tasks-per-section", type=int, default=2)
-args.add_argument("--sections", type=int, default=1)
+args.add_argument("--sections", type=float, default=1)
 args.add_argument("--redundancy", type=int, default=2)
 args.add_argument("--suffix", default="")
 args = args.parse_args()
@@ -106,29 +105,33 @@ data_mqm = [[val[i] for val in data_mqm.values()] for i in range(len(sources))]
 
 # base section is ~100 (safe for the tutorial)
 # in case we have 1 task per section, then a single task has to capture all systems
-EFFECTIVE_SECTION_SIZE = (100 - len(tutorial)) * args.tasks_per_section // len(systems)
-data_mqm = data_mqm[: args.sections * EFFECTIVE_SECTION_SIZE]
+EFFECTIVE_SECTION_SIZE = 100 - len(tutorial)
+# make sure we don't get messed up by the rounding
+assert int(args.sections * EFFECTIVE_SECTION_SIZE) == args.sections * EFFECTIVE_SECTION_SIZE
+data_mqm = data_mqm[: int(args.sections * EFFECTIVE_SECTION_SIZE)]
 
 r = random.Random(123)
 
 tasks = []
 
-for source_section_i in range(len(data_mqm) // EFFECTIVE_SECTION_SIZE):
-    source_section_a = EFFECTIVE_SECTION_SIZE * source_section_i
-    source_section_b = EFFECTIVE_SECTION_SIZE * (source_section_i + 1)
+section_i = 0
+while data_mqm:
+    section_i += 1
+    data_local = data_mqm[:EFFECTIVE_SECTION_SIZE]
     data_local = [
-        x for sys_line in data_mqm[source_section_a:source_section_b] for x in sys_line
+        x for sys_line in data_local for x in sys_line
     ]
-    print("Covering from", source_section_a, "to", source_section_b)
+    data_mqm = data_mqm[EFFECTIVE_SECTION_SIZE:]
+    print("Covering from", (section_i-1)*EFFECTIVE_SECTION_SIZE, "to", section_i*EFFECTIVE_SECTION_SIZE)
 
     # shuffle everything within the section
     r.shuffle(data_local)
 
-    for task_i in range(args.tasks_per_section):
+    while data_local:
         # each Appraise section is strictly 100 segments
 
         # add tutorial to the front
-        task = data_local[: 100 - len(tutorial)]
+        task = data_local[: EFFECTIVE_SECTION_SIZE]
       
         # shuffle documents on document level
         task_doc = collections.defaultdict(list)
@@ -141,7 +144,8 @@ for source_section_i in range(len(data_mqm) // EFFECTIVE_SECTION_SIZE):
         task = copy.deepcopy(tutorial) + task
         # if we are missing at most 5 samples, fill them from the beginning
         # but skip the tutorial, which would mess it up
-        if len(task) >= 95:
+        if len(task) >= 50+len(tutorial) and len(task) < 100:
+            print("Aligning from", len(task), "to", 100)
             task_addition = copy.deepcopy(
                 task[len(tutorial): 100 - len(task)+len(tutorial)]
             )
@@ -172,10 +176,9 @@ print(
     len(tasks),
     "tasks because we have",
     len(systems),
-    "systems",
-    "and you requested",
-    args.tasks_per_section,
-    "tasks per section.",
+    "systems and",
+    args.sections,
+    "sections"
 )
 print(
     "Therefore, each task covers",
@@ -186,7 +189,7 @@ print(
 )
 print(
     "As a result, we covered the first",
-    source_section_b,
+    section_i*EFFECTIVE_SECTION_SIZE,
     "segments",
     "because you requested",
     args.sections,
