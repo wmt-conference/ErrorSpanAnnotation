@@ -2,6 +2,22 @@
     {
         "mqm": {
             "tutorial": {
+                "instruction": "This translation seems to be all correct. Please set the slider to 100% and continue.",
+                "score_target": 100
+            },
+            "payload": []
+        },
+        "documentID": "ende-tutorial1",
+        "sourceID": "ende-tutorial1",
+        "targetID": "ende-tutorial1",
+        "itemType": "TGT",
+        "sourceText": "Der Hund ist rausgerannt.",
+        "targetText": "The dog ran outside.",
+        "itemID": 1000000
+    },
+    {
+        "mqm": {
+            "tutorial": {
                 "instruction": "The word <u>\"walked\"</u> is incorrect. Mark it minor error (light pink) using the instructions above.",
                 "mqm_target": [
                     {
@@ -13,9 +29,9 @@
             },
             "payload": []
         },
-        "documentID": "ende-tutorial",
-        "sourceID": "ende-tutorial",
-        "targetID": "ende-tutorial",
+        "documentID": "ende-tutorial1",
+        "sourceID": "ende-tutorial1",
+        "targetID": "ende-tutorial1",
         "itemType": "TGT",
         "sourceText": "Der Hund ist rausgerannt.",
         "targetText": "The dog walked outside.",
@@ -35,9 +51,9 @@
             },
             "payload": []
         },
-        "documentID": "ende-tutorial",
-        "sourceID": "ende-tutorial",
-        "targetID": "ende-tutorial",
+        "documentID": "ende-tutorial1",
+        "sourceID": "ende-tutorial1",
+        "targetID": "ende-tutorial1",
         "itemType": "TGT",
         "sourceText": "Der Hund ist rausgerannt.",
         "targetText": "The dog stayed inside.",
@@ -46,14 +62,14 @@
     {
         "mqm": {
             "tutorial": {
-                "instruction": "While the translation is technically correct, it does not sound very natural. Mark the erroneous words but at the end, use the slider to evaluate the overall translation quality to around 70%.",
+                "instruction": "While the translation is technically correct, it does not sound very natural. Don't mark any erroneous words but at the end, use the slider to evaluate the overall translation quality to around 70%.",
                 "score_target": 70
             },
             "payload": []
         },
-        "documentID": "ende-tutorial",
-        "sourceID": "ende-tutorial",
-        "targetID": "ende-tutorial",
+        "documentID": "ende-tutorial2",
+        "sourceID": "ende-tutorial2",
+        "targetID": "ende-tutorial2",
         "itemType": "TGT",
         "sourceText": "Although the cats stayed outside overnight, they were not cold.",
         "targetText": "Obwohl die Katzen die Nacht über im Freien verharrten, erfuhren sie keine Kälte.",
@@ -73,9 +89,9 @@
             },
             "payload": []
         },
-        "documentID": "ende-tutorial",
-        "sourceID": "ende-tutorial",
-        "targetID": "ende-tutorial",
+        "documentID": "ende-tutorial2",
+        "sourceID": "ende-tutorial2",
+        "targetID": "ende-tutorial2",
         "itemType": "TGT",
         "sourceText": "Der Hund ist rausgerannt.",
         "targetText": "The walked outside.",
@@ -95,9 +111,9 @@
                     "severity": "minor"
                 }]
         },
-        "documentID": "ende-tutorial",
-        "sourceID": "ende-tutorial",
-        "targetID": "ende-tutorial",
+        "documentID": "ende-tutorial2",
+        "sourceID": "ende-tutorial2",
+        "targetID": "ende-tutorial2",
         "itemType": "TGT",
         "sourceText": "Der Hund ist rausgerannt.",
         "targetText": "The dog ran outside.",
