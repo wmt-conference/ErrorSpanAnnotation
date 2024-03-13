@@ -8,7 +8,8 @@ import utils
 import os
 
 args = argparse.ArgumentParser()
-args.add_argument("--tutorial", default="en-de")
+args.add_argument("--sec-tutorial", default="de-en")
+args.add_argument("--sec-bad", default=None)
 args.add_argument("--mqm", default=None)
 args.add_argument("--year", default="wmt23")
 args.add_argument("--langs", default="en-de")
@@ -28,10 +29,15 @@ def find_file(filename):
     raise Exception("File " + filename + " not found")
 
 
-if args.tutorial:
-    tutorial = json.load(open(f"data/tutorial/{args.tutorial}.json", "r"))
+if args.sec_tutorial:
+    sec_tutorial = json.load(open(f"data/extra/tutorial-{args.sec_tutorial}.json", "r"))
 else:
-    tutorial = []
+    sec_tutorial = []
+
+if args.sec_bad:
+    sec_bad = json.load(open(f"data/extra/bad-{args.sec_bad}.json", "r"))
+else:
+    sec_bad = []
 
 sources = [
     x.strip() for x in open(find_file(f"{args.year}/sources/{args.langs}.txt"), "r")
@@ -95,6 +101,7 @@ for sys in systems:
         obj["targetID"] = f"{args.year}.{sys}"
         obj["sourceText"] = source
         obj["targetText"] = target
+        obj["itemType"] = "TGT"
         obj["_item"] = f"{sys} | {seg_i} | {document}"
 
 # make sure that we have as many sources as all systems
@@ -105,24 +112,27 @@ data_mqm = [[val[i] for val in data_mqm.values()] for i in range(len(sources))]
 
 # base section is ~100 (safe for the tutorial)
 # in case we have 1 task per section, then a single task has to capture all systems
-EFFECTIVE_SECTION_SIZE = 100 - len(tutorial)
-# make sure we don't get messed up by the rounding
-assert int(args.sections * EFFECTIVE_SECTION_SIZE) == args.sections * EFFECTIVE_SECTION_SIZE
+EFFECTIVE_SECTION_SIZE = 100 - len(sec_tutorial) - len(sec_bad)
 data_mqm = data_mqm[: int(args.sections * EFFECTIVE_SECTION_SIZE)]
 
 r = random.Random(123)
 
-tasks = []
+def is_bad_ok(task_doc):
+    task_items = [x for doc in task_doc for x in doc]
+    task_items_bad = [i for i, x in enumerate(task_items) if x["itemType"].startswith("BAD.")]
+    # for now just make sure that the attention check is not too much at the beginning
+    return all([i > 15 for i in task_items_bad])
 
+tasks = []
 section_i = 0
 while data_mqm:
     section_i += 1
     data_local = data_mqm[:EFFECTIVE_SECTION_SIZE]
+    print("Covering from", (section_i-1)*EFFECTIVE_SECTION_SIZE, "to", (section_i-1)*EFFECTIVE_SECTION_SIZE + len(data_local))
     data_local = [
         x for sys_line in data_local for x in sys_line
     ]
     data_mqm = data_mqm[EFFECTIVE_SECTION_SIZE:]
-    print("Covering from", (section_i-1)*EFFECTIVE_SECTION_SIZE, "to", section_i*EFFECTIVE_SECTION_SIZE)
 
     # shuffle everything within the section
     r.shuffle(data_local)
@@ -132,22 +142,27 @@ while data_mqm:
 
         # add tutorial to the front
         task = data_local[: EFFECTIVE_SECTION_SIZE]
+        task = copy.deepcopy(sec_bad) + task
       
         # shuffle documents on document level
         task_doc = collections.defaultdict(list)
         for item in task:
             task_doc[item["documentID"]].append(item)
         task_doc = list(task_doc.values())
+        # shuffle until we are happy with the attention check layout
         r.shuffle(task_doc)
+        while not is_bad_ok(task_doc):
+            r.shuffle(task_doc)
+
         task = [item for doc in task_doc for item in doc]
 
-        task = copy.deepcopy(tutorial) + task
+        task = copy.deepcopy(sec_tutorial) + task
         # if we are missing at most 5 samples, fill them from the beginning
         # but skip the tutorial, which would mess it up
-        if len(task) >= 50+len(tutorial) and len(task) < 100:
+        if len(task) >= 50+len(sec_tutorial)+len(sec_bad) and len(task) < 100:
             print("Aligning from", len(task), "to", 100)
             task_addition = copy.deepcopy(
-                task[len(tutorial): 100 - len(task)+len(tutorial)]
+                task[len(sec_tutorial)+len(sec_bad): 100 - len(task)+len(sec_tutorial)+len(sec_bad)]
             )
             for item in task_addition:
                 item["documentID"] += "#duplicate"
@@ -156,7 +171,7 @@ while data_mqm:
         if len(task) != 100:
             raise Exception("Tried to add a task without exactly 100 segments")
         tasks.append(task)
-        data_local = data_local[100 - len(tutorial) :]
+        data_local = data_local[100 - len(sec_tutorial) -len(sec_bad):]
 
 tasks_new = []
 for task in tasks:
@@ -164,8 +179,6 @@ for task in tasks:
     for obj_i, obj in enumerate(task):
         # Appraise needs positive integer
         obj["itemID"] = obj_i+1
-        # everything is TGT, though not sure what that means
-        obj["itemType"] = "TGT"
         # mandatory for Appraise backward compatibility
         obj["isCompleteDocument"] = False
 
@@ -185,7 +198,9 @@ print(
     EFFECTIVE_SECTION_SIZE,
     "segments",
     "and contains a tutorial of size",
-    len(tutorial),
+    len(sec_tutorial),
+    "and attention check of size",
+    len(sec_bad),
 )
 print(
     "As a result, we covered the first",
