@@ -143,7 +143,7 @@ for source_section_i in range(len(data_mqm) // EFFECTIVE_SECTION_SIZE):
         # but skip the tutorial, which would mess it up
         if len(task) >= 95:
             task_addition = copy.deepcopy(
-                task[: 100 - len(task)]
+                task[len(tutorial): 100 - len(task)+len(tutorial)]
             )
             for item in task_addition:
                 item["documentID"] += "#duplicate"
