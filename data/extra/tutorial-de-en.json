@@ -2,7 +2,7 @@
     {
         "mqm": {
             "tutorial": {
-                "instruction": "This translation seems to be all correct. Please set the slider to 100% and continue.",
+                "instruction": "This translation seems to be all correct. Please use the slider to set the quality (if exists) or click 'mark complete'.",
                 "score_target": 100
             },
             "payload": []

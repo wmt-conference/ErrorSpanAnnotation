@@ -17,5 +17,17 @@ python3 manage.py StartNewCampaign ~/batches/wmt_demo_manifest.json \
         ~/batches/batches_wmt23_en-zh.json \
     --csv-output ~/batches/wmt_demo_users.csv
 
+
+python3 manage.py StartNewCampaign ~/batches/wmt_demo_manifest_esa.json \
+    --batches-json \
+        ~/batches/batches_wmt23_en-de.json \
+    --csv-output ~/batches/wmt_demo_users_esa.csv
+
+python3 manage.py StartNewCampaign ~/batches/wmt_demo_manifest_mqm.json \
+    --batches-json \
+        ~/batches/batches_wmt23_en-de.json \
+    --csv-output ~/batches/wmt_demo_users_mqm.csv
+        
+
 export APPRAISE_ALLOWED_HOSTS="127.0.0.1,172.211.57.127"
 nohup python3 manage.py runserver 0.0.0.0:80 &
