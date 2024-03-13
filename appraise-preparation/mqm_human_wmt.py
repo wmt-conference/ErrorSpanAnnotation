@@ -121,34 +121,33 @@ for source_section_i in range(len(data_mqm) // EFFECTIVE_SECTION_SIZE):
     ]
     print("Covering from", source_section_a, "to", source_section_b)
 
-    # shuffle everything within
+    # shuffle everything within the section
     r.shuffle(data_local)
 
     for task_i in range(args.tasks_per_section):
         # each Appraise section is strictly 100 segments
 
         # add tutorial to the front
-        local_task = data_local[: 100 - len(tutorial)]
+        task = data_local[: 100 - len(tutorial)]
       
+        # shuffle documents on document level
+        task_doc = collections.defaultdict(list)
+        for item in task:
+            task_doc[item["documentID"]].append(item)
+        task_doc = list(task_doc.values())
+        r.shuffle(task_doc)
+        task = [item for doc in task_doc for item in doc]
 
-        task = copy.deepcopy(tutorial) + local_task
+        task = copy.deepcopy(tutorial) + task
         # if we are missing at most 5 samples, fill them from the beginning
         # but skip the tutorial, which would mess it up
         if len(task) >= 95:
             task_addition = copy.deepcopy(
-                local_task[: 100 - len(task)]
+                task[: 100 - len(task)]
             )
             for item in task_addition:
                 item["documentID"] += "#duplicate"
             task = task + task_addition
-
-        # shuffle documents on document level
-        local_task_doc = collections.defaultdict(list)
-        for item in local_task:
-            local_task_doc[item["documentID"]].append(item)
-        local_task_doc = list(local_task_doc.values())
-        r.shuffle(local_task_doc)
-        local_task = [item for doc in local_task_doc for item in doc]
 
         if len(task) != 100:
             raise Exception("Tried to add a task without exactly 100 segments")
