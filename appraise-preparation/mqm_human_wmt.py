@@ -8,14 +8,17 @@ import utils
 import os
 
 args = argparse.ArgumentParser()
-args.add_argument("--sec-tutorial", default="de-en")
+args.add_argument("--sec-tutorial", default="de-en.mqm")
 args.add_argument("--bad-segments", type=int, default=12)
 args.add_argument("--mqm", default=None)
+# for cases where we want to load MQM for filtering but not actually add it
+args.add_argument("--no-mqm", action="store_true")
 args.add_argument("--year", default="wmt23")
 args.add_argument("--langs", default="en-de")
 args.add_argument("--systems", nargs="+", default=None)
 # Appraise section is "exactly" 100 segments
-args.add_argument("--src-docs", type=float, default=50)
+args.add_argument("--src-docs", type=int, default=20)
+args.add_argument("--src-docs-seed", type=int, default=0)
 args.add_argument("--redundancy", type=int, default=2)
 args.add_argument("--suffix", default="")
 args = args.parse_args()
@@ -43,35 +46,41 @@ documents = [
 ]
 print(len(sources), "sources")
 
-documents_allowed = random.sample(set(documents), k=args.src_docs)
-print(documents_allowed)
-exit()
+documents_allowed = random.Random(args.src_docs_seed).sample(sorted(set(documents)), k=args.src_docs)
+print(f"Out of {len(set(documents))} chosing the following:", documents_allowed)
 
 data_mqm = collections.defaultdict(list)
+banlines = set()
 if args.mqm:
     for line in open(
         find_file(f"{args.year}/{args.mqm}.seg.rating"),
         "r",
     ):
         sys, mqm = line.strip().split("\t")
-        if args.systems and sys not in args.systems:
+        if (args.systems and sys not in args.systems) or sys == "synthetic_ref":
             continue
         if mqm == "None":
-            mqm = []
+            # set to None and filter them globally
+            mqm = None
+            # the length of this list is also the line position
+            banlines.add(len(data_mqm[sys]))
         else:
             mqm = json.loads(mqm)
             # Tom/Gemba does not provide the same format but that's fine
             if "errors" in mqm:
                 mqm = mqm["errors"]
-        mqm = [
-            {
-                "start_i": x["start"],
-                "end_i": x["end"],
-                "severity": x["severity"],
-            }
-            for x in mqm
-        ]
+            mqm = [
+                {
+                    "start_i": x["start"],
+                    "end_i": x["end"],
+                    "severity": x["severity"],
+                }
+                for x in mqm
+            ]
+        if args.no_mqm:
+            mqm = []
         data_mqm[sys].append({"mqm": mqm})
+        
     systems = list(data_mqm.keys())
 else:
     # use any metrics rating to get _item
@@ -106,26 +115,37 @@ for sys in systems:
 # make sure that we have as many sources as all systems
 assert all([len(v) == len(sources) for v in data_mqm.values()])
 
-# throw away sys source structure
-data_mqm = [[val[i] for val in data_mqm.values()] for i in range(len(sources))]
+# prepare bad documents from the global pool
+data_bad = utils.prep_bad_documents(data_mqm)
+
+# filter undesired docs
+data_mqm = {
+    sys:[obj for obj in vals if obj["documentID"].split("#")[0] in documents_allowed]
+    for sys,vals in data_mqm.items()
+}
+# filter lines with None MQM
+data_mqm = {
+    sys:[obj for obj_i, obj in enumerate(vals) if obj_i not in banlines]
+    for sys,vals in data_mqm.items()
+}
+
+# throw away sys source structure (transpose)
+data_mqm = [list(sublist) for sublist in list(zip(*data_mqm.values()))]
+total_lines = len(data_mqm)
+print("Skipping", len(banlines), "lines because their MQM is None")
 
 # base section is ~100 (safe for the tutorial)
 # in case we have 1 task per section, then a single task has to capture all systems
 EFFECTIVE_SECTION_SIZE = 100 - len(sec_tutorial) - args.bad_segments
-data_mqm = data_mqm[: int(args.sections * EFFECTIVE_SECTION_SIZE)]
 
 r = random.Random(123)
 
-# prepare BAD documents
-
-# TODO: sample
-
 tasks = []
 section_i = 0
+print()
 while data_mqm:
     section_i += 1
     data_local = data_mqm[:EFFECTIVE_SECTION_SIZE]
-    print("Covering from", (section_i-1)*EFFECTIVE_SECTION_SIZE, "to", (section_i-1)*EFFECTIVE_SECTION_SIZE + len(data_local))
     data_local = [
         x for sys_line in data_local for x in sys_line
     ]
@@ -139,7 +159,9 @@ while data_mqm:
 
         # add tutorial to the front
         task = data_local[: EFFECTIVE_SECTION_SIZE]
-        task = copy.deepcopy(sec_bad) + task
+        data_local = data_local[EFFECTIVE_SECTION_SIZE:]
+        data_bad_local = utils.sample_bad_documents(data_bad, args.bad_segments)
+        task = copy.deepcopy(data_bad_local) + task
       
         # shuffle documents on document level
         task_doc = collections.defaultdict(list)
@@ -151,21 +173,22 @@ while data_mqm:
         task = [item for doc in task_doc for item in doc]
 
         task = copy.deepcopy(sec_tutorial) + task
-        # if we are missing at most 5 samples, fill them from the beginning
+        # if we are missing samples, fill them from the beginning
         # but skip the tutorial, which would mess it up
-        if len(task) >= 50+len(sec_tutorial)+len(sec_bad) and len(task) < 100:
-            print("Aligning from", len(task), "to", 100)
-            task_addition = copy.deepcopy(
-                task[len(sec_tutorial)+len(sec_bad): 100 - len(task)+len(sec_tutorial)+len(sec_bad)]
-            )
+        _duplicate_i = 0
+        if len(task) == 100:
+            print("Task already", len(task))
+        while len(task) < 100:
+            _duplicate_i += 1
+            _prev_task_len = len(task)
+            task_addition = copy.deepcopy(task[len(sec_tutorial):][:100-len(task)])
             for item in task_addition:
-                item["documentID"] += "#duplicate"
+                item["documentID"] += f"#duplicate{_duplicate_i}"
             task = task + task_addition
+            print(f"{'-' if _duplicate_i > 1 else ''}Filling task from", _prev_task_len, "to", len(task))
 
-        if len(task) != 100:
-            raise Exception("Tried to add a task without exactly 100 segments")
         tasks.append(task)
-        data_local = data_local[100 - len(sec_tutorial) -len(sec_bad):]
+print()
 
 tasks_new = []
 for task in tasks:
@@ -184,8 +207,8 @@ print(
     "tasks because we have",
     len(systems),
     "systems and",
-    args.sections,
-    "sections"
+    args.src_docs,
+    "source documents"
 )
 print(
     "Therefore, each task covers",
@@ -194,15 +217,12 @@ print(
     "and contains a tutorial of size",
     len(sec_tutorial),
     "and attention check of size",
-    len(sec_bad),
+    args.bad_segments,
 )
 print(
-    "As a result, we covered the first",
-    section_i*EFFECTIVE_SECTION_SIZE,
-    "segments",
-    "because you requested",
-    args.sections,
-    "sections",
+    "As a result, we covered",
+    total_lines,
+    "segments"
 )
 
 

@@ -1,3 +1,5 @@
+import random
+
 LANG_2_TO_3 = {
     "en": "eng",
     "de": "deu",
@@ -8,6 +10,51 @@ LANG_2_TO_3 = {
     "zh": "zho",
 }
 
+RANDOM_PREP_BAD = random.Random(0)
+def prep_bad_documents(data_mqm):
+    import collections    
+    import copy
+    # detach
+    data_mqm = copy.deepcopy(data_mqm)
+    data_mqm = [x for sub in data_mqm.values() for x in sub]
+    data_docs = collections.defaultdict(list)
+    all_tgt = []
+    for obj in data_mqm:
+        data_docs[obj["documentID"]].append(obj)
+        all_tgt.append(obj["targetText"])
+    data_docs = [sub for sub in data_docs.values() if len(sub) in {2, 3, 4, 5}]
+    for sub in data_docs:
+        for obj in sub:
+            corrupted, start_i, end_i = corrupt_text_by_mixing(
+                obj["targetText"],
+                RANDOM_PREP_BAD.choice(all_tgt),
+                character_based=False
+            )
+            obj["targetText"] = corrupted
+            obj["itemType"] = f"BAD.{start_i}.{end_i}"
+    return data_docs
+
+RANDOM_SAMPLE_BAD = random.Random(0)
+def sample_bad_documents(data_bad, bad_segments):
+    assert bad_segments == 12
+    CONFIGS = [
+        [5, 5, 2],
+        [3, 3, 3, 3],
+        [4, 4, 4],
+        [5, 4, 3],
+    ]
+    config = RANDOM_SAMPLE_BAD.choice(CONFIGS)
+    docs = [
+        RANDOM_SAMPLE_BAD.choice([doc for doc in data_bad if len(doc) == c])
+        for c in config
+    ]
+    for doc_i, doc in enumerate(docs):
+        for obj in doc:
+            obj["documentID"] = obj["documentID"] + f"#bad{doc_i+1}"
+
+    docs = [x for doc in docs for x in doc]
+    assert len(docs) == bad_segments
+    return docs
 
 def corrupt_text_by_mixing(seg_orig: str, seg_inject: str, character_based: bool = False) -> str:
     """
@@ -99,4 +146,5 @@ def corrupt_text_by_mixing(seg_orig: str, seg_inject: str, character_based: bool
     if character_based:
         bad_text = ''.join(bad_data)
 
-    return bad_text
+    # return text but also indicies
+    return (bad_text, bad_pos, bad_len)
