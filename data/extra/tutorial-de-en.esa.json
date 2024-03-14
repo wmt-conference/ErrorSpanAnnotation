@@ -62,7 +62,7 @@
     {
         "mqm": {
             "tutorial": {
-                "instruction": "While the translation is technically correct, it does not sound very natural. Don't mark any erroneous words but at the end, use the slider to evaluate the overall translation quality to around 70%.",
+                "instruction": "While the translation is technically correct, it does not sound very natural. Don't mark any erroneous words but at the end, use the slider to evaluate the overall translation quality as around 70%.",
                 "score_target": 70
             },
             "payload": []

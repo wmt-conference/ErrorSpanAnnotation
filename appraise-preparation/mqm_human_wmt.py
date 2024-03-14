@@ -9,13 +9,13 @@ import os
 
 args = argparse.ArgumentParser()
 args.add_argument("--sec-tutorial", default="de-en")
-args.add_argument("--sec-bad", default=None)
+args.add_argument("--bad-segments", type=int, default=12)
 args.add_argument("--mqm", default=None)
 args.add_argument("--year", default="wmt23")
 args.add_argument("--langs", default="en-de")
 args.add_argument("--systems", nargs="+", default=None)
 # Appraise section is "exactly" 100 segments
-args.add_argument("--sections", type=float, default=1)
+args.add_argument("--src-docs", type=float, default=50)
 args.add_argument("--redundancy", type=int, default=2)
 args.add_argument("--suffix", default="")
 args = args.parse_args()
@@ -34,11 +34,6 @@ if args.sec_tutorial:
 else:
     sec_tutorial = []
 
-if args.sec_bad:
-    sec_bad = json.load(open(f"data/extra/bad-{args.sec_bad}.json", "r"))
-else:
-    sec_bad = []
-
 sources = [
     x.strip() for x in open(find_file(f"{args.year}/sources/{args.langs}.txt"), "r")
 ]
@@ -47,6 +42,10 @@ documents = [
     for x in open(find_file(f"{args.year}/documents/{args.langs}.docs"), "r")
 ]
 print(len(sources), "sources")
+
+documents_allowed = random.sample(set(documents), k=args.src_docs)
+print(documents_allowed)
+exit()
 
 data_mqm = collections.defaultdict(list)
 if args.mqm:
@@ -112,16 +111,14 @@ data_mqm = [[val[i] for val in data_mqm.values()] for i in range(len(sources))]
 
 # base section is ~100 (safe for the tutorial)
 # in case we have 1 task per section, then a single task has to capture all systems
-EFFECTIVE_SECTION_SIZE = 100 - len(sec_tutorial) - len(sec_bad)
+EFFECTIVE_SECTION_SIZE = 100 - len(sec_tutorial) - args.bad_segments
 data_mqm = data_mqm[: int(args.sections * EFFECTIVE_SECTION_SIZE)]
 
 r = random.Random(123)
 
-def is_bad_ok(task_doc):
-    task_items = [x for doc in task_doc for x in doc]
-    task_items_bad = [i for i, x in enumerate(task_items) if x["itemType"].startswith("BAD.")]
-    # for now just make sure that the attention check is not too much at the beginning
-    return all([i > 15 for i in task_items_bad])
+# prepare BAD documents
+
+# TODO: sample
 
 tasks = []
 section_i = 0
@@ -149,11 +146,8 @@ while data_mqm:
         for item in task:
             task_doc[item["documentID"]].append(item)
         task_doc = list(task_doc.values())
-        # shuffle until we are happy with the attention check layout
         r.shuffle(task_doc)
-        while not is_bad_ok(task_doc):
-            r.shuffle(task_doc)
-
+        # flatten
         task = [item for doc in task_doc for item in doc]
 
         task = copy.deepcopy(sec_tutorial) + task
