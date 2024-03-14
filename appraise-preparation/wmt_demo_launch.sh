@@ -20,13 +20,19 @@ python3 manage.py StartNewCampaign ~/batches/wmt_demo_manifest.json \
 
 python3 manage.py StartNewCampaign ~/batches/wmt_demo_manifest_esa.json \
     --batches-json \
-        ~/batches/batches_wmt23_en-de.json \
+        ~/batches/batches_wmt23_en-de_esa.json \
     --csv-output ~/batches/wmt_demo_users_esa.csv
 
 python3 manage.py StartNewCampaign ~/batches/wmt_demo_manifest_mqm.json \
     --batches-json \
-        ~/batches/batches_wmt23_en-de.json \
+        ~/batches/batches_wmt23_en-de_mqm.json \
     --csv-output ~/batches/wmt_demo_users_mqm.csv
+
+python3 manage.py StartNewCampaign ~/batches/wmt_demo_manifest_esa_gemba.json \
+    --batches-json \
+        ~/batches/batches_wmt23_en-de_esa_gemba.json \
+    --csv-output ~/batches/wmt_demo_users_esa_gemba.csv
+
         
 
 export APPRAISE_ALLOWED_HOSTS="127.0.0.1,172.211.57.127"

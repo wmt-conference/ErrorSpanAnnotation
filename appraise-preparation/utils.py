@@ -10,52 +10,53 @@ LANG_2_TO_3 = {
     "zh": "zho",
 }
 
-RANDOM_PREP_BAD = random.Random(0)
-def prep_bad_documents(data_mqm):
-    import collections    
+RANDOM_SAMPLE_BAD = random.Random(0)
+def sample_bad_documents(data_bad, bad_segments):
     import copy
-    # detach
-    data_mqm = copy.deepcopy(data_mqm)
-    data_mqm = [x for sub in data_mqm.values() for x in sub]
+    import collections
+
     data_docs = collections.defaultdict(list)
     all_tgt = []
-    for obj in data_mqm:
+    for obj in data_bad:
         data_docs[obj["documentID"]].append(obj)
         all_tgt.append(obj["targetText"])
-    data_docs = [sub for sub in data_docs.values() if len(sub) in {2, 3, 4, 5}]
-    for sub in data_docs:
-        for obj in sub:
+    data_docs = list(data_docs.values())
+
+    docs = []
+    while bad_segments != 0:
+        available = [doc_i for doc_i, doc in enumerate(data_docs) if len(doc) <= bad_segments]
+
+        if not data_docs:
+            # clip last one
+            docs.append(copy.deepcopy(RANDOM_SAMPLE_BAD.choice(docs))[:bad_segments])
+            bad_segments -= len(docs[-1])
+        elif not available:
+            # clip last one
+            doc_i = RANDOM_SAMPLE_BAD.choice(range(len(data_docs)))
+            docs.append(data_docs.pop(doc_i)[:bad_segments])
+            bad_segments = 0
+        else:
+            doc_i = RANDOM_SAMPLE_BAD.choice(available)
+            docs.append(data_docs.pop(doc_i))
+            bad_segments -= len(docs[-1])
+    
+    
+    docs = copy.deepcopy(docs)
+    for doc_i, doc in enumerate(docs):
+        for obj in doc:
             corrupted, start_i, end_i = corrupt_text_by_mixing(
                 obj["targetText"],
-                RANDOM_PREP_BAD.choice(all_tgt),
+                RANDOM_SAMPLE_BAD.choice(all_tgt),
                 character_based=False
             )
             obj["targetText"] = corrupted
             obj["itemType"] = f"BAD.{start_i}.{end_i}"
-    return data_docs
-
-RANDOM_SAMPLE_BAD = random.Random(0)
-def sample_bad_documents(data_bad, bad_segments):
-    assert bad_segments == 12
-    CONFIGS = [
-        [5, 5, 2],
-        [3, 3, 3, 3],
-        [4, 4, 4],
-        [5, 4, 3],
-    ]
-    config = RANDOM_SAMPLE_BAD.choice(CONFIGS)
-    docs = [
-        RANDOM_SAMPLE_BAD.choice([doc for doc in data_bad if len(doc) == c])
-        for c in config
-    ]
-    for doc_i, doc in enumerate(docs):
-        for obj in doc:
             obj["documentID"] = obj["documentID"] + f"#bad{doc_i+1}"
 
     docs = [x for doc in docs for x in doc]
-    assert len(docs) == bad_segments
     return docs
 
+RANDOM_GEN_BAD = random.Random(0)
 def corrupt_text_by_mixing(seg_orig: str, seg_inject: str, character_based: bool = False) -> str:
     """
     Creates bad reference for given text.
@@ -73,7 +74,6 @@ def corrupt_text_by_mixing(seg_orig: str, seg_inject: str, character_based: bool
     by whitespace, the resulting phrase length will be doubled, and
     is interpreted as a character length.
     """
-    import random
 
     if character_based:
         seg_data = list(seg_orig)
@@ -127,15 +127,15 @@ def corrupt_text_by_mixing(seg_orig: str, seg_inject: str, character_based: bool
     # This happens for all seg_len > 3.
     bad_pos = 0
     if seg_len - bad_len > 0:
-        bad_pos = random.choice(range(seg_len - bad_len))
+        bad_pos = RANDOM_GEN_BAD.choice(range(seg_len - bad_len))
 
     elif seg_len > 3:
         _xs = max(1, seg_len - bad_len - 1)
-        bad_pos = random.choice([x + 1 for x in range(_xs)])
+        bad_pos = RANDOM_GEN_BAD.choice([x + 1 for x in range(_xs)])
 
     ref_pos = 0
     if ref_len - bad_len > 0:
-        ref_pos = random.choice(range(ref_len - bad_len))
+        ref_pos = RANDOM_GEN_BAD.choice(range(ref_len - bad_len))
 
     bad_data = (
         seg_data[:bad_pos]

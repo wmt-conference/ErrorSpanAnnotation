@@ -12,14 +12,14 @@ args.add_argument("--sec-tutorial", default="de-en.mqm")
 args.add_argument("--bad-segments", type=int, default=12)
 args.add_argument("--mqm", default=None)
 # for cases where we want to load MQM for filtering but not actually add it
-args.add_argument("--no-mqm", action="store_true")
+args.add_argument("--mqm-filter", default=None)
 args.add_argument("--year", default="wmt23")
 args.add_argument("--langs", default="en-de")
 args.add_argument("--systems", nargs="+", default=None)
 # Appraise section is "exactly" 100 segments
 args.add_argument("--src-docs", type=int, default=20)
 args.add_argument("--src-docs-seed", type=int, default=0)
-args.add_argument("--redundancy", type=int, default=2)
+args.add_argument("--redundancy", type=int, default=1)
 args.add_argument("--suffix", default="")
 args = args.parse_args()
 
@@ -37,9 +37,14 @@ if args.sec_tutorial:
 else:
     sec_tutorial = []
 
+banlines = set()
 sources = [
     x.strip() for x in open(find_file(f"{args.year}/sources/{args.langs}.txt"), "r")
 ]
+for line_i, line in enumerate(sources):
+    if len(line.split(" ")) > 200:
+        banlines.add(line_i)
+print("Found", len(banlines), "very long lines, omitting them")
 documents = [
     x.strip().split("\t")[1]
     for x in open(find_file(f"{args.year}/documents/{args.langs}.docs"), "r")
@@ -50,7 +55,6 @@ documents_allowed = random.Random(args.src_docs_seed).sample(sorted(set(document
 print(f"Out of {len(set(documents))} chosing the following:", documents_allowed)
 
 data_mqm = collections.defaultdict(list)
-banlines = set()
 if args.mqm:
     for line in open(
         find_file(f"{args.year}/{args.mqm}.seg.rating"),
@@ -60,10 +64,8 @@ if args.mqm:
         if (args.systems and sys not in args.systems) or sys == "synthetic_ref":
             continue
         if mqm == "None":
-            # set to None and filter them globally
-            mqm = None
-            # the length of this list is also the line position
-            banlines.add(len(data_mqm[sys]))
+            # set to empty MQM
+            mqm = []
         else:
             mqm = json.loads(mqm)
             # Tom/Gemba does not provide the same format but that's fine
@@ -71,14 +73,12 @@ if args.mqm:
                 mqm = mqm["errors"]
             mqm = [
                 {
-                    "start_i": x["start"],
-                    "end_i": x["end"],
+                    "start_i": x["start"] if x["start"] != -1 else "missing",
+                    "end_i": x["end"] if x["end"] != -1 else "missing",
                     "severity": x["severity"],
                 }
                 for x in mqm
             ]
-        if args.no_mqm:
-            mqm = []
         data_mqm[sys].append({"mqm": mqm})
         
     systems = list(data_mqm.keys())
@@ -91,6 +91,24 @@ else:
             continue
         data_mqm[sys].append({"mqm": []})
     systems = list(data_mqm.keys())
+
+# sort for stability and reproducibility
+systems.sort()
+
+# filter MQMs globally
+data_mqm_filter = collections.defaultdict(list)
+if args.mqm_filter:
+    for line in open(
+        find_file(f"{args.year}/{args.mqm_filter}.seg.rating"),
+        "r",
+    ):
+        sys, mqm = line.strip().split("\t")
+        if (args.systems and sys not in args.systems) or sys == "synthetic_ref":
+            continue
+        if mqm == "None":
+            # the length of this list is also the line position
+            banlines.add(len(data_mqm_filter[sys]))
+        data_mqm_filter[sys].append(None)
 
 for sys in systems:
     print(len(data_mqm[sys]), "of", sys)
@@ -115,24 +133,21 @@ for sys in systems:
 # make sure that we have as many sources as all systems
 assert all([len(v) == len(sources) for v in data_mqm.values()])
 
-# prepare bad documents from the global pool
-data_bad = utils.prep_bad_documents(data_mqm)
-
 # filter undesired docs
 data_mqm = {
-    sys:[obj for obj in vals if obj["documentID"].split("#")[0] in documents_allowed]
-    for sys,vals in data_mqm.items()
+    sys:[obj for obj in data_mqm[sys] if obj["documentID"].split("#")[0] in documents_allowed]
+    for sys in systems
 }
 # filter lines with None MQM
 data_mqm = {
-    sys:[obj for obj_i, obj in enumerate(vals) if obj_i not in banlines]
-    for sys,vals in data_mqm.items()
+    sys:[obj for obj_i, obj in enumerate(data_mqm[sys]) if obj_i not in banlines]
+    for sys in systems
 }
 
 # throw away sys source structure (transpose)
 data_mqm = [list(sublist) for sublist in list(zip(*data_mqm.values()))]
 total_lines = len(data_mqm)
-print("Skipping", len(banlines), "lines because their MQM is None")
+print("Skipping", len(banlines), "lines because they are very long or their MQM is None")
 
 # base section is ~100 (safe for the tutorial)
 # in case we have 1 task per section, then a single task has to capture all systems
@@ -160,8 +175,10 @@ while data_mqm:
         # add tutorial to the front
         task = data_local[: EFFECTIVE_SECTION_SIZE]
         data_local = data_local[EFFECTIVE_SECTION_SIZE:]
-        data_bad_local = utils.sample_bad_documents(data_bad, args.bad_segments)
-        task = copy.deepcopy(data_bad_local) + task
+
+        # prepare bad documents from the global pool
+        data_bad = utils.sample_bad_documents(task, args.bad_segments)
+        task = copy.deepcopy(data_bad) + task
       
         # shuffle documents on document level
         task_doc = collections.defaultdict(list)

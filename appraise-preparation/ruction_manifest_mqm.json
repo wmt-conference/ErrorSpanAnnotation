@@ -1,0 +1,13 @@
+{
+    "CAMPAIGN_URL": "http://172.211.57.127:80/dashboard/sso/",
+    "CAMPAIGN_NAME": "ruction03gemba",
+    "CAMPAIGN_KEY": "ruction03gemba",
+    "CAMPAIGN_NO": 3,
+    "REDUNDANCY": 33,
+    "TASKS_TO_ANNOTATORS": [
+        ["eng", "deu", "uniform", 33, 33]
+    ],
+
+    "TASK_TYPE": "Document",
+    "TASK_OPTIONS": "ESA;StaticContext"
+}
