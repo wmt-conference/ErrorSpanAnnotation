@@ -52,3 +52,5 @@ python3 appraise-preparation/mqm_human_wmt.py \
     --mqm "metric-scores/en-de/GEMBA-MQM-ESA-GPT4-src" \
     --mqm-filter "human-scores/en-de.mqm.merged" \
 ;
+
+zip ~/Downloads/ruction_rc5 appraise-preparation/ruction_manifest_* data/batches_wmt23_en-de_*
