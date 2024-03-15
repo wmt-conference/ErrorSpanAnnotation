@@ -1,9 +1,9 @@
 {
-    "CAMPAIGN_URL": "http://172.211.57.127:80/dashboard/sso/",
-    "CAMPAIGN_NAME": "ruction03gemba",
-    "CAMPAIGN_KEY": "ruction03gemba",
+    "CAMPAIGN_URL": "http://127.0.0.1:8000/dashboard/sso/",
+    "CAMPAIGN_NAME": "ruction03mqm",
+    "CAMPAIGN_KEY": "ruction03mqm",
     "CAMPAIGN_NO": 3,
-    "REDUNDANCY": 33,
+    "REDUNDANCY": 1,
     "TASKS_TO_ANNOTATORS": [
         ["eng", "deu", "uniform", 33, 33]
     ],

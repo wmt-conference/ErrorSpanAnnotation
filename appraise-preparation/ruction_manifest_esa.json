@@ -1,9 +1,9 @@
 {
-    "CAMPAIGN_URL": "http://172.211.57.127:80/dashboard/sso/",
+    "CAMPAIGN_URL": "http://127.0.0.1:8000/dashboard/sso/",
     "CAMPAIGN_NAME": "ruction01esa",
     "CAMPAIGN_KEY": "ruction01esa",
     "CAMPAIGN_NO": 1,
-    "REDUNDANCY": 33,
+    "REDUNDANCY": 1,
     "TASKS_TO_ANNOTATORS": [
         ["eng", "deu", "uniform", 33, 33]
     ],
