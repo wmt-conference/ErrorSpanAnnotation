@@ -155,24 +155,23 @@ EFFECTIVE_SECTION_SIZE = 100 - len(sec_tutorial) - args.bad_segments
 
 r = random.Random(123)
 
+# shuffle everything on doc level
+data_mqm = [obj for syslines in data_mqm for obj in syslines]
+data_mqm_doc = collections.defaultdict(list)
+for obj in data_mqm:
+    data_mqm_doc[obj["documentID"]].append(obj)
+data_mqm_doc = list(data_mqm_doc.values())
+r.shuffle(data_mqm_doc)
+data_mqm = [obj for doc in data_mqm_doc for obj in doc]
+
 tasks = []
-section_i = 0
 print()
 while data_mqm:
-    section_i += 1
     data_local = data_mqm[:EFFECTIVE_SECTION_SIZE]
-    data_local = [
-        x for sys_line in data_local for x in sys_line
-    ]
     data_mqm = data_mqm[EFFECTIVE_SECTION_SIZE:]
-
-    # shuffle everything within the section
-    r.shuffle(data_local)
 
     while data_local:
         # each Appraise section is strictly 100 segments
-
-        # add tutorial to the front
         task = data_local[: EFFECTIVE_SECTION_SIZE]
         data_local = data_local[EFFECTIVE_SECTION_SIZE:]
 
@@ -189,6 +188,7 @@ while data_mqm:
         # flatten
         task = [item for doc in task_doc for item in doc]
 
+        # add tutorial to the front
         task = copy.deepcopy(sec_tutorial) + task
         # if we are missing samples, fill them from the beginning
         # but skip the tutorial, which would mess it up
@@ -204,6 +204,8 @@ while data_mqm:
             task = task + task_addition
             print(f"{'-' if _duplicate_i > 1 else ''}Filling task from", _prev_task_len, "to", len(task))
 
+
+        print("Task contains", len({obj["documentID"] for obj in task}), "documents")
         tasks.append(task)
 print()
 

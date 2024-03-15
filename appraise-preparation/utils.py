@@ -50,7 +50,8 @@ def sample_bad_documents(data_bad, bad_segments):
                 character_based=False
             )
             obj["targetText"] = corrupted
-            obj["itemType"] = f"BAD.{start_i}.{end_i}"
+            # obj["itemType"] = f"BAD.{start_i}.{end_i}"
+            obj["itemType"] = "BAD"
             obj["documentID"] = obj["documentID"] + f"#bad{doc_i+1}"
 
     docs = [x for doc in docs for x in doc]
