@@ -52,7 +52,7 @@ documents = [
 print(len(sources), "sources")
 
 documents_allowed = random.Random(args.src_docs_seed).sample(sorted(set(documents)), k=args.src_docs)
-print(f"Out of {len(set(documents))} chosing the following:", documents_allowed)
+print(f"Out of {len(set(documents))} documents chosing the following:", documents_allowed)
 
 data_mqm = collections.defaultdict(list)
 if args.mqm:
