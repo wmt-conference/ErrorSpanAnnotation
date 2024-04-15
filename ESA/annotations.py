@@ -1,4 +1,5 @@
 import os
+import json
 import ipdb
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -25,10 +26,9 @@ class AppraiseAnnotations:
         # load csv file
         # TODO Vilem/Roman what is the purpose of (Kocmi named the columns):
         # why is the export in reverse order? I am reversing it back
-        # unk_col_always_false: Kocmi don't know about purpose of this column, but it is always False for all schemas
+        # unk_col_always_false: Kocmi didn't know what's the purpose of this column, but it is always False for all schemas
         
-
-        header = ["login", "system", "HIT_ids", "is_bad", "source_lang", "target_lang", "score", "seg_id", "unk_col_always_false", "span_errors", "start_time", "end_time"]
+        header = ["login", "system", "itemID", "is_bad", "source_lang", "target_lang", "score", "documentID", "unk_col_always_false", "span_errors", "start_time", "end_time"]
 
         df = pd.read_csv(self.path, sep=",", names=header)
         # reverse rows order in df
@@ -36,8 +36,107 @@ class AppraiseAnnotations:
 
         # remove rows which has "-tutorial" in the value for column system
         df = df[~df["system"].str.contains("-tutorial")]
+
+        # remove duplicate with lower start_time, this happens when annotator changed their decision
+        df = df.drop_duplicates(subset=["login", "itemID"], keep="last")
         
         return df
+
+    def generate_scores(self):
+        docs_template = pd.read_csv(f"mt-metrics-eval-v2/wmt23/documents/en-de.docs", sep="\t", header=None)
+        # drop column 0
+        docs_template = docs_template.drop(0, axis=1)
+        # IMPORTANT: since there is a bug in batch indices, we need to map it based on the textual information
+
+        # load mqm annotations for matching
+        mqm = pd.read_csv(f"mt-metrics-eval-v2/wmt23/human-scores/en-de.mqm.seg.score", sep="\t", header=None)
+        mqm.columns = ["system", "wmt_mqm_score"]
+        # generate df which for each system has the same number of rows as docs_template
+        # load sources and translations
+        # load sources from "mt-metrics-eval-v2/wmt23/sources/en-de.txt" and name the column sources
+        protocol_annotations = []
+        sources = []
+        with open(f"mt-metrics-eval-v2/wmt23/sources/en-de.txt") as f:
+            for line in f:
+                sources.append(line.strip())
+        for system in mqm["system"].unique():
+            if system == "refA":
+                translation_path = "mt-metrics-eval-v2/wmt23/references/en-de.refA.txt"
+            else:
+                translation_path = f"mt-metrics-eval-v2/wmt23/system-outputs/en-de/{system}.txt"
+            translation = []
+            with open(translation_path) as f:
+                for line in f:
+                    translation.append(line.strip())
+            dfcon = pd.concat([docs_template, pd.DataFrame({"source": sources, "translation": translation})], axis=1)
+            dfcon['system'] = system
+            protocol_annotations.append(dfcon)
+
+        df = pd.concat(protocol_annotations).reset_index(drop=True)
+        # add column with score
+        df["score"] = None
+        # rename column 1
+        df = df.rename(columns={1: "documentID"})
+
+        # load json f"campaign-ruction-rc5/data/batches_wmt23_en-de_{self.annotation_scheme.lower()}.json" into a dictionary
+        batches = json.load(open(f"campaign-ruction-rc5/data/batches_wmt23_en-de_{self.annotation_scheme.lower()}.json"))
+
+        mapping_line_num = {}
+        for batch in batches:
+            for item in batch["items"]:
+                if "tutorial" in item["documentID"]:
+                    continue
+                mapping_line_num[(item["itemID"], item["documentID"])] = (item["_item"].split(" | ")[1], item["sourceText"], item['targetText'])
+
+        for index, row in self.df.iterrows():
+            if row["is_bad"] != "TGT" or "#duplicate" in row["documentID"]:
+                continue
+
+            system = row["system"].replace("wmt23.", "")
+            documentID = row["documentID"].split("#")[0]
+            line_num, source, translation = mapping_line_num[(row["itemID"], row["documentID"])]
+            score = row["score"]
+
+            assigned = df.loc[(df["system"] == system) & (df["documentID"] == documentID) & (df["source"] == source) & (df["translation"] == translation)]
+
+            if row["documentID"] == 'elitr_minuting-19#GPT4-5shot' and row['login'] == "engdeu6907":
+                # bug in campaign rc5
+                if row["itemID"] == 90:
+                    assigned = df.loc[[955]]
+                else:
+                    assigned = df.loc[[956]]
+                
+            if len(assigned) != 1:
+                if (documentID == "manlycoffee.110351250115060992"):
+                    try: 
+                        mapping_line_num[(row["itemID"] + 4, row["documentID"])]
+                        index_number = assigned.index[1]
+                    except:
+                        index_number = assigned.index[0]
+                    # print(system, index_number, index, df.loc[index_number, "score"])
+                    if system == "ONLINE-W":
+                        if row['login'] == "engdeu6908":
+                            index_number = 5286
+                        else:
+                            index_number = 5290
+                else:
+                    ipdb.set_trace()
+            else:
+                index_number = assigned.index[0]
+
+                
+            assigned_score = df.loc[index_number, "score"]
+            # assign score to the correct row in df, first check if the row is None
+            if assigned_score is None or assigned_score == score:
+                df.loc[index_number, "score"] = score
+            else:
+                print("there is a problem, which needs investigation")
+                ipdb.set_trace()
+
+        # combine columns from df and mqm on their index
+        df = df.merge(mqm, left_index=True, right_index=True, how="left")
+
+        ipdb.set_trace()
 
     def get_average_minutes_per_HIT(self, unfiltered=False):
         median = 0
