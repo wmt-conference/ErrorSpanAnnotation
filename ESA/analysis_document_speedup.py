@@ -5,11 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 SCHEME = "GEMBA"
-anno_esa = AppraiseAnnotations(SCHEME).generate_scores().df
-
-# Index(['login', 'system', 'itemID', 'is_bad', 'source_lang', 'target_lang',
-#        'score', 'documentID', 'unk_col_always_false', 'span_errors',
-#        'start_time', 'end_time'],
+anno_esa = AppraiseAnnotations.get_full(SCHEME)
 
 data_times = collections.defaultdict(list)
 

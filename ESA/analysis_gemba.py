@@ -2,7 +2,7 @@ from annotations import AppraiseAnnotations
 import numpy as np
 import collections
 
-anno = AppraiseAnnotations("GEMBA").generate_scores().df
+anno = AppraiseAnnotations.get_full("GEMBA")
 
 to_average_users = []
 for login in anno.AnnotatorID.unique():
@@ -69,7 +69,7 @@ print(
 )
     
 
-anno = AppraiseAnnotations("ESA").generate_scores().df
+anno = AppraiseAnnotations.get_full("ESA")
 
 to_average_users = []
 for login in anno.AnnotatorID.unique():

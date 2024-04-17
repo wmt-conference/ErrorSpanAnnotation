@@ -51,10 +51,12 @@ class AppraiseAnnotations:
 
     @staticmethod
     def get_full(annotation_scheme):
-        fname = f"campaign-ruction-rc5/en-de.{annotation_scheme}.pd"
+        fname = f"campaign-ruction-rc5/en-de.{annotation_scheme}.pkl"
         if not os.path.exists(fname):
             print("Generating data")
-            anno = AppraiseAnnotations()
+            anno = AppraiseAnnotations(annotation_scheme).generate_scores()
+            anno.df.to_pickle(fname)
+        return pd.read_pickle(fname)
 
     def generate_scores(self):
         if not os.path.exists("data/mt-metrics-eval-v2") and os.path.exists("mt-metrics-eval-v2"):
