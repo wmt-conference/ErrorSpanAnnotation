@@ -190,13 +190,13 @@ class AppraiseAnnotations:
             if self.annotation_scheme == SCHEME_GEMBA:
                 self.df.at[index,'span_errors'] = row['span_errors']
 
-            if self.annotation_scheme == SCHEME_MQM:
+            if self.annotation_scheme == SCHEME_MQM or (self.annotation_scheme in [SCHEME_ESA, SCHEME_GEMBA] and use_severity_for_esa):
                 # parse json from row['span_errors']
                 score = 0
-                weight = {"minor": -1, "major": -5, "critical": -25}
+                weight = {"minor": -1, "major": -5, "critical": -25, "undecided": 0}
                 span_errors = json.loads(row['span_errors'])
                 for error in span_errors:
-                    if "Punctuation" in error['error_type']:
+                    if self.annotation_scheme == SCHEME_MQM and "Punctuation" in error['error_type']:
                         score += -0.1
                     else:
                         score += weight[error["severity"]]
@@ -246,7 +246,10 @@ class AppraiseAnnotations:
         # replace None scores with "None"
         df["score"] = df["score"].fillna("None")
         # save df into tsv file
-        df.to_csv(f"campaign-ruction-rc5/en-de.{self.annotation_scheme}.seg.score", sep="\t", index=False, header=False)
+        subname = ""
+        if use_severity_for_esa:
+            subname = "_severity"
+        df.to_csv(f"campaign-ruction-rc5/en-de.{self.annotation_scheme}{subname}.seg.score", sep="\t", index=False, header=False)
 
         # allows chaining
         return self

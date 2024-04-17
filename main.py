@@ -16,7 +16,9 @@ def main(args):
         # avg_minutes, median = annotations.get_average_minutes_per_HIT()
         # print(f"Scheme: {scheme}, Average time per HIT: {avg_minutes:.1f} minutes, Median time per HIT: {median:.1f} seconds")
 
-        # annotations.generate_scores()
+        # Next code is not needed to run unless the code changes
+        # annotations.generate_scores(True)
+        # annotations.generate_scores(True) # this also generates ESA and GEMBA with severity
 
 
 
