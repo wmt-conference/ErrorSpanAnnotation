@@ -4,9 +4,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-SCHEME = "GEMBA"
+SCHEME = "MQM"
 anno_esa = AppraiseAnnotations.get_full(SCHEME)
-
 data_times = collections.defaultdict(list)
 
 

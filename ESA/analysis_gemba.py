@@ -2,7 +2,7 @@ from annotations import AppraiseAnnotations
 import numpy as np
 import collections
 
-anno = AppraiseAnnotations.get_full("GEMBA")
+anno = AppraiseAnnotations.get_full("MQM")
 
 to_average_users = []
 for login in anno.AnnotatorID.unique():
@@ -15,7 +15,7 @@ for login in anno.AnnotatorID.unique():
     prev_time = 0
     to_average = collections.defaultdict(list)
     for _, row in df.iterrows():
-        if type(row["span_errors_orig"]) is float or type(row["span_errors"]) is float:
+        if row["span_errors_gemba"] is None or row["span_errors"] is None:
             continue
 
         v_time = row["start_time"]-prev_time
@@ -23,18 +23,18 @@ for login in anno.AnnotatorID.unique():
             v_time = v_time_median
         prev_time = row["start_time"]
         to_average["time"].append(v_time)
-        to_average["span_orig"].append(len(row["span_errors_orig"]))
+        to_average["span_gemba"].append(len(row["span_errors_gemba"]))
         to_average["span_kept"].append(len([
-            a for a in row["span_errors_orig"]
+            a for a in row["span_errors_gemba"]
             if [b for b in row["span_errors"] if a["start_i"] == b["start_i"] and a["end_i"] == b["end_i"] and a["severity"] == b["severity"]]
         ]))
         to_average["span_removed"].append(len([
-            a for a in row["span_errors_orig"]
+            a for a in row["span_errors_gemba"]
             if not [b for b in row["span_errors"] if a["start_i"] == b["start_i"] and a["end_i"] == b["end_i"] and a["severity"] == b["severity"]]
         ]))
         to_average["span_added"].append(len([
             a for a in row["span_errors"]
-            if not [b for b in row["span_errors_orig"] if a["start_i"] == b["start_i"] and a["end_i"] == b["end_i"] and a["severity"] == b["severity"]]
+            if not [b for b in row["span_errors_gemba"] if a["start_i"] == b["start_i"] and a["end_i"] == b["end_i"] and a["severity"] == b["severity"]]
         ]))
 
         to_average["span_final"].append(len(row["span_errors"]))
@@ -45,7 +45,7 @@ to_average_users.sort(key=lambda x: x["time"])
 for user in to_average_users:
     print(
         f"{user['time']:.1f}s",
-        f"{user['span_orig']:.1f}",
+        f"{user['span_gemba']:.1f}",
         f"{user['span_kept']:.1f}",
         f"{user['span_removed']:.1f}",
         f"{user['span_added']:.1f}",
@@ -59,7 +59,7 @@ print(r"\midrule")
 user = {k:np.average([x[k] for x in to_average_users]) for k in user.keys()}
 print(
     f"{user['time']:.1f}s",
-    f"{user['span_orig']:.1f}",
+    f"{user['span_gemba']:.1f}",
     f"{user['span_kept']:.1f}",
     f"{user['span_removed']:.1f}",
     f"{user['span_added']:.1f}",

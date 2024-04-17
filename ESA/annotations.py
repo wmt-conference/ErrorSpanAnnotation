@@ -24,13 +24,11 @@ class AppraiseAnnotations:
 
         # to the df add column with AnnotatorID where login is the key
         self.df = self.df.merge(self.annotator_mapping, left_on="login", right_on="login", how="left")
+        # unk_col_always_false: unclear what the purpose of this constant column is
+        self.df = self.df.drop(columns=["unk_col_always_false"])
 
     def load_annotations(self):
-        # load csv file
-        # TODO Vilem/Roman what is the purpose of (Kocmi named the columns):
-        # why is the export in reverse order? I am reversing it back
-        # unk_col_always_false: Kocmi didn't know what's the purpose of this column, but it is always False for all schemas
-        
+        # load csv file        
         header = ["login", "system", "itemID", "is_bad", "source_lang", "target_lang", "score", "documentID", "unk_col_always_false", "span_errors", "start_time", "end_time"]
 
         df = pd.read_csv(self.path, sep=",", names=header)
@@ -43,10 +41,6 @@ class AppraiseAnnotations:
         # remove duplicate with lower start_time, this happens when annotator changed their decision
         df = df.drop_duplicates(subset=["login", "itemID"], keep="last")
 
-
-        # add column with original MQM
-        df["span_errors_orig"] = pd.Series([[] for _ in df.iterrows()])
-        
         return df
 
     @staticmethod
@@ -54,19 +48,93 @@ class AppraiseAnnotations:
         fname = f"campaign-ruction-rc5/en-de.{annotation_scheme}.pkl"
         if not os.path.exists(fname):
             print("Generating data")
-            anno = AppraiseAnnotations(annotation_scheme).generate_scores()
+            anno = AppraiseAnnotations(annotation_scheme).add_gemba_and_wmt_scores()
             anno.df.to_pickle(fname)
         return pd.read_pickle(fname)
     
-    def load_gemba_and_wmt_scores(self):
-        # TODO: the logic should be a bit different from generate_scores
-        pass
+    def add_gemba_and_wmt_scores(self):
+        lines_score = pd.read_csv(f"data/mt-metrics-eval-v2/wmt23/human-scores/en-de.mqm.seg.score", sep="\t", header=None, dtype=str)
+        lines_score.columns = ["systemID", "wmt_mqm_score"]
+        lines_score = lines_score.drop(columns=["systemID"])
+        lines_mqm = pd.read_csv(f"data/mt-metrics-eval-v2/wmt23/human-scores/en-de.mqm.merged.seg.rating", sep="\t", header=None, dtype=str)
+        lines_mqm.columns = ["systemID", "wmt_mqm"]
+        lines_mqm = lines_mqm[lines_mqm["systemID"] != "synthetic_ref"]
+        systems = list(lines_mqm["systemID"].unique())
+        lines_mqm = lines_mqm.drop(columns=["systemID"])
 
-    def generate_scores(self):
-        if not os.path.exists("data/mt-metrics-eval-v2") and os.path.exists("mt-metrics-eval-v2"):
-            print("HELLO! We moved `mt-metrics-eval-v2` to `data/mt-metrics-eval-v2`. Please move the data on your system and rerun me.")
-            exit()
+        lines_source = pd.read_csv(f"data/mt-metrics-eval-v2/wmt23/sources/en-de.txt", sep="\t", header=None, dtype=str)
+        lines_source.columns = ["src"]
+        lines_docs = pd.read_csv(f"data/mt-metrics-eval-v2/wmt23/documents/en-de.docs", sep="\t", header=None, dtype=str)
+        lines_docs.columns = ["domain", "documentID"]
 
+        annotations_all = []
+        for system in systems:
+            if system == "refA":
+                fname = f"data/mt-metrics-eval-v2/wmt23/references/en-de.refA.txt"
+            else:
+                fname = f"data/mt-metrics-eval-v2/wmt23/system-outputs/en-de/{system}.txt"
+            lines_translation = pd.read_csv(fname, sep="\t", header=None)
+            lines_translation.columns = ["tgt"]
+            
+            dfcon = pd.concat([lines_docs, lines_translation, lines_source, pd.DataFrame([str(x) for x in range(len(lines_source))], columns=["itemID_wmt"])], axis=1)
+            dfcon["systemID"] = system
+            annotations_all.append(dfcon)
+
+        wmt_df = pd.concat(annotations_all).reset_index(drop=True)
+
+        assert len(wmt_df) == len(lines_score)
+        assert len(wmt_df) == len(lines_mqm)
+        wmt_df = wmt_df.merge(lines_score, left_index=True, right_index=True, how="left")
+        wmt_df = wmt_df.merge(lines_mqm, left_index=True, right_index=True, how="left")
+
+        # hack because 
+        wmt_df["systemID"] 
+
+        batches = json.load(open(f"campaign-ruction-rc5/data/batches_wmt23_en-de_{self.annotation_scheme.lower()}.json"))
+        batches = [
+            item for task in batches for item in task["items"]
+            if "_item" in item
+        ]
+        for item in batches:
+            tmp = item["documentID"].split("#")
+            item["documentID"], item["systemID"] = tmp[0], tmp[1]
+            if len(tmp) > 2:
+                item["documentID_suffix"] = tmp[2]
+        batches = pd.DataFrame.from_dict(batches)
+
+        self.df["span_errors_gemba"] = None
+        self.df["span_errors_wmt"] = None
+        self.df["score_wmt"] = None
+
+        for row_index, row in self.df.iterrows():
+            itemID = row["itemID"]
+            tmp = row["documentID"].split("#")
+            documentID, systemID = tmp[0], tmp[1]
+
+            
+            item_batch = batches[(batches["itemID"] == itemID) & (batches["documentID"] == documentID) & (batches["systemID"] == systemID)]
+            if len(item_batch) != 1:
+                print(f"FOUND IN BATCHES ({len(item_batch)})", itemID, documentID, systemID)
+                continue
+            item_batch = item_batch.iloc[0]
+            itemID_wmt = item_batch["_item"].split(" | ")[1]
+
+            item_wmt = wmt_df[(wmt_df["itemID_wmt"] == itemID_wmt) & (wmt_df["documentID"] == documentID) & (wmt_df["systemID"] == systemID)]
+
+            if len(item_wmt) != 1:
+                print(f"FOUND IN WMT ({len(item_wmt)})", itemID, itemID_wmt, documentID, systemID, sep="^")
+                continue
+
+            # merge
+            self.df.at[row_index,'span_errors_gemba'] = item_batch["mqm"]
+            self.df.at[row_index,'span_errors_wmt'] = item_wmt["wmt_mqm"]
+            self.df.at[row_index,'score_wmt'] = item_wmt["wmt_mqm_score"]
+            # answers are encoded in stringified JSON
+            self.df.at[row_index,'span_errors'] = json.loads(row["span_errors"])
+
+        return self
+
+    def generate_wmt_score_files(self):
         docs_template = pd.read_csv(f"data/mt-metrics-eval-v2/wmt23/documents/en-de.docs", sep="\t", header=None)
         # drop column 0
         docs_template = docs_template.drop(0, axis=1)
@@ -109,7 +177,7 @@ class AppraiseAnnotations:
             for item in batch["items"]:
                 if "tutorial" in item["documentID"]:
                     continue
-                mapping_line_num[(item["itemID"], item["documentID"])] = (item["_item"].split(" | ")[1], item["sourceText"], item['targetText'], item["mqm"])
+                mapping_line_num[(item["itemID"], item["documentID"])] = (item["_item"].split(" | ")[1], item["sourceText"], item['targetText'])
 
         for index, row in self.df.iterrows():
             if row["is_bad"] != "TGT" or "#duplicate" in row["documentID"]:
@@ -117,10 +185,9 @@ class AppraiseAnnotations:
 
             system = row["system"].replace("wmt23.", "")
             documentID = row["documentID"].split("#")[0]
-            line_num, source, translation, span_errors_orig = mapping_line_num[(row["itemID"], row["documentID"])]
+            line_num, source, translation = mapping_line_num[(row["itemID"], row["documentID"])]
             score = row["score"]
             if self.annotation_scheme == SCHEME_GEMBA:
-                self.df.at[index,'span_errors_orig'] = span_errors_orig
                 self.df.at[index,'span_errors'] = row['span_errors']
 
             if self.annotation_scheme == SCHEME_MQM:
@@ -180,11 +247,6 @@ class AppraiseAnnotations:
         df["score"] = df["score"].fillna("None")
         # save df into tsv file
         df.to_csv(f"campaign-ruction-rc5/en-de.{self.annotation_scheme}.seg.score", sep="\t", index=False, header=False)
-
-        # parse string-encoded original MQM annotations
-        # if we do that before, some of them get turned back to string somehow, maybe on the merge?
-        for index, row in self.df.iterrows():
-            self.df.at[index, "span_errors"] = json.loads(row["span_errors"])
 
         # allows chaining
         return self
