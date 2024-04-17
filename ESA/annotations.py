@@ -39,6 +39,10 @@ class AppraiseAnnotations:
 
         # remove duplicate with lower start_time, this happens when annotator changed their decision
         df = df.drop_duplicates(subset=["login", "itemID"], keep="last")
+
+
+        # add column with original MQM
+        df["span_errors_orig"] = pd.Series([[] for _ in df.iterrows()])
         
         return df
 
@@ -89,7 +93,7 @@ class AppraiseAnnotations:
             for item in batch["items"]:
                 if "tutorial" in item["documentID"]:
                     continue
-                mapping_line_num[(item["itemID"], item["documentID"])] = (item["_item"].split(" | ")[1], item["sourceText"], item['targetText'])
+                mapping_line_num[(item["itemID"], item["documentID"])] = (item["_item"].split(" | ")[1], item["sourceText"], item['targetText'], item["mqm"])
 
         for index, row in self.df.iterrows():
             if row["is_bad"] != "TGT" or "#duplicate" in row["documentID"]:
@@ -97,8 +101,12 @@ class AppraiseAnnotations:
 
             system = row["system"].replace("wmt23.", "")
             documentID = row["documentID"].split("#")[0]
-            line_num, source, translation = mapping_line_num[(row["itemID"], row["documentID"])]
+            line_num, source, translation, span_errors_orig = mapping_line_num[(row["itemID"], row["documentID"])]
             score = row["score"]
+            if self.annotation_scheme == SCHEME_GEMBA:
+                self.df.at[index,'span_errors_orig'] = span_errors_orig
+                self.df.at[index,'span_errors'] = row['span_errors']
+
             if self.annotation_scheme == SCHEME_MQM:
                 # parse json from row['span_errors']
                 score = 0
@@ -144,7 +152,7 @@ class AppraiseAnnotations:
                 df.loc[index_number, "score"] = score
             else:
                 print("there is a problem, which needs investigation")
-                ipdb.set_trace()
+                # ipdb.set_trace()
 
         # combine columns from df and mqm on their index
         df = df.merge(mqm, left_index=True, right_index=True, how="left")
@@ -156,6 +164,11 @@ class AppraiseAnnotations:
         df["score"] = df["score"].fillna("None")
         # save df into tsv file
         df.to_csv(f"campaign-ruction-rc5/en-de.{self.annotation_scheme}.seg.score", sep="\t", index=False, header=False)
+
+        # parse string-encoded original MQM annotations
+        # if we do that before, some of them get turned back to string somehow, maybe on the merge?
+        for index, row in self.df.iterrows():
+            self.df.at[index, "span_errors"] = json.loads(row["span_errors"])
 
         # allows chaining
         return self
