@@ -17,7 +17,7 @@ class AppraiseAnnotations:
         self.df = self.load_annotations()
 
         # load annotators mapping
-        self.annotator_mapping = pd.read_csv("Annotators_mapping.csv")
+        self.annotator_mapping = pd.read_csv("data/Annotators_mapping.csv")
         # keep only AnnotatorID and login
         self.annotator_mapping = self.annotator_mapping[["AnnotatorID", "login"]]
         self.annotator_mapping["AnnotatorID"] = "Human_" + self.annotator_mapping["AnnotatorID"].astype(str)
@@ -43,27 +43,31 @@ class AppraiseAnnotations:
         return df
 
     def generate_scores(self):
-        docs_template = pd.read_csv(f"mt-metrics-eval-v2/wmt23/documents/en-de.docs", sep="\t", header=None)
+        if not os.path.exists("data/mt-metrics-eval-v2") and os.path.exists("mt-metrics-eval-v2"):
+            print("HELLO! We moved `mt-metrics-eval-v2` to `data/mt-metrics-eval-v2`. Please move the data on your system and rerun me.")
+            exit()
+
+        docs_template = pd.read_csv(f"data/mt-metrics-eval-v2/wmt23/documents/en-de.docs", sep="\t", header=None)
         # drop column 0
         docs_template = docs_template.drop(0, axis=1)
         # IMPORTANT: since there is a bug in batch indices, we need to map it based on the textual information
 
         # load mqm annotations for matching
-        mqm = pd.read_csv(f"mt-metrics-eval-v2/wmt23/human-scores/en-de.mqm.seg.score", sep="\t", header=None)
+        mqm = pd.read_csv(f"data/mt-metrics-eval-v2/wmt23/human-scores/en-de.mqm.seg.score", sep="\t", header=None)
         mqm.columns = ["system", "wmt_mqm_score"]
         # generate df which for each system has the same number of rows as docs_template
         # load sources and translations
         # load sources from "mt-metrics-eval-v2/wmt23/sources/en-de.txt" and name the column sources
         protocol_annotations = []
         sources = []
-        with open(f"mt-metrics-eval-v2/wmt23/sources/en-de.txt") as f:
+        with open(f"data/mt-metrics-eval-v2/wmt23/sources/en-de.txt") as f:
             for line in f:
                 sources.append(line.strip())
         for system in mqm["system"].unique():
             if system == "refA":
-                translation_path = "mt-metrics-eval-v2/wmt23/references/en-de.refA.txt"
+                translation_path = f"data/mt-metrics-eval-v2/wmt23/references/en-de.refA.txt"
             else:
-                translation_path = f"mt-metrics-eval-v2/wmt23/system-outputs/en-de/{system}.txt"
+                translation_path = f"data/mt-metrics-eval-v2/wmt23/system-outputs/en-de/{system}.txt"
             translation = []
             with open(translation_path) as f:
                 for line in f:
@@ -78,7 +82,6 @@ class AppraiseAnnotations:
         # rename column 1
         df = df.rename(columns={1: "documentID"})
 
-        # load json f"campaign-ruction-rc5/data/batches_wmt23_en-de_{self.annotation_scheme.lower()}.json" into a dictionary
         batches = json.load(open(f"campaign-ruction-rc5/data/batches_wmt23_en-de_{self.annotation_scheme.lower()}.json"))
 
         mapping_line_num = {}
@@ -136,7 +139,8 @@ class AppraiseAnnotations:
         # combine columns from df and mqm on their index
         df = df.merge(mqm, left_index=True, right_index=True, how="left")
 
-        ipdb.set_trace()
+        # allows chaining
+        return self
 
     def get_average_minutes_per_HIT(self, unfiltered=False):
         median = 0
