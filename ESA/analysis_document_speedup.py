@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 SCHEME = "GEMBA"
-anno_esa = AppraiseAnnotations(f"campaign-ruction-rc5/240315rc5{SCHEME}.scores.csv", SCHEME).generate_scores().df
+anno_esa = AppraiseAnnotations(SCHEME).generate_scores().df
 
 # Index(['login', 'system', 'itemID', 'is_bad', 'source_lang', 'target_lang',
 #        'score', 'documentID', 'unk_col_always_false', 'span_errors',

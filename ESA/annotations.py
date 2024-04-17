@@ -11,8 +11,8 @@ SCHEME_GEMBA = "GEMBA"  # Schema used for parallel project, not part of WMT 2024
 
 
 class AppraiseAnnotations:
-    def __init__(self, path, annotation_scheme):
-        self.path = path
+    def __init__(self, annotation_scheme):
+        self.path = f"campaign-ruction-rc5/240315rc5{annotation_scheme}.scores.csv"
         self.annotation_scheme = annotation_scheme
         self.df = self.load_annotations()
 
@@ -48,6 +48,13 @@ class AppraiseAnnotations:
         df["span_errors_orig"] = pd.Series([[] for _ in df.iterrows()])
         
         return df
+
+    @staticmethod
+    def get_full(annotation_scheme):
+        fname = f"campaign-ruction-rc5/en-de.{annotation_scheme}.pd"
+        if not os.path.exists(fname):
+            print("Generating data")
+            anno = AppraiseAnnotations()
 
     def generate_scores(self):
         if not os.path.exists("data/mt-metrics-eval-v2") and os.path.exists("mt-metrics-eval-v2"):

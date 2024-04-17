@@ -2,8 +2,7 @@ from annotations import AppraiseAnnotations
 import numpy as np
 import collections
 
-anno = AppraiseAnnotations(f"campaign-ruction-rc5/240315rc5GEMBA.scores.csv", "GEMBA").generate_scores()
-anno = anno.df.merge(anno.annotator_mapping, left_on="login", right_on="login", how="left")
+anno = AppraiseAnnotations("GEMBA").generate_scores().df
 
 to_average_users = []
 for login in anno.AnnotatorID.unique():
@@ -70,8 +69,7 @@ print(
 )
     
 
-anno = AppraiseAnnotations(f"campaign-ruction-rc5/240315rc5ESA.scores.csv", "ESA").generate_scores()
-anno = anno.df.merge(anno.annotator_mapping, left_on="login", right_on="login", how="left")
+anno = AppraiseAnnotations("ESA").generate_scores().df
 
 to_average_users = []
 for login in anno.AnnotatorID.unique():
