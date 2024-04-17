@@ -99,10 +99,20 @@ class AppraiseAnnotations:
             documentID = row["documentID"].split("#")[0]
             line_num, source, translation = mapping_line_num[(row["itemID"], row["documentID"])]
             score = row["score"]
+            if self.annotation_scheme == SCHEME_MQM:
+                # parse json from row['span_errors']
+                score = 0
+                weight = {"minor": -1, "major": -5, "critical": -25}
+                span_errors = json.loads(row['span_errors'])
+                for error in span_errors:
+                    if "Punctuation" in error['error_type']:
+                        score += -0.1
+                    else:
+                        score += weight[error["severity"]]
 
             assigned = df.loc[(df["system"] == system) & (df["documentID"] == documentID) & (df["source"] == source) & (df["translation"] == translation)]
 
-            if row["documentID"] == 'elitr_minuting-19#GPT4-5shot' and row['login'] == "engdeu6907":
+            if row["documentID"] == 'elitr_minuting-19#GPT4-5shot' and row['login'] in ["engdeu6907", "engdeu6807", "engdeu6a07"]:
                 # bug in campaign rc5
                 if row["itemID"] == 90:
                     assigned = df.loc[[955]]
@@ -138,9 +148,18 @@ class AppraiseAnnotations:
 
         # combine columns from df and mqm on their index
         df = df.merge(mqm, left_index=True, right_index=True, how="left")
+        # keep only column system_x and score
+        df = df[["system_x", "score"]]
+        # rename system_x to system
+        df = df.rename(columns={"system_x": "system"})
+        # replace None scores with "None"
+        df["score"] = df["score"].fillna("None")
+        # save df into tsv file
+        df.to_csv(f"campaign-ruction-rc5/en-de.{self.annotation_scheme}.seg.score", sep="\t", index=False, header=False)
 
         # allows chaining
         return self
+
 
     def get_average_minutes_per_HIT(self, unfiltered=False):
         median = 0

@@ -18,9 +18,8 @@ def main(args):
 
         annotations.generate_scores()
 
-    ranks = {}
-    for protocol in ["wmt-mqm", "wmt-dasqm", "esa", "mqm", "gemba"]:
-        ranks[protocol] = HumanScores(protocol, "en-de")
+    ranks = HumanScores("en-de")
+    ranks.generate_ranks()
 
     ipdb.set_trace()
 
