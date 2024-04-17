@@ -57,6 +57,10 @@ class AppraiseAnnotations:
             anno = AppraiseAnnotations(annotation_scheme).generate_scores()
             anno.df.to_pickle(fname)
         return pd.read_pickle(fname)
+    
+    def load_gemba_and_wmt_scores(self):
+        # TODO: the logic should be a bit different from generate_scores
+        pass
 
     def generate_scores(self):
         if not os.path.exists("data/mt-metrics-eval-v2") and os.path.exists("mt-metrics-eval-v2"):
