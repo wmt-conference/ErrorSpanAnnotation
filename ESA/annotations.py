@@ -22,6 +22,9 @@ class AppraiseAnnotations:
         self.annotator_mapping = self.annotator_mapping[["AnnotatorID", "login"]]
         self.annotator_mapping["AnnotatorID"] = "Human_" + self.annotator_mapping["AnnotatorID"].astype(str)
 
+        # to the df add column with AnnotatorID where login is the key
+        self.df = self.df.merge(self.annotator_mapping, left_on="login", right_on="login", how="left")
+
     def load_annotations(self):
         # load csv file
         # TODO Vilem/Roman what is the purpose of (Kocmi named the columns):

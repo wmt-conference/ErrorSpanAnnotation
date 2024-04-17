@@ -16,7 +16,9 @@ def main(args):
         # avg_minutes, median = annotations.get_average_minutes_per_HIT()
         # print(f"Scheme: {scheme}, Average time per HIT: {avg_minutes:.1f} minutes, Median time per HIT: {median:.1f} seconds")
 
-        annotations.generate_scores()
+        # annotations.generate_scores()
+
+
 
     ranks = HumanScores("en-de")
     ranks.generate_ranks()
