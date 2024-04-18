@@ -3,6 +3,7 @@ import pandas as pd
 from scipy.stats import ranksums
 from itertools import combinations
 import matplotlib.pyplot as plt
+from ESA.settings import methods, PROJECT
 
 
 class HumanScores:
@@ -47,14 +48,17 @@ class HumanScores:
                 df[col] = df[col].astype(float)
         # group by system
         df2 = df.groupby("system").mean()
-        df2.groupby("system").mean().to_excel("delme2.xlsx")
+        df2.groupby("system").mean().to_excel("generated_plots/system_ranking.xlsx")
 
 
         results = {}
         data = {}
         data_clusters = {}
-        # for scheme in ["wmt-mqm", "wmt-dasqm", "esa", "gemba", "mqm", "esa_severity", "gemba_severity"]:
-        for scheme in ["wmt-mqm", "wmt-dasqm", "esa", "mqm", "esa_severity"]:
+        list_of_schemes = ["wmt-mqm", "mqm", "wmt-dasqm", "esa"]
+        if PROJECT == "GEMBA":
+            list_of_schemes = ["wmt-mqm", "wmt-dasqm", "esa", "gemba", "mqm", "esa_severity", "gemba_severity"]
+
+        for scheme in list_of_schemes:
             # Step 1: Calculate average scores for each system
             system_scores = df[['system', scheme]].groupby('system')[scheme].agg(['mean', list]).rename(columns={'list': 'scores'})
             # sort by mean score
@@ -78,48 +82,52 @@ class HumanScores:
                     threshold = system_scores.at[system, 'mean'] - (system_scores.at[system, 'mean'] - system_scores.at[system_scores.index[i + 1], 'mean'])/2
                     data_clusters[scheme].append(threshold)
                     
-
-
                 data[scheme]["system"].append(system)
                 data[scheme][scheme].append(system_scores.at[system, 'mean'])
 
-        plot_clusters(data, data_clusters)
+        self.plot_clusters(data, data_clusters)
        
-def plot_clusters(data, data_clusters):
-    # Create a figure with subplots for each schema
-    columns = int((len(data) - 1)/2)
-    fig, axs = plt.subplots(2, columns, figsize=(4 * columns, 8)) 
-    axs = axs.flatten() 
 
-    i = 0
-    for _, scheme in enumerate(data):
-        if scheme == "wmt-mqm":
-            continue
-        df1 = pd.DataFrame(data["wmt-mqm"])
-        # set index to "systems"
-        df1.set_index("system", inplace=True)
-        df2 = pd.DataFrame(data[scheme])
-        df2.set_index("system", inplace=True)
+    def plot_clusters(self, data, data_clusters):
+        # Create a figure with subplots for each schema
+        rows = int((len(data) - 1)/3)
+        columns = 3 #int((len(data) - 1)/2)
+        fig, axs = plt.subplots(rows, columns, figsize=(4 * columns, 4 * rows)) 
+        axs = axs.flatten() 
 
-        # merge the two dataframes
-        df = pd.merge(df1, df2, left_index=True, right_index=True)
-        
-        # Plotting the scatter plots for each dataset
-        df.plot.scatter(x=scheme, y="wmt-mqm", ax=axs[i], color='black')
-        
-        # Ensuring x-axis only shows whole numbers
-        axs[i].xaxis.set_major_locator(plt.MaxNLocator(integer=True))
-        
-        # Adding titles with language pairs or other identifiers
-        axs[i].set_title(f"Scatter plot for {scheme}")
-        
-        # Plotting vertical lines for scheme clusters and horizontal for MQM
-        for cluster in data_clusters[scheme]:
-            axs[i].axvline(cluster, color="red", linestyle="--")
-        for cluster in data_clusters["wmt-mqm"]:
-            axs[i].axhline(cluster, color="blue", linestyle="--")
-        i += 1
+        i = 0
+        for _, scheme in enumerate(data):
+            if scheme == "wmt-mqm":
+                continue
+            df1 = pd.DataFrame(data["wmt-mqm"])
+            # set index to "systems"
+            df1.set_index("system", inplace=True)
+            df2 = pd.DataFrame(data[scheme])
+            df2.set_index("system", inplace=True)
 
-    plt.tight_layout()
-    subname = "_gemba" if "gemba" in data else ""
-    plt.savefig(f"generated_plots/clusters_esa{subname}.pdf")
+            # merge the two dataframes
+            df = pd.merge(df1, df2, left_index=True, right_index=True)
+            
+            # Plotting the scatter plots for each dataset
+            df.plot.scatter(x=scheme, y="wmt-mqm", ax=axs[i], color='black')
+
+            # rename x-axis and y-axis based on methods[scheme]
+            axs[i].set_xlabel(methods[scheme]['name'])
+            axs[i].set_ylabel(methods["wmt-mqm"]['name'])
+            
+            # Ensuring x-axis only shows whole numbers
+            axs[i].xaxis.set_major_locator(plt.MaxNLocator(integer=True))
+            
+            # Adding titles with language pairs or other identifiers
+            axs[i].set_title(f"System scores ({self.language_pair})")
+            
+            # Plotting vertical lines for scheme clusters and horizontal for MQM
+            for cluster in data_clusters[scheme]:
+                axs[i].axvline(cluster, color="red", linestyle="--")
+            for cluster in data_clusters["wmt-mqm"]:
+                axs[i].axhline(cluster, color="blue", linestyle="--")
+            i += 1
+
+        plt.tight_layout()
+        subname = "gemba" if PROJECT == "GEMBA" else "esa"
+        plt.savefig(f"PAPER/generated_plots/clusters_{subname}.pdf")

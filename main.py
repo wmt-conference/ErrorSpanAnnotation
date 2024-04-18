@@ -4,6 +4,8 @@ from ESA.human_scores import HumanScores
 import ipdb
 
 
+
+
 def main(args):
     schemes = [
         (SCHEME_ESA),
@@ -21,11 +23,11 @@ def main(args):
         # annotations.generate_scores(True) # this also generates ESA and GEMBA with severity
 
 
+    # GENERATE RESOURCES FOR PAPER
 
     ranks = HumanScores("en-de")
     ranks.generate_ranks()
 
-    ipdb.set_trace()
 
 if __name__ == '__main__':
     app.run(main)
