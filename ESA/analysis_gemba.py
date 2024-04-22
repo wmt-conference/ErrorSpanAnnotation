@@ -1,8 +1,12 @@
 from annotations import AppraiseAnnotations
 import numpy as np
 import collections
+import matplotlib.pyplot as plt
+import figutils
 
-anno = AppraiseAnnotations.get_full("MQM")
+figutils.matplotlib_default()
+
+anno = AppraiseAnnotations.get_full("GEMBA")
 
 to_average_users = []
 for login in anno.AnnotatorID.unique():
@@ -67,7 +71,66 @@ print(
     sep = " & ",
     end=" \\\\\n"
 )
-    
+
+def plot_complex(to_average_users, scheme):
+    fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(2.5, 3), height_ratios=[2, 1])
+
+    if scheme == "GEMBA":
+        ax0.bar(
+            range(len(to_average_users)),
+            height=[user['span_removed']+user['span_kept'] for user in to_average_users],
+            color=figutils.COLORS[0],
+            label="Removed",
+        )
+        ax0.bar(
+            range(len(to_average_users)),
+            height=[user['span_kept'] for user in to_average_users],
+            color=figutils.COLORS[3],
+            label="Kept",
+        )
+        ax0.bar(
+            range(len(to_average_users)),
+            height=[-user['span_added'] for user in to_average_users],
+            color=figutils.COLORS[1],
+            label="Added",
+        )
+    elif scheme == "ESA":
+        ax0.bar(
+            range(len(to_average_users)),
+            height=[-user['span_final'] for user in to_average_users],
+            color=figutils.COLORS[1],
+            label="Added",
+        )
+
+    ax0.set_yticks([-1, 0, 1], ["+1", "0", "+1"])
+    ax0.set_xticks([])
+    ax0.set_ylabel("Segments")
+    ax0.legend(
+        facecolor="#ccc",
+        handlelength=0.5,
+        ncols=3,
+        columnspacing=0.5,
+        loc="lower center",
+    )
+    ax0.set_ylim(-2.2, 1.8)
+    ax0.spines[["top", "right"]].set_visible(False)
+
+    ax1.scatter(
+        range(len(to_average_users)),
+        [user["time"] for user in to_average_users],
+        color="black",
+    )
+    ax1.set_ylabel("Time")
+    ax1.set_xlabel(f"User ({scheme.replace('GEMBA', 'GEMBA+ESA')})")
+    ax1.set_xticks(range(len(to_average_users)), [""]*len(to_average_users))
+    ax1.spines[["top", "right"]].set_visible(False)
+    ax1.set_ylim(5, 85)
+
+    plt.tight_layout(pad=0.1)
+    plt.savefig(f"figures/edit_degree_{scheme}.pdf")
+    plt.show()
+        
+plot_complex(to_average_users, scheme="GEMBA")
 
 anno = AppraiseAnnotations.get_full("ESA")
 
@@ -113,3 +176,4 @@ print(
         end=" \\\\\n"
     )
     
+plot_complex(to_average_users, scheme="ESA")
