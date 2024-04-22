@@ -7,12 +7,19 @@ import numpy as np
 
 SCHEME_ESA = "ESA"
 SCHEME_MQM = "MQM"
+SCHEME_ESA_SEVERITY = "ESA_SEVERITY" # protocol where score is devised from severity of errors
+
+
 SCHEME_GEMBA = "GEMBA"  # Schema used for parallel project, not part of WMT 2024
+SCHEME_GEMBA_SEVERITY = "GEMBA_SEVERITY"  # Schema used for parallel project, not part of WMT 2024
 
 
 class AppraiseAnnotations:
     def __init__(self, annotation_scheme):
-        self.path = f"campaign-ruction-rc5/240315rc5{annotation_scheme}.scores.csv"
+        self.batch_file_name = annotation_scheme
+        if "_SEVERITY" in annotation_scheme:
+            self.batch_file_name = annotation_scheme.replace('_SEVERITY', '')
+
         self.annotation_scheme = annotation_scheme
         self.df = self.load_annotations()
 
@@ -31,7 +38,7 @@ class AppraiseAnnotations:
         # load csv file        
         header = ["login", "system", "itemID", "is_bad", "source_lang", "target_lang", "score", "documentID", "unk_col_always_false", "span_errors", "start_time", "end_time"]
 
-        df = pd.read_csv(self.path, sep=",", names=header)
+        df = pd.read_csv(f"campaign-ruction-rc5/240315rc5{self.batch_file_name}.scores.csv", sep=",", names=header)
         # reverse rows order in df
         df = df.iloc[::-1].reset_index(drop=True)
 
@@ -40,6 +47,21 @@ class AppraiseAnnotations:
 
         # remove duplicate with lower start_time, this happens when annotator changed their decision
         df = df.drop_duplicates(subset=["login", "itemID"], keep="last")
+
+        # generate scores
+        if self.annotation_scheme in [SCHEME_MQM, SCHEME_ESA_SEVERITY, SCHEME_GEMBA_SEVERITY]:
+            weight = {"minor": -1, "major": -5, "critical": -25, "undecided": 0}
+            for index, row in df.iterrows():
+                score = 0
+                span_errors = json.loads(row['span_errors'])
+                for error in span_errors:
+                    if self.annotation_scheme == SCHEME_MQM and "Punctuation" in error['error_type']:
+                        score += -0.1
+                    else:
+                        score += weight[error["severity"]]
+                if score > 25:
+                    score = 25
+                df.at[index, "score"] = score                
 
         return df
 
@@ -90,7 +112,7 @@ class AppraiseAnnotations:
         # hack because 
         wmt_df["systemID"] 
 
-        batches = json.load(open(f"campaign-ruction-rc5/data/batches_wmt23_en-de_{self.annotation_scheme.lower()}.json"))
+        batches = json.load(open(f"campaign-ruction-rc5/data/batches_wmt23_en-de_{self.batch_file_name.lower()}.json"))
         batches = [
             item for task in batches for item in task["items"]
             if "_item" in item
@@ -170,7 +192,7 @@ class AppraiseAnnotations:
         # rename column 1
         df = df.rename(columns={1: "documentID"})
 
-        batches = json.load(open(f"campaign-ruction-rc5/data/batches_wmt23_en-de_{self.annotation_scheme.lower()}.json"))
+        batches = json.load(open(f"campaign-ruction-rc5/data/batches_wmt23_en-de_{self.batch_file_name.lower()}.json"))
 
         mapping_line_num = {}
         for batch in batches:
@@ -187,19 +209,6 @@ class AppraiseAnnotations:
             documentID = row["documentID"].split("#")[0]
             line_num, source, translation = mapping_line_num[(row["itemID"], row["documentID"])]
             score = row["score"]
-            if self.annotation_scheme == SCHEME_GEMBA:
-                self.df.at[index,'span_errors'] = row['span_errors']
-
-            if self.annotation_scheme == SCHEME_MQM or (self.annotation_scheme in [SCHEME_ESA, SCHEME_GEMBA] and use_severity_for_esa):
-                # parse json from row['span_errors']
-                score = 0
-                weight = {"minor": -1, "major": -5, "critical": -25, "undecided": 0}
-                span_errors = json.loads(row['span_errors'])
-                for error in span_errors:
-                    if self.annotation_scheme == SCHEME_MQM and "Punctuation" in error['error_type']:
-                        score += -0.1
-                    else:
-                        score += weight[error["severity"]]
 
             assigned = df.loc[(df["system"] == system) & (df["documentID"] == documentID) & (df["source"] == source) & (df["translation"] == translation)]
 
@@ -246,10 +255,7 @@ class AppraiseAnnotations:
         # replace None scores with "None"
         df["score"] = df["score"].fillna("None")
         # save df into tsv file
-        subname = ""
-        if use_severity_for_esa:
-            subname = "_severity"
-        df.to_csv(f"campaign-ruction-rc5/en-de.{self.annotation_scheme}{subname}.seg.score", sep="\t", index=False, header=False)
+        df.to_csv(f"campaign-ruction-rc5/en-de.{self.annotation_scheme}.seg.score", sep="\t", index=False, header=False)
 
         # allows chaining
         return self
