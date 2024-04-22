@@ -22,6 +22,7 @@ class AppraiseAnnotations:
 
         self.annotation_scheme = annotation_scheme
         self.df = self.load_annotations()
+        self._estimate_annotation_duration()
 
         # load annotators mapping
         self.annotator_mapping = pd.read_csv("data/Annotators_mapping.csv")
@@ -33,6 +34,8 @@ class AppraiseAnnotations:
         self.df = self.df.merge(self.annotator_mapping, left_on="login", right_on="login", how="left")
         # unk_col_always_false: unclear what the purpose of this constant column is
         self.df = self.df.drop(columns=["unk_col_always_false"])
+        # add column bad_duplicate to filter out bad and duplicate rows
+        self.df["valid_segment"] = self.df.apply(lambda x: "#bad" not in x['documentID'] and "#duplicate" not in x['documentID'], axis=1)
 
     def load_annotations(self):
         # load csv file        
@@ -48,7 +51,7 @@ class AppraiseAnnotations:
         # remove duplicate with lower start_time, this happens when annotator changed their decision
         df = df.drop_duplicates(subset=["login", "itemID"], keep="last")
 
-        # generate scores
+        # generate scores for MQM schemas
         if self.annotation_scheme in [SCHEME_MQM, SCHEME_ESA_SEVERITY, SCHEME_GEMBA_SEVERITY]:
             weight = {"minor": -1, "major": -5, "critical": -25, "undecided": 0}
             for index, row in df.iterrows():
@@ -64,6 +67,18 @@ class AppraiseAnnotations:
                 df.at[index, "score"] = score                
 
         return df
+    
+    def _estimate_annotation_duration(self): 
+        self.df["duration_seconds"] = 0       
+        for login in self.df.login.unique():
+            subdf = self.df[self.df['login'] == login]
+            previous_timestamp = subdf.iloc[0]["start_time"]
+            for i in range(1, len(subdf)):
+                index = subdf.index[i]
+                diff = self.df.loc[index]["start_time"] - previous_timestamp
+                
+                previous_timestamp = self.df.loc[index]["start_time"]
+                self.df.at[index, "duration_seconds"] = diff   
 
     @staticmethod
     def get_full(annotation_scheme):
@@ -245,6 +260,10 @@ class AppraiseAnnotations:
             else:
                 print("there is a problem, which needs investigation")
                 # ipdb.set_trace()
+
+            # assign source and system into the df
+            self.df.at[index, "source_seg"] = assigned['source'].iloc[0]
+            self.df.at[index, "translation_seg"] = assigned['translation'].iloc[0]
 
         # combine columns from df and mqm on their index
         df = df.merge(mqm, left_index=True, right_index=True, how="left")

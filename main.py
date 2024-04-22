@@ -1,30 +1,31 @@
 from absl import app
 from ESA.annotations import AppraiseAnnotations, SCHEME_ESA, SCHEME_GEMBA, SCHEME_MQM, SCHEME_ESA_SEVERITY, SCHEME_GEMBA_SEVERITY
 from ESA.human_scores import HumanScores
+from ESA.settings import PROJECT
+from ESA.analysis_time_spans import analyse_annotation_durations
 import ipdb
-
+import numpy as np
 
 
 
 def main(args):
-    schemes = [SCHEME_ESA, SCHEME_GEMBA, SCHEME_MQM, SCHEME_ESA_SEVERITY, SCHEME_GEMBA_SEVERITY]
+    schemes = [SCHEME_ESA, SCHEME_MQM, SCHEME_ESA_SEVERITY]
+    if PROJECT == "GEMBA":
+        schemes += [SCHEME_GEMBA,SCHEME_GEMBA_SEVERITY]
 
     annots = {}
     for scheme in schemes:
         annots[scheme] = AppraiseAnnotations(scheme)
-        avg_minutes, median = annots[scheme].get_average_minutes_per_HIT()
-        print(f"Scheme: {scheme}, Average time per HIT: {avg_minutes:.1f} minutes, Median time per HIT: {median:.1f} seconds")
-
-        avg_minutes, median = annots[scheme].get_average_minutes_per_HIT(unfiltered=True)
         # Next code is not needed to run unless the code changes
-        annots[scheme].generate_wmt_score_files()
+        # annots[scheme].generate_wmt_score_files()
                
 
 
     # GENERATE RESOURCES FOR PAPER
-
     ranks = HumanScores("en-de")
     ranks.generate_ranks()
+    analyse_annotation_durations()
+
 
 
 if __name__ == '__main__':
