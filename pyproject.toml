@@ -1,0 +1,17 @@
+[project]
+name = "ErrorSpanAnnotations"
+version = "0.0.0"
+dependencies = [
+    "matplotlib",
+    "numpy",
+    "pandas",
+    "ipdb",
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+# include only the ESA/ directory
+packages = ["ESA"]

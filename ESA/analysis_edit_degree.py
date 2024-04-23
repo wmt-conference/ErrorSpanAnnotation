@@ -81,6 +81,8 @@ def plot_complex(to_average_users, scheme):
             height=[user['span_removed']+user['span_kept'] for user in to_average_users],
             color=figutils.COLORS[0],
             label="Removed",
+            # default is 0.8 so this makes it be "in the back"
+            width=0.79,
         )
         ax0.bar(
             range(len(to_average_users)),

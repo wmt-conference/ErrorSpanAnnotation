@@ -8,7 +8,6 @@ import ipdb
 import numpy as np
 
 
-
 def main(args):
     # class containing all merged informations
     merged = MergedAnnotations()

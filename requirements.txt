@@ -1,4 +1,0 @@
-ipdb
-pandas
-numpy
-matplotlib
