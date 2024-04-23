@@ -1,8 +1,8 @@
-from annotations import AppraiseAnnotations
+from ESA.annotations import AppraiseAnnotations
 import numpy as np
 import collections
 import matplotlib.pyplot as plt
-import figutils
+import ESA.figutils as figutils
 
 figutils.matplotlib_default()
 

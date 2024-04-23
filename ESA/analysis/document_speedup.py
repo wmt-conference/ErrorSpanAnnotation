@@ -1,4 +1,4 @@
-from annotations import AppraiseAnnotations
+from ESA.annotations import AppraiseAnnotations
 import collections
 import pandas as pd
 import matplotlib.pyplot as plt
