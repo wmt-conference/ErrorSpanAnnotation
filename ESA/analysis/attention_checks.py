@@ -18,11 +18,37 @@ for documentID, doc_bad in df_bad.groupby(by="documentID"):
     if re.match(r".*#duplicate\d+", documentID):
         continue
     documentID = re.sub(r"#bad\d+$", "", doc_bad.iloc[0]["documentID"])
+    login_gemba = doc_bad.iloc[0]["login_gemba"]
 
-    doc_tgt = df_tgt[(df_tgt.documentID == documentID) & (df_tgt.login_gemba == doc_bad.iloc[0]["login_gemba"])]
+    doc_tgt = df_tgt[(df_tgt.documentID == documentID) & (df_tgt.login_gemba == login_gemba)]
+
 
     doc_bad = doc_bad.sort_values(by="itemID")
     doc_tgt = doc_tgt.sort_values(by="itemID")
+
+    # get previous and following documents
+    df_user_pre = df[(df.login_gemba == login_gemba) & (df.itemID < doc_bad.iloc[0].itemID)].sort_values(by="itemID")
+    df_user_pst = df[(df.login_gemba == login_gemba) & (df.itemID > doc_bad.iloc[-1].itemID)].sort_values(by="itemID")
+
+    if len(df_user_pre) > 0 and len(df_user_pst) > 0:
+        df_user_pre = df_user_pre[df_user_pre.documentID == df_user_pre.iloc[-1].documentID]
+        df_user_pst = df_user_pst[df_user_pst.documentID == df_user_pst.iloc[0].documentID]
+
+        for _, line in df_user_pre.iterrows():
+            if type(line["gemba_mqm_span_errors_gemba"]) != list:
+                continue
+            spans_gemba = {(x["start_i"], x["end_i"]) for x in line["gemba_mqm_span_errors_gemba"]}
+            spans_gesa = {(x["start_i"], x["end_i"]) for x in json.loads(line["span_errors_gemba"])}
+            if spans_gemba:
+                data_agg[("activity", "pre")].append(len(spans_gemba & spans_gesa)/len(spans_gemba))
+            
+        for _, line in df_user_pst.iterrows():
+            if type(line["gemba_mqm_span_errors_gemba"]) != list:
+                continue
+            spans_gemba = {(x["start_i"], x["end_i"]) for x in line["gemba_mqm_span_errors_gemba"]}
+            spans_gesa = {(x["start_i"], x["end_i"]) for x in json.loads(line["span_errors_gemba"])}
+            if spans_gemba:
+                data_agg[("activity", "pst")].append(len(spans_gemba & spans_gesa)/len(spans_gemba))
     
     assert len(doc_bad) == len(doc_tgt)
 
