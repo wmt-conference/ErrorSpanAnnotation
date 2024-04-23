@@ -3,15 +3,21 @@ import collections
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import argparse
 
-SCHEME = "MQM"
-anno_esa = AppraiseAnnotations.get_full(SCHEME)
+args = argparse.ArgumentParser()
+args.add_argument("scheme", default="ESA")
+args = args.parse_args()
+
+plt.figure(figsize=(4, 1.5))
+
+anno_esa = AppraiseAnnotations.get_full(args.scheme)
 data_times = collections.defaultdict(list)
 
 
 annot_times = []
-for login in anno_esa.login.unique():
-    df = anno_esa[anno_esa['login'] == login]
+for AnnotatorID in anno_esa.AnnotatorID.unique():
+    df = anno_esa[anno_esa['AnnotatorID'] == AnnotatorID]
     df = df.sort_values("start_time").reset_index(drop=True)
     for i in range(0, len(df) - 1):
         annot_times.append(df.iloc[i + 1]["start_time"] - df.iloc[i]["start_time"])
@@ -21,8 +27,8 @@ median = df.median()[0]
 
 df = anno_esa.sort_values("start_time")
 times_users = []
-for login in anno_esa.login.unique():
-    subdf = df[df['login'] == login]
+for AnnotatorID in anno_esa.AnnotatorID.unique():
+    subdf = df[df['AnnotatorID'] == AnnotatorID]
     reducing_time = 0
     previous_timestamp = subdf.iloc[0]["start_time"]
     times_user = []
@@ -50,22 +56,46 @@ def smooth(y, box_pts):
 
 
 times_users_big = [[] for _ in range(len(times_users[0])*2)]
+times_users_var = []
 for times_user in times_users:
-    times_user = smooth(times_user, 40)
+    # compute variation on the first 100 segments
+    times_user_average = np.average(times_user[:100])
+    times_users_var.append(np.average([abs(x-times_user_average) for x in times_user[:100]]))
+
+    times_user = smooth(times_user, 15)
     for i, v in enumerate(times_user):
+        # reindex to 0 .. 100
+        i = int(i*100/len(times_user))
         times_users_big[i].append(v)
+
     plt.plot(
+        np.linspace(0, 100, len(times_user)),
         times_user,
-        color="black", alpha=0.4,
+        color="black", alpha=0.3,
     )
 
 times_users_big = [np.average(v) for v in times_users_big if v]
+
+slope = (np.average(times_users_big[-10:-5])-np.average(times_users_big[5:10]))/100
+print(f"Learned slope: {slope:.4f}s")
+print(f"ABS variation: {np.average(times_users_var):.4f}s")
+
 plt.plot(
     times_users_big,
     color="black", linewidth=4,
 )
 
-plt.title(SCHEME)
-plt.ylabel("Segment time")
-plt.xlabel("Segment progression")
+plt.ylim(10, 120)
+
+plt.title(f"{args.scheme}  ({slope:.2f}s per segment)")
+plt.ylabel("Segment time (s)", labelpad=-2)
+plt.xticks([0, 20, 80, 100])
+plt.xlabel("Segment progression", labelpad=-8)
+plt.yticks([25, 50, 75, 100])
+
+ax = plt.gca()
+ax.spines[['top', 'right']].set_visible(False)
+
+plt.tight_layout(pad=0.1)
+plt.savefig(f"figures/document_speedup_{args.scheme}.pdf")
 plt.show()
