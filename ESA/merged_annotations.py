@@ -32,4 +32,3 @@ class MergedAnnotations:
             merged = merged.merge(gemba_df, on=identical_columns)
 
         self.df = merged
-        

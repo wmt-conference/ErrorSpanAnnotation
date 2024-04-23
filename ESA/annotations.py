@@ -217,7 +217,12 @@ class AppraiseAnnotations:
             for item in batch["items"]:
                 if "tutorial" in item["documentID"]:
                     continue
-                mapping_line_num[(item["itemID"], item["documentID"])] = (item["_item"].split(" | ")[1], item["sourceText"], item['targetText'])
+
+                if "GEMBA" in self.annotation_scheme:
+                    mapping_line_num[(item["itemID"], item["documentID"])] = (item["_item"].split(" | ")[1], item["sourceText"], item['targetText'], item['mqm'])
+                else:
+                    mapping_line_num[(item["itemID"], item["documentID"])] = (item["_item"].split(" | ")[1], item["sourceText"], item['targetText'], None)
+                
 
         for index, row in self.df.iterrows():
             if row["is_bad"] != "TGT" or "#duplicate" in row["documentID"]:
@@ -225,7 +230,7 @@ class AppraiseAnnotations:
 
             system = row["system"].replace("wmt23.", "")
             documentID = row["documentID"].split("#")[0]
-            line_num, source, translation = mapping_line_num[(row["itemID"], row["documentID"])]
+            line_num, source, translation, orig_mqm = mapping_line_num[(row["itemID"], row["documentID"])]
             score = row["score"]
 
             assigned = df.loc[(df["system"] == system) & (df["documentID"] == documentID) & (df["source"] == source) & (df["translation"] == translation)]
@@ -267,6 +272,9 @@ class AppraiseAnnotations:
             # assign source and system into the df
             self.df.at[index, "source_seg"] = assigned['source'].iloc[0]
             self.df.at[index, "translation_seg"] = assigned['translation'].iloc[0]
+
+            if "GEMBA" in self.annotation_scheme:
+                self.df.at[index, "gemba_mqm_span_errors"] = orig_mqm
 
         # combine columns from df and mqm on their index
         df = df.merge(mqm, left_index=True, right_index=True, how="left")
