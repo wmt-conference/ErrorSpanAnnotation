@@ -90,6 +90,9 @@ class AppraiseAnnotations:
         return pd.read_pickle(fname)
     
     def add_gemba_and_wmt_scores(self):
+        print("WARNING: You are using a deprecated loader. Please switch to `MergedAnnotations().df`")
+        # WARNING: Before you delete me, please check that `analysis_document_speedup.py` and `analysis_edit_degree.py` have been migrated to the new loader.
+
         lines_score = pd.read_csv(f"data/mt-metrics-eval-v2/wmt23/human-scores/en-de.mqm.seg.score", sep="\t", header=None, dtype=str)
         lines_score.columns = ["systemID", "wmt_mqm_score"]
         lines_score = lines_score.drop(columns=["systemID"])
