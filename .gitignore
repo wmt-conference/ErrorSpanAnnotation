@@ -1,4 +1,7 @@
 # added by zouharvi
+.history*
+*.xlsx
+.idea
 PAPER/
 generated_plots/
 figures/

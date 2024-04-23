@@ -34,24 +34,24 @@ class HumanScores:
             scores[protocol] = pd.read_csv(path, sep="\t", header=None, names=["system", "score"])['score']
 
         # merge scores
-        self.resources = pd.DataFrame(scores)
+        df = pd.DataFrame(scores)
 
-    def generate_ranks(self):
-        df = self.resources
         # replace in all columns string "None" with NaN
-        df = df.replace("None", float("nan"))
-        df = df.dropna()
-
         # convert all scores to float
         for col in df.columns:
             if col != "system":
-                df[col] = df[col].astype(float)
+                df[col] = df[col].replace("None", float("nan")).astype(float)
+
+        self.resources = df
+
+    def generate_ranks(self):
+        df = self.resources
+        df = df.dropna()
+
         # group by system
         df2 = df.groupby("system").mean()
         df2.groupby("system").mean().to_excel("generated_plots/system_ranking.xlsx")
 
-
-        results = {}
         data = {}
         data_clusters = {}
         list_of_schemes = ["wmt-mqm", "mqm", "wmt-dasqm", "esa"]
@@ -131,3 +131,11 @@ class HumanScores:
         plt.tight_layout()
         subname = "gemba" if PROJECT == "GEMBA" else "esa"
         plt.savefig(f"PAPER/generated_plots/clusters_{subname}.pdf")
+
+    def calculate_inter_annotator_with_mqm(self):
+        df = self.resources
+        df = df.dropna()
+        print("-"*50)
+        print(f"Intra-annotator agreement against WMT-MQM:")
+        print(df.corr(method='kendall', numeric_only=True)['wmt-mqm'])
+        print("-"*50)
