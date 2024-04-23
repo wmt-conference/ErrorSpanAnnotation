@@ -89,8 +89,11 @@ plt.ylim(10, 120)
 
 plt.title(f"{args.scheme}  ({slope:.2f}s per segment)")
 plt.ylabel("Segment time (s)", labelpad=-2)
-plt.xticks([0, 20, 80, 100])
-plt.xlabel("Segment progression", labelpad=-8)
+plt.xticks(
+    [0, 20, 80, 100],
+    ["0%", "20%", "80%", "100%"],
+)
+plt.xlabel("Annotation progression", labelpad=-8)
 plt.yticks([25, 50, 75, 100])
 
 ax = plt.gca()
