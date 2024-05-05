@@ -56,7 +56,7 @@ import ESA.figutils as figutils
 
 figutils.matplotlib_default()
 
-fig = plt.figure(figsize=(3, 1.8))
+fig = plt.figure(figsize=(4, 1.8))
 
 KWARGS = {
     "alpha": 0.7,
