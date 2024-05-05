@@ -2,7 +2,6 @@ import ESA.settings
 ESA.settings.PROJECT = "GEMBA"
 from ESA.merged_annotations import MergedAnnotations
 import json
-import itertools
 import ESA.figutils
 import numpy as np
 ESA.figutils.matplotlib_default()
@@ -13,16 +12,6 @@ all_sets = []
 
 def get_spans(spans):
       return {(x["start_i"], x["end_i"]) for x in spans}
-
-# ['login_mqm', 'system', 'itemID', 'is_bad', 'source_lang', 'target_lang',
-#        'score_mqm', 'documentID', 'span_errors_mqm', 'start_time_mqm',
-#        'end_time_mqm', 'duration_seconds_mqm', 'AnnotatorID_mqm',
-#        'valid_segment', 'source_seg', 'translation_seg', 'login_esa',
-#        'score_esa', 'span_errors_esa', 'start_time_esa', 'end_time_esa',
-#        'duration_seconds_esa', 'AnnotatorID_esa', 'login_gemba', 'score_gemba',
-#        'span_errors_gemba', 'start_time_gemba', 'end_time_gemba',
-#        'duration_seconds_gemba', 'AnnotatorID_gemba',
-#        'gemba_mqm_span_errors_gemba']
 
 for _, row in df.iterrows():
     if type(row.gemba_mqm_span_errors_gemba) != list:
