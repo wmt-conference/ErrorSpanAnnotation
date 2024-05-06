@@ -20,6 +20,8 @@ for _, row in df.iterrows():
     spans_gesa = get_spans(json.loads(row.span_errors_gemba))
     spans_esa = get_spans(json.loads(row.span_errors_esa))
     spans_mqm = get_spans(json.loads(row.span_errors_mqm))
+    print(row.keys())
+    exit()
 
     all_sets.append({
           "gemba": spans_gemba,

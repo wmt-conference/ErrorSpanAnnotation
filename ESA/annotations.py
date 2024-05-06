@@ -82,6 +82,7 @@ class AppraiseAnnotations:
 
     @staticmethod
     def get_full(annotation_scheme):
+        print("WARNING: You are using a deprecated loader. Please switch to `MergedAnnotations().df`")
         fname = f"campaign-ruction-rc5/en-de.{annotation_scheme}.pkl"
         if not os.path.exists(fname):
             print("Generating data")

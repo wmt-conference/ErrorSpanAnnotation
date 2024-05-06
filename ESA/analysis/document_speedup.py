@@ -78,6 +78,8 @@ times_users_big = [np.average(v) for v in times_users_big if v]
 
 slope = (np.average(times_users_big[-10:-5])-np.average(times_users_big[5:10]))/100
 print(f"Learned slope: {slope:.4f}s")
+slope_init = (times_users_big[15]-times_users_big[1])/15
+print(f"Learned slope (first 15%): {slope_init:.4f}s")
 print(f"ABS variation: {np.average(times_users_var):.4f}s")
 
 plt.plot(
@@ -87,7 +89,7 @@ plt.plot(
 
 plt.ylim(10, 120)
 
-plt.title(f"{args.scheme}  ({slope:.2f}s per segment)")
+plt.title(f"{args.scheme.replace('GEMBA', 'GEMBA+ESA')}  ({slope:.2f}s per segment)")
 plt.ylabel("Segment time (s)", labelpad=-2)
 plt.xticks(
     [0, 20, 80, 100],

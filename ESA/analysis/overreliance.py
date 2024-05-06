@@ -26,7 +26,7 @@ for annotator in df.AnnotatorID_gemba.unique():
         per_progress[int(line_i*100/len(df_local))].append({
             "span_kept": len(span_gemba & span_gesa),
             "span_removed": len(span_gemba - span_gesa),
-            "span_added": len(span_gesa & span_gemba),
+            "span_added": len(span_gesa - span_gemba),
         })
 
 # average across timestamps
@@ -82,7 +82,7 @@ plt.legend(
     columnspacing=0.5,
     loc="lower center",
 )
-plt.ylim(-2.2, 2.0)
+plt.ylim(-1.8, 2.0)
 plt.gca().spines[["top", "right"]].set_visible(False)
 
 plt.tight_layout(pad=0.1)
