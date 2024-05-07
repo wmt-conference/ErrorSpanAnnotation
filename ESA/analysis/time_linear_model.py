@@ -1,37 +1,11 @@
 import ESA.settings
-ESA.settings.PROJECT = "esa"
+ESA.settings.PROJECT = "GEMBA"
 from ESA.merged_annotations import MergedAnnotations
 import numpy as np
 import json
-import statsmodels.formula.api as smf
-import pandas as pd
-
-df = MergedAnnotations().df
-
-
-data = []
-for _, row in df.iterrows():
-    df_local = df[df.AnnotatorID_gemba == row.AnnotatorID_gemba]
-    data.append({
-        "Time": row.end_time_gemba-row.start_time_gemba,
-        "Annotator": row.AnnotatorID_gemba,
-        "Progress": 100*np.average(df_local.end_time_gemba <= row.start_time_gemba),
-        "Words": len(str(row.translation_seg).split()),
-        "ErrorsOut": len(json.loads(row.span_errors_gemba)),
-        "DocumentSize": np.sum(df_local.documentID == row.documentID),
-    })
-
-# transpose
-data = {k:[x[k] for x in data] for k in data[0].keys
-        ()}
-data = pd.DataFrame.from_dict(data)
-
-model = smf.mixedlm("Time ~ Progress + Words + ErrorsOut + DocumentSize", data, groups=data["Annotator"])
-model_fit = model.fit()
-print(model_fit.summary())
-
 import collections
 
+df = MergedAnnotations().df
 
 data_gesa = collections.defaultdict(list)
 data_esa = collections.defaultdict(list)
