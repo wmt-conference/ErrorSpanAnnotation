@@ -4,6 +4,9 @@ from ESA.merged_annotations import MergedAnnotations
 import numpy as np
 import json
 import collections
+from sklearn.model_selection import cross_val_score
+from sklearn.linear_model import HuberRegressor
+import pandas as pd
 
 df = MergedAnnotations().df
 
@@ -59,6 +62,28 @@ def process_data(data):
             np.corrcoef(data_local[feature], data_local["Time"])[0,1]
             for data_local in data.values()
         ]
+
+
+    data_y_all = []
+    data_x_all = []
+    for data_local in data.values():
+        data_y_all += data_local["Time"]
+        data_x_all += list(pd.DataFrame.from_dict(data_local).drop(columns=["Time"]).values)
+    model = HuberRegressor(epsilon=1.1, max_iter=1000)
+    model.fit(data_x_all, data_y_all)
+    data_y_pred = model.predict(data_x_all)
+    print(f"Corr: {np.corrcoef(data_y_all, data_y_pred)[0,1]:.1%}")
+
+    accuracies = []
+    for data_local in data.values():
+        data_y = data_local["Time"]
+        data_x = pd.DataFrame.from_dict(data_local).drop(columns=["Time"])
+        model = HuberRegressor(epsilon=1.1, max_iter=1000)
+        scores = cross_val_score(model, data_x, data_y, cv=len(data_x)//2, scoring="neg_mean_absolute_error")
+        accuracies.append(np.average(scores))
+    print(f"MAE: {-np.average(accuracies):.2f}s")
+
+
 
     for feature in list(data.values())[0].keys():
         print(f"{feature:>15}: {np.average(correlations[feature]):.1%}")
