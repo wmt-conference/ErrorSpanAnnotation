@@ -106,6 +106,12 @@ for _, row in df.iterrows():
 		span_len(s1) for s1 in spans_gesa
 	]
 	to_average["normalizer"].append(len(spans_added))
+	
+
+	to_average["severity_diff_no_norm"].append(
+		len([s1 for s1 in spans_added if s1["severity"] == "major"]) -
+        len([s1 for s1 in spans_added if s1["severity"] == "minor"])
+    )
 
 normalization = np.average(to_average.pop("normalizer"))
 
