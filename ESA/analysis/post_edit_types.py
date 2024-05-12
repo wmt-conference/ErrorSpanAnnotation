@@ -90,14 +90,16 @@ for _, row in df.iterrows():
 	to_average["spans_moved_t20"].append(len(spans_moved_t20))
 	to_average["spans_moved_t10"].append(len(spans_moved_t10))
 	to_average["spans_moved_t5"].append(len(spans_moved_t5))
-	to_average["spans_moved_inc"].append(len([
+	spans_moved_inc = [
 		(s1, s2) for s1, s2 in spans_moved_t20
 		if span_len(s1) < span_len(s2)
-	]))
-	to_average["spans_moved_dec"].append(len([
+	]
+	spans_moved_dec = [
 		(s1, s2) for s1, s2 in spans_moved_t20
 		if span_len(s1) > span_len(s2)
-	]))
+	]
+	to_average["spans_moved_inc"].append(len(spans_moved_inc))
+	to_average["spans_moved_dec"].append(len(spans_moved_dec))
 
 	to_average["gemba_span_len_no_norm"] += [
 		span_len(s1) for s1 in spans_gemba
@@ -112,6 +114,14 @@ for _, row in df.iterrows():
 		len([s1 for s1 in spans_added if s1["severity"] == "major"]) -
         len([s1 for s1 in spans_added if s1["severity"] == "minor"])
     )
+
+	# to find examples
+	if spans_moved_inc and len(spans_gesa) <= 3 and len(row.translation_seg) <= 100:
+		print(row.source_seg)
+		print(row.translation_seg)
+		print(spans_gesa)
+		print()
+	
 
 normalization = np.average(to_average.pop("normalizer"))
 
