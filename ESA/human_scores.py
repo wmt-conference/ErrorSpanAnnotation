@@ -29,7 +29,7 @@ class HumanScores:
             elif protocol == "gemba_severity":
                 path = f"campaign-ruction-rc5/{language_pair}.GEMBA_severity.seg.score"
             elif protocol == "llm":
-                ipdb.set_trace()
+                path = f"campaign-ruction-rc5/{language_pair}.LLM.seg.score"
 
             scores["system"] = pd.read_csv(path, sep="\t", header=None, names=["system", "score"])['system']
             scores[protocol] = pd.read_csv(path, sep="\t", header=None, names=["system", "score"])['score']
@@ -92,7 +92,10 @@ class HumanScores:
         # Create a figure with subplots for each schema
         rows = int((len(data) - 1)/3)
         columns = 3 #int((len(data) - 1)/2)
-        fig, axs = plt.subplots(rows, columns, figsize=(4 * columns, 4 * rows)) 
+        rows = 1
+        columns = len(data) - 1
+        fig, axs = plt.subplots(rows, columns, figsize=(4 * columns, 4 * rows))
+
         axs = axs.flatten() 
 
         i = 0
@@ -119,7 +122,7 @@ class HumanScores:
             axs[i].xaxis.set_major_locator(plt.MaxNLocator(integer=True))
             
             # Adding titles with language pairs or other identifiers
-            axs[i].set_title(f"System scores ({self.language_pair})")
+            # axs[i].set_title(f"System scores ({self.language_pair})")
             
             # Plotting vertical lines for scheme clusters and horizontal for MQM
             for cluster in data_clusters[scheme]:

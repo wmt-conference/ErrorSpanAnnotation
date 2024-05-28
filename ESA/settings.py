@@ -24,5 +24,8 @@ methods = {
     "gemba": {
         "name": "GESA"
     },
+    "llm": {
+        "name": "LLM (no humans)"
+    },
 }
 
