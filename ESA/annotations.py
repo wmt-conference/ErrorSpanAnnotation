@@ -50,6 +50,7 @@ class AppraiseAnnotations:
         # add column bad_duplicate to filter out bad and duplicate rows
         self.df["valid_segment"] = self.df.apply(lambda x: "#bad" not in x['documentID'] and "#duplicate" not in x['documentID'], axis=1)
 
+
     def load_annotations(self):
         # load csv file        
         header = ["login", "system", "itemID", "is_bad", "source_lang", "target_lang", "score", "documentID", "unk_col_always_false", "span_errors", "start_time", "end_time"]
@@ -66,7 +67,6 @@ class AppraiseAnnotations:
 
         # generate scores for MQM schemas
         if self.annotation_scheme in [SCHEME_MQM, SCHEME_ESA_SEVERITY, SCHEME_GEMBA_SEVERITY]:
-
             for index, row in df.iterrows():
                 score = 0
                 span_errors = json.loads(row['span_errors'])
@@ -165,7 +165,6 @@ class AppraiseAnnotations:
             tmp = row["documentID"].split("#")
             documentID, systemID = tmp[0], tmp[1]
 
-            
             item_batch = batches[(batches["itemID"] == itemID) & (batches["documentID"] == documentID) & (batches["systemID"] == systemID)]
             if len(item_batch) != 1:
                 print(f"FOUND IN BATCHES ({len(item_batch)})", itemID, documentID, systemID)
@@ -197,6 +196,10 @@ class AppraiseAnnotations:
         # load mqm annotations for matching
         mqm = pd.read_csv(f"data/mt-metrics-eval-v2/wmt23/human-scores/en-de.mqm.seg.score", sep="\t", header=None)
         mqm.columns = ["system", "wmt_mqm_score"]
+
+        mqm_spans = pd.read_csv(f"data/wmt23_en-de.mqm.merged_sorted.seg.rating", sep="\t", header=None)
+        mqm_spans.columns = ["system", "wmt_mqm_error_spans"]
+
         # generate df which for each system has the same number of rows as docs_template
         # load sources and translations
         # load sources from "mt-metrics-eval-v2/wmt23/sources/en-de.txt" and name the column sources
@@ -288,6 +291,21 @@ class AppraiseAnnotations:
             if "GEMBA" in self.annotation_scheme:
                 self.df.at[index, "gemba_mqm_span_errors"] = orig_mqm
                 df.loc[index_number, "gemba_mqm_span_errors"] = orig_mqm
+
+            if self.annotation_scheme == "MQM":
+                if 'wmt_mqm_span_errors' not in self.df:
+                    self.df['wmt_mqm_span_errors'] = None
+
+                spans = mqm_spans.iloc[index_number]["wmt_mqm_error_spans"]
+                if spans == "None":
+                    spans = "None"
+                else:
+                    spans = json.loads(spans)
+                    if "errors" in spans:
+                        spans = spans["errors"]
+
+                # asign list into the df under column wmt_mqm_span_errors into the row index
+                self.df.at[index, "wmt_mqm_span_errors"] = spans
 
         # combine columns from df and mqm on their index
         df = df.merge(mqm, left_index=True, right_index=True, how="left")
