@@ -85,19 +85,18 @@ def evaluate_scoring(scoring: str, color="black", linestyle="-"):
 	)
 	plt.text(
 		180,
-		0.855-tick_i*0.024,
+		0.881-tick_i*0.024,
 		f"{np.average(acc):.1%}",
 		fontsize=8
 	)
 	tick_i+=1
-	# print(scoring, f"{acc:.1%}")
 
 evaluate_scoring("esa_score", color=figutils.COLORS[0])
 evaluate_scoring("esa_mqm", color=figutils.COLORS[0], linestyle="-.")
 evaluate_scoring("gesa_score", color=figutils.COLORS[1])
 evaluate_scoring("gesa_mqm", color=figutils.COLORS[1], linestyle="-.")
 evaluate_scoring("mqm_mqm", linestyle="-.")
-# evaluate_scoring("gemba_mqm")
+evaluate_scoring("gemba_mqm", color=figutils.COLORS[2], linestyle="-.")
 
 plt.legend(handlelength=1.6, labelspacing=0.07, framealpha=0, loc=(0.4, 0))
 plt.xticks(list(range(10, 210, 50))+[206])
