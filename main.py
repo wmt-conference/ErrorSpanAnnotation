@@ -7,22 +7,23 @@ from ESA.merged_annotations import MergedAnnotations
 import ipdb
 import numpy as np
 
-
 def main(args):
+
+
+
     # class containing all merged informations
     merged = MergedAnnotations()
 
-
     schemes = [SCHEME_ESA, SCHEME_MQM, SCHEME_ESA_SEVERITY]
     if PROJECT == "GEMBA":
-        schemes += [SCHEME_GEMBA,SCHEME_GEMBA_SEVERITY]
+        schemes += [SCHEME_GEMBA, SCHEME_GEMBA_SEVERITY]
 
     annots = {}
     for scheme in schemes:
         annots[scheme] = AppraiseAnnotations(scheme)
         # Next code is not needed to run unless the code changes
         # annots[scheme].generate_wmt_score_files()
-               
+
 
 
     # GENERATE RESOURCES FOR PAPER

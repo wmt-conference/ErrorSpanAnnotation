@@ -9,10 +9,23 @@ SCHEME_ESA = "ESA"
 SCHEME_MQM = "MQM"
 SCHEME_ESA_SEVERITY = "ESA_SEVERITY" # protocol where score is devised from severity of errors
 
-
 SCHEME_GEMBA = "GEMBA"  # Schema used for parallel project, not part of WMT 2024
 SCHEME_GEMBA_SEVERITY = "GEMBA_SEVERITY"  # Schema used for parallel project, not part of WMT 2024
 
+MQM_WEIGHTS = {"minor": -1, "major": -5, "critical": -25, "undecided": 0}
+
+
+def apply_mqm_annotations(span_errors):
+    # missing values needs to be None
+    if not isinstance(span_errors, list):
+        return "None"
+
+    score = 0
+    for error in span_errors:
+        score += MQM_WEIGHTS[error["severity"]]
+    if score < -25:
+        score = -25
+    return score
 
 class AppraiseAnnotations:
     def __init__(self, annotation_scheme):
@@ -53,7 +66,7 @@ class AppraiseAnnotations:
 
         # generate scores for MQM schemas
         if self.annotation_scheme in [SCHEME_MQM, SCHEME_ESA_SEVERITY, SCHEME_GEMBA_SEVERITY]:
-            weight = {"minor": -1, "major": -5, "critical": -25, "undecided": 0}
+
             for index, row in df.iterrows():
                 score = 0
                 span_errors = json.loads(row['span_errors'])
@@ -61,9 +74,9 @@ class AppraiseAnnotations:
                     if self.annotation_scheme == SCHEME_MQM and "Punctuation" in error['error_type']:
                         score += -0.1
                     else:
-                        score += weight[error["severity"]]
-                if score > 25:
-                    score = 25
+                        score += MQM_WEIGHTS[error["severity"]]
+                if score < -25:
+                    score = -25
                 df.at[index, "score"] = score                
 
         return df
@@ -167,11 +180,11 @@ class AppraiseAnnotations:
                 continue
 
             # merge
-            self.df.at[row_index,'span_errors_gemba'] = item_batch["mqm"]
-            self.df.at[row_index,'span_errors_wmt'] = item_wmt["wmt_mqm"]
-            self.df.at[row_index,'score_wmt'] = item_wmt["wmt_mqm_score"]
+            self.df.at[row_index, 'span_errors_gemba'] = item_batch["mqm"]
+            self.df.at[row_index, 'span_errors_wmt'] = item_wmt["wmt_mqm"]
+            self.df.at[row_index, 'score_wmt'] = item_wmt["wmt_mqm_score"]
             # answers are encoded in stringified JSON
-            self.df.at[row_index,'span_errors'] = json.loads(row["span_errors"])
+            self.df.at[row_index, 'span_errors'] = json.loads(row["span_errors"])
 
         return self
 
@@ -223,7 +236,6 @@ class AppraiseAnnotations:
                     mapping_line_num[(item["itemID"], item["documentID"])] = (item["_item"].split(" | ")[1], item["sourceText"], item['targetText'], item['mqm'])
                 else:
                     mapping_line_num[(item["itemID"], item["documentID"])] = (item["_item"].split(" | ")[1], item["sourceText"], item['targetText'], None)
-                
 
         for index, row in self.df.iterrows():
             if row["is_bad"] != "TGT" or "#duplicate" in row["documentID"]:
@@ -261,7 +273,6 @@ class AppraiseAnnotations:
             else:
                 index_number = assigned.index[0]
 
-                
             assigned_score = df.loc[index_number, "score"]
             # assign score to the correct row in df, first check if the row is None
             if assigned_score is None or assigned_score == score:
@@ -276,9 +287,18 @@ class AppraiseAnnotations:
 
             if "GEMBA" in self.annotation_scheme:
                 self.df.at[index, "gemba_mqm_span_errors"] = orig_mqm
+                df.loc[index_number, "gemba_mqm_span_errors"] = orig_mqm
 
         # combine columns from df and mqm on their index
         df = df.merge(mqm, left_index=True, right_index=True, how="left")
+
+        # also save scores as if the original LLM scores were generated
+        if "GEMBA" in self.annotation_scheme:
+            df2 = df.copy()
+            df2['score'] = df2['gemba_mqm_span_errors'].apply(lambda x: apply_mqm_annotations(x))
+            df2 = df2[["system_x", "score"]]
+            df2.to_csv(f"campaign-ruction-rc5/en-de.LLM.seg.score", sep="\t", index=False, header=False)
+            
         # keep only column system_x and score
         df = df[["system_x", "score"]]
         # rename system_x to system
@@ -290,7 +310,6 @@ class AppraiseAnnotations:
 
         # allows chaining
         return self
-
 
     def get_average_minutes_per_HIT(self, unfiltered=False):
         median = 0

@@ -1,11 +1,16 @@
 import ipdb
 import numpy as np
-from ESA.annotations import AppraiseAnnotations, SCHEME_ESA, SCHEME_MQM
+from ESA.settings import PROJECT
+from ESA.annotations import AppraiseAnnotations, SCHEME_ESA, SCHEME_MQM, SCHEME_GEMBA
 
 
 def analyse_annotation_durations():
+    schemes = [SCHEME_ESA, SCHEME_MQM]
+    if PROJECT == "GEMBA":
+        schemes += [SCHEME_GEMBA]
+
     annots = {}
-    for scheme in [SCHEME_ESA, SCHEME_MQM]:
+    for scheme in schemes:
         annots[scheme] = AppraiseAnnotations(scheme)
         avg_minutes, median = annots[scheme].get_average_minutes_per_HIT()
         print(f"When filtered out long pauses: Scheme: {scheme}, Average time per HIT: {avg_minutes:.1f} minutes, Median time per HIT: {median:.1f} seconds")

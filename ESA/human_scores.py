@@ -13,8 +13,7 @@ class HumanScores:
 
         # load protocol
         scores = {}
-        systems = []
-        for protocol in ["wmt-mqm", "wmt-dasqm", "esa", "mqm", "gemba", "esa_severity", "gemba_severity"]:
+        for protocol in ["llm", "wmt-mqm", "wmt-dasqm", "esa", "mqm", "gemba", "esa_severity", "gemba_severity"]:
             if protocol == "wmt-mqm":
                 path = f"data/mt-metrics-eval-v2/wmt23/human-scores/{language_pair}.mqm.seg.score"
             elif protocol == "wmt-dasqm":
@@ -29,6 +28,8 @@ class HumanScores:
                 path = f"campaign-ruction-rc5/{language_pair}.ESA_severity.seg.score"
             elif protocol == "gemba_severity":
                 path = f"campaign-ruction-rc5/{language_pair}.GEMBA_severity.seg.score"
+            elif protocol == "llm":
+                ipdb.set_trace()
 
             scores["system"] = pd.read_csv(path, sep="\t", header=None, names=["system", "score"])['system']
             scores[protocol] = pd.read_csv(path, sep="\t", header=None, names=["system", "score"])['score']
@@ -56,7 +57,7 @@ class HumanScores:
         data_clusters = {}
         list_of_schemes = ["wmt-mqm", "mqm", "wmt-dasqm", "esa"]
         if PROJECT == "GEMBA":
-            list_of_schemes = ["wmt-mqm", "wmt-dasqm", "esa", "gemba", "mqm", "esa_severity", "gemba_severity"]
+            list_of_schemes = ["wmt-mqm", "esa", "gemba", "llm"]
 
         for scheme in list_of_schemes:
             # Step 1: Calculate average scores for each system
@@ -86,7 +87,6 @@ class HumanScores:
                 data[scheme][scheme].append(system_scores.at[system, 'mean'])
 
         self.plot_clusters(data, data_clusters)
-       
 
     def plot_clusters(self, data, data_clusters):
         # Create a figure with subplots for each schema
