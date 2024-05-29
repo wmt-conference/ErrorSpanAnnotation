@@ -22,10 +22,10 @@ methods = {
         "name": "GESA (severities)"
     },
     "gemba": {
-        "name": "GESA"
+        "name": "GEMBA+ESA"
     },
     "llm": {
-        "name": "LLM (no humans)"
+        "name": "GEMBA (no humans)"
     },
 }
 

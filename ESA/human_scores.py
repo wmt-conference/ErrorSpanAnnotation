@@ -94,7 +94,7 @@ class HumanScores:
         columns = 3 #int((len(data) - 1)/2)
         rows = 1
         columns = len(data) - 1
-        fig, axs = plt.subplots(rows, columns, figsize=(4 * columns, 4 * rows))
+        fig, axs = plt.subplots(rows, columns, figsize=(3 * columns, 3 * rows))
 
         axs = axs.flatten() 
 

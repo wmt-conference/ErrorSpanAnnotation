@@ -3,8 +3,8 @@ name = "ErrorSpanAnnotations"
 version = "0.0.0"
 dependencies = [
     "matplotlib",
-    "numpy",
-    "pandas",
+    "numpy==1.26.4",
+    "pandas==1.5.3",
     "ipdb",
 ]
 
