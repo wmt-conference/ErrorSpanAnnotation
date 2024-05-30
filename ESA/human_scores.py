@@ -89,17 +89,22 @@ class HumanScores:
         self.plot_clusters(data, data_clusters)
 
     def plot_clusters(self, data, data_clusters):
+        import ESA.figutils as figutils
+
+        figutils.matplotlib_default()
+
         # Create a figure with subplots for each schema
         rows = int((len(data) - 1)/3)
         columns = 3 #int((len(data) - 1)/2)
         rows = 1
         columns = len(data) - 1
-        fig, axs = plt.subplots(rows, columns, figsize=(3 * columns, 3 * rows))
+        fig, axs = plt.subplots(rows, columns, figsize=(3 * columns, 2 * rows))
 
         axs = axs.flatten() 
 
         i = 0
         for _, scheme in enumerate(data):
+
             if scheme == "wmt-mqm":
                 continue
             df1 = pd.DataFrame(data["wmt-mqm"])
@@ -116,22 +121,27 @@ class HumanScores:
 
             # rename x-axis and y-axis based on methods[scheme]
             axs[i].set_xlabel(methods[scheme]['name'])
-            axs[i].set_ylabel(methods["wmt-mqm"]['name'])
+            if i == 0:
+                axs[i].set_ylabel(methods["wmt-mqm"]['name'], labelpad=-2)
+            else:
+                # use ylabel only for the first plot
+                # the rest still needs ghost space
+                axs[i].set_ylabel("$\,$", labelpad=-2)
             
             # Ensuring x-axis only shows whole numbers
-            axs[i].xaxis.set_major_locator(plt.MaxNLocator(integer=True))
+            axs[i].xaxis.set_major_locator(plt.MaxNLocator(integer=True, nbins=8))
             
             # Adding titles with language pairs or other identifiers
             # axs[i].set_title(f"System scores ({self.language_pair})")
             
             # Plotting vertical lines for scheme clusters and horizontal for MQM
             for cluster in data_clusters[scheme]:
-                axs[i].axvline(cluster, color="red", linestyle="--")
+                axs[i].axvline(cluster, color=figutils.COLORS[0], linestyle="--")
             for cluster in data_clusters["wmt-mqm"]:
-                axs[i].axhline(cluster, color="blue", linestyle="--")
+                axs[i].axhline(cluster, color=figutils.COLORS[2], linestyle="--")
             i += 1
 
-        plt.tight_layout()
+        plt.tight_layout(pad=0.1, w_pad=0.5)
         subname = "gemba" if PROJECT == "GEMBA" else "esa"
         plt.savefig(f"PAPER/generated_plots/clusters_{subname}.pdf")
 
