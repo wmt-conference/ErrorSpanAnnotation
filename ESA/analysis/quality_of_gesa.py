@@ -11,7 +11,12 @@ df = MergedAnnotations().df
 all_sets = []
 
 def get_spans(spans):
-      return {(x["start_i"], x["end_i"]) for x in spans}
+    return {(x["start_i"], x["end_i"]) for x in spans}
+
+def get_spans_wmt(spans):
+    if spans == "None":
+        return None
+    return {(x["start"], x["end"]) for x in spans}
 
 for _, row in df.iterrows():
     if type(row.gemba_mqm_span_errors_gemba) != list:
@@ -20,8 +25,7 @@ for _, row in df.iterrows():
     spans_gesa = get_spans(json.loads(row.span_errors_gemba))
     spans_esa = get_spans(json.loads(row.span_errors_esa))
     spans_mqm = get_spans(json.loads(row.span_errors_mqm))
-    print(row.keys())
-    exit()
+    spans_wmt = get_spans_wmt(row.wmt_mqm_span_errors)
 
     all_sets.append({
           "gemba": spans_gemba,
@@ -31,8 +35,10 @@ for _, row in df.iterrows():
           "gesa_added": spans_gesa - spans_gemba,
           "esa": spans_esa,
           "mqm": spans_mqm,
+          "wmt": spans_wmt,
     })
 
+all_sets = [x for x in all_sets if x["wmt"] is not None]
 
 def span_set_similarity(spans_a, spans_b):
     if len(spans_b) == 0:
@@ -40,11 +46,12 @@ def span_set_similarity(spans_a, spans_b):
     else:
         return len(spans_a & spans_b)/len(spans_b)
 
-LATEX=True
+LATEX=False
 
 # for key1, key2 in itertools.product(all_sets[0].keys(), repeat=2):
 for key1 in all_sets[0].keys():
-    for key2 in all_sets[0].keys():
+    for key2 in ["esa", "mqm", "wmt"]:
+    # for key2 in all_sets[0].keys():
         # we are not interested in subsets of that
         if key2.startswith("gesa_"):
             continue
