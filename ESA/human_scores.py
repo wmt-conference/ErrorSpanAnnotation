@@ -107,6 +107,7 @@ class HumanScores:
 
             if scheme == "wmt-mqm":
                 continue
+
             df1 = pd.DataFrame(data["wmt-mqm"])
             # set index to "systems"
             df1.set_index("system", inplace=True)
@@ -115,7 +116,9 @@ class HumanScores:
 
             # merge the two dataframes
             df = pd.merge(df1, df2, left_index=True, right_index=True)
-            
+            # calculate pearson correlation
+            corr = df.corr(method='pearson', numeric_only=True)['wmt-mqm'][scheme]
+
             # Plotting the scatter plots for each dataset
             df.plot.scatter(x=scheme, y="wmt-mqm", ax=axs[i], color='black')
 
@@ -130,15 +133,16 @@ class HumanScores:
             
             # Ensuring x-axis only shows whole numbers
             axs[i].xaxis.set_major_locator(plt.MaxNLocator(integer=True, nbins=8))
-            
-            # Adding titles with language pairs or other identifiers
-            # axs[i].set_title(f"System scores ({self.language_pair})")
-            
+
             # Plotting vertical lines for scheme clusters and horizontal for MQM
             for cluster in data_clusters[scheme]:
                 axs[i].axvline(cluster, color=figutils.COLORS[0], linestyle="--")
             for cluster in data_clusters["wmt-mqm"]:
                 axs[i].axhline(cluster, color=figutils.COLORS[2], linestyle="--")
+
+            # Add correlation to the plot to the bottom right
+            axs[i].text(0.95, 0.05, f"r={corr:.3f}", transform=axs[i].transAxes, ha='right', va='bottom')
+
             i += 1
 
         plt.tight_layout(pad=0.1, w_pad=0.5)
