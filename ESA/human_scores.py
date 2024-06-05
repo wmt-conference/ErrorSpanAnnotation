@@ -141,7 +141,7 @@ class HumanScores:
                 axs[i].axhline(cluster, color=figutils.COLORS[2], linestyle="--")
 
             # Add correlation to the plot to the bottom right
-            axs[i].text(0.95, 0.05, f"r={corr:.3f}", transform=axs[i].transAxes, ha='right', va='bottom')
+            axs[i].text(0.95, 0.05, f"ρ={corr:.3f}", transform=axs[i].transAxes, ha='right', va='bottom')
 
             i += 1
 
