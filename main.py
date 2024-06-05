@@ -7,12 +7,10 @@ from ESA.merged_annotations import MergedAnnotations
 import ipdb
 import numpy as np
 
+
 def main(args):
-
-
-
     # class containing all merged informations
-    merged = MergedAnnotations()
+    merged = MergedAnnotations(second_campaign=True)
 
     schemes = [SCHEME_ESA, SCHEME_MQM, SCHEME_ESA_SEVERITY]
     if PROJECT == "GEMBA":

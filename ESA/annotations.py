@@ -7,10 +7,14 @@ import numpy as np
 
 SCHEME_ESA = "ESA"
 SCHEME_MQM = "MQM"
-SCHEME_ESA_SEVERITY = "ESA_SEVERITY" # protocol where score is devised from severity of errors
+SCHEME_ESA_SEVERITY = "ESA_SEVERITY"  # protocol where score is devised from severity of errors
 
 SCHEME_GEMBA = "GEMBA"  # Schema used for parallel project, not part of WMT 2024
 SCHEME_GEMBA_SEVERITY = "GEMBA_SEVERITY"  # Schema used for parallel project, not part of WMT 2024
+
+# second campaign annotations
+SCHEME_ESA2 = "ESA2"
+SCHEME_GEMBA2 = "GEMBA2"
 
 MQM_WEIGHTS = {"minor": -1, "major": -5, "critical": -25, "undecided": 0}
 
@@ -26,6 +30,7 @@ def apply_mqm_annotations(span_errors):
     if score < -25:
         score = -25
     return score
+
 
 class AppraiseAnnotations:
     def __init__(self, annotation_scheme):
@@ -50,12 +55,14 @@ class AppraiseAnnotations:
         # add column bad_duplicate to filter out bad and duplicate rows
         self.df["valid_segment"] = self.df.apply(lambda x: "#bad" not in x['documentID'] and "#duplicate" not in x['documentID'], axis=1)
 
-
     def load_annotations(self):
         # load csv file        
         header = ["login", "system", "itemID", "is_bad", "source_lang", "target_lang", "score", "documentID", "unk_col_always_false", "span_errors", "start_time", "end_time"]
 
-        df = pd.read_csv(f"campaign-ruction-rc5/240315rc5{self.batch_file_name}.scores.csv", sep=",", names=header)
+        if self.annotation_scheme in [SCHEME_ESA2, SCHEME_GEMBA2]:
+            df = pd.read_csv(f"campaign-ruction-rc5/240520rc6{self.batch_file_name.replace('2', '')}.scores.csv", sep=",", names=header)
+        else:
+            df = pd.read_csv(f"campaign-ruction-rc5/240315rc5{self.batch_file_name}.scores.csv", sep=",", names=header)
         # reverse rows order in df
         df = df.iloc[::-1].reset_index(drop=True)
 
@@ -144,7 +151,7 @@ class AppraiseAnnotations:
         # hack because 
         wmt_df["systemID"] 
 
-        batches = json.load(open(f"campaign-ruction-rc5/data/batches_wmt23_en-de_{self.batch_file_name.lower()}.json"))
+        batches = json.load(open(f"campaign-ruction-rc5/data/batches_wmt23_en-de_{self.batch_file_name.replace('2', '').lower()}.json"))
         batches = [
             item for task in batches for item in task["items"]
             if "_item" in item
@@ -227,7 +234,7 @@ class AppraiseAnnotations:
         # rename column 1
         df = df.rename(columns={1: "documentID"})
 
-        batches = json.load(open(f"campaign-ruction-rc5/data/batches_wmt23_en-de_{self.batch_file_name.lower()}.json"))
+        batches = json.load(open(f"campaign-ruction-rc5/data/batches_wmt23_en-de_{self.batch_file_name.replace('2', '').lower()}.json"))
 
         mapping_line_num = {}
         for batch in batches:
@@ -251,7 +258,7 @@ class AppraiseAnnotations:
 
             assigned = df.loc[(df["system"] == system) & (df["documentID"] == documentID) & (df["source"] == source) & (df["translation"] == translation)]
 
-            if row["documentID"] == 'elitr_minuting-19#GPT4-5shot' and row['login'] in ["engdeu6907", "engdeu6807", "engdeu6a07"]:
+            if row["documentID"] == 'elitr_minuting-19#GPT4-5shot' and row['login'].endswith("07"):
                 # bug in campaign rc5
                 if row["itemID"] == 90:
                     assigned = df.loc[[955]]
@@ -267,7 +274,7 @@ class AppraiseAnnotations:
                         index_number = assigned.index[0]
                     # print(system, index_number, index, df.loc[index_number, "score"])
                     if system == "ONLINE-W":
-                        if row['login'] == "engdeu6908":
+                        if row['login'] in ["engdeu6908", "engdeu6e08"]:
                             index_number = 5286
                         else:
                             index_number = 5290
