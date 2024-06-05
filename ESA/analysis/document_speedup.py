@@ -89,7 +89,7 @@ plt.plot(
 
 plt.ylim(10, 120)
 
-plt.title(f"{args.scheme.replace('GEMBA', 'GEMBA+ESA')}  ({slope:.2f}s per segment)")
+plt.title(f"{args.scheme.replace('GEMBA', r'ESA$^\mathrm{AI}$')}  ({slope:.2f}s per segment)")
 plt.ylabel("Segment time (s)", labelpad=-2)
 plt.xticks(
     [0, 20, 80, 100],

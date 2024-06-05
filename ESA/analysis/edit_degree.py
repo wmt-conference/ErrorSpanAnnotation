@@ -1,4 +1,6 @@
-from ESA.annotations import AppraiseAnnotations
+import ESA.settings
+ESA.settings.PROJECT = "GEMBA"
+from ESA.merged_annotations import MergedAnnotations
 import numpy as np
 import collections
 import matplotlib.pyplot as plt
@@ -6,7 +8,9 @@ import ESA.figutils as figutils
 
 figutils.matplotlib_default()
 
-anno = AppraiseAnnotations.get_full("GEMBA")
+raise Exception("Migration not finished")
+
+anno = MergedAnnotations().df
 
 to_average_users = []
 for login in anno.AnnotatorID.unique():
@@ -123,7 +127,7 @@ def plot_complex(to_average_users, scheme):
         color="black",
     )
     ax1.set_ylabel("Time")
-    ax1.set_xlabel(f"User ({scheme.replace('GEMBA', 'GEMBA+ESA')})")
+    ax1.set_xlabel(f"User ({scheme.replace('GEMBA', r'ESA$^\mathrm{AI}$')})")
     ax1.set_xticks(range(len(to_average_users)), [""]*len(to_average_users))
     ax1.spines[["top", "right"]].set_visible(False)
     ax1.set_ylim(5, 85)

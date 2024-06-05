@@ -22,7 +22,7 @@ methods = {
         "name": "GESA (severities)"
     },
     "gemba": {
-        "name": "GEMBA+ESA"
+        "name": r"ESA$^\mathrm{AI}$"
     },
     "llm": {
         "name": "GEMBA (no humans)"
