@@ -10,7 +10,7 @@ import numpy as np
 
 def main(args):
     # class containing all merged informations
-    merged = MergedAnnotations(second_campaign=False)
+    merged = MergedAnnotations(second_campaign=True)
 
     schemes = [SCHEME_ESA, SCHEME_MQM, SCHEME_ESA_SEVERITY]
     if PROJECT == "GEMBA":

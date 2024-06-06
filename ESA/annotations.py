@@ -296,8 +296,13 @@ class AppraiseAnnotations:
             self.df.at[index, "translation_seg"] = assigned['translation'].iloc[0]
 
             if "GEMBA" in self.annotation_scheme:
-                self.df.at[index, "gemba_mqm_span_errors"] = orig_mqm
-                df.loc[index_number, "gemba_mqm_span_errors"] = orig_mqm
+                if 'gemba_mqm_span_errors' not in self.df:
+                    self.df['gemba_mqm_span_errors'] = [[] for _ in range(len(self.df))]
+                    df['gemba_mqm_span_errors'] = [[] for _ in range(len(df))]
+
+                if len(orig_mqm) > 0:
+                    self.df.at[index, "gemba_mqm_span_errors"] = orig_mqm
+                    df.loc[index_number, "gemba_mqm_span_errors"] = orig_mqm
 
             if self.annotation_scheme == "MQM":
                 if 'wmt_mqm_span_errors' not in self.df:
