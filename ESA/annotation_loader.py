@@ -51,7 +51,7 @@ class AnnotationLoader:
                'span_errors': 'Assigned errors for given segment as defined by protocol - only for MQM, ESA, ESAAI',
                'start_time': 'Appraise start time without any filtering',
                'end_time': 'Appraise end time without any filtering',
-               'duration_seconds': 'How long did it take to annotate the segment in seconds, after filtering',  # TODO this is missing
+               'duration_seconds': 'How long did it take to annotate the segment in seconds, after filtering',
                'AnnotatorID': 'Unique ID for each human annotator',
                }
 
