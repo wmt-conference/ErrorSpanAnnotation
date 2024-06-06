@@ -19,7 +19,7 @@ methods = {
         "name": "MQM (WMT23)"
     },
     "gemba_severity": {
-        "name": "GESA (severities)"
+        "name": r"ESA$^\mathrm{AI}$ (severities)"
     },
     "gemba": {
         "name": r"ESA$^\mathrm{AI}$"
