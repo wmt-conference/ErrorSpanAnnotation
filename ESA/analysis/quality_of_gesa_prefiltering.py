@@ -1,3 +1,4 @@
+raise Exception("This code uses old loader, please refactor.")
 import itertools
 import json
 import ESA.settings

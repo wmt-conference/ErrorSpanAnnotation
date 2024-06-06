@@ -1,3 +1,4 @@
+raise Exception("This code uses old loader, please refactor.")
 import ESA.settings
 ESA.settings.PROJECT = "GEMBA"
 from ESA.merged_annotations import MergedAnnotations

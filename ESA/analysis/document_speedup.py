@@ -1,3 +1,4 @@
+raise Exception("This code uses old loader, please refactor.")
 from ESA.annotations import AppraiseAnnotations
 import collections
 import pandas as pd

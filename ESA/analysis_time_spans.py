@@ -1,3 +1,4 @@
+raise Exception("This code uses old loader, please refactor.")
 import ipdb
 import numpy as np
 from ESA.settings import PROJECT

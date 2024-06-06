@@ -1,3 +1,4 @@
+raise Exception("This code uses old loader, please refactor.")
 import ipdb
 import pandas as pd
 from scipy.stats import ranksums

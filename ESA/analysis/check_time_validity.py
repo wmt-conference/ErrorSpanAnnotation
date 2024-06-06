@@ -1,3 +1,4 @@
+raise Exception("This code uses old loader, please refactor.")
 print("WARNING: This is just to test possible errors in Appraise data collection.")
 
 import csv

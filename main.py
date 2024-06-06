@@ -1,3 +1,4 @@
+raise Exception("This code uses old loader, please refactor.")
 from absl import app
 from ESA.annotations import AppraiseAnnotations, SCHEME_ESA, SCHEME_GEMBA, SCHEME_MQM, SCHEME_ESA_SEVERITY, SCHEME_GEMBA_SEVERITY
 from ESA.human_scores import HumanScores

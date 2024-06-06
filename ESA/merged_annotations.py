@@ -1,3 +1,4 @@
+raise Exception("This code uses old loader, please refactor.")
 import ipdb
 from ESA.settings import PROJECT
 from ESA.annotations import AppraiseAnnotations, SCHEME_ESA, SCHEME_GEMBA, SCHEME_MQM, SCHEME_ESA_SEVERITY, SCHEME_GEMBA_SEVERITY, SCHEME_ESA2, SCHEME_GEMBA2

@@ -1,3 +1,4 @@
+raise Exception("This code uses old loader, please refactor.")
 import json
 import numpy as np
 import ESA.settings
