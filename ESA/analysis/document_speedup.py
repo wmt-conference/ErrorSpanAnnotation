@@ -4,6 +4,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import argparse
+import ESA.settings
+import matplotlib.patches as patches
 
 args = argparse.ArgumentParser()
 args.add_argument("scheme", default="ESA")
@@ -71,9 +73,23 @@ for times_user in times_users:
     plt.plot(
         np.linspace(0, 100, len(times_user)),
         times_user,
-        color="black", alpha=0.3,
+        color="black", alpha=0.15,
     )
 
+
+plt.gca().add_patch(patches.Rectangle(
+    (0, 10), 20, 200,
+    linewidth=0, edgecolor=None,
+    facecolor='#8d8a')
+)
+plt.text(
+    10, 105,
+    s="learning",
+    color="#050",
+    ha="center",
+    fontsize=9,
+    fontweight="black",
+)
 times_users_big = [np.average(v) for v in times_users_big if v]
 
 slope = (np.average(times_users_big[-10:-5])-np.average(times_users_big[5:10]))/100
@@ -82,6 +98,30 @@ slope_init = (times_users_big[15]-times_users_big[1])/15
 print(f"Learned slope (first 15%): {slope_init:.4f}s")
 print(f"ABS variation: {np.average(times_users_var):.4f}s")
 
+
+# _xs = [0, 18]
+# _ys = [np.average(times_users_big[0]), np.average(times_users_big[18])]
+# plt.plot(
+#     _xs, _ys,
+#     color="#050",
+# )
+# _xs = [0, 100]
+# _ys = [np.average(times_users_big[0]), np.average(times_users_big[-1])]
+# plt.plot(
+#     _xs, _ys,
+#     color="#050",
+# )
+# plt.text(
+#     x=np.average(_xs), y=np.average(_ys),
+#     s="average speedup",
+#     color="#050",
+#     rotation=-5,
+#     fontsize=9,
+#     fontweight="black",
+#     ha="center",
+# )
+
+
 plt.plot(
     times_users_big,
     color="black", linewidth=4,
@@ -89,7 +129,9 @@ plt.plot(
 
 plt.ylim(10, 120)
 
-plt.title(f"{args.scheme.replace('GEMBA', r'ESA$^\mathrm{AI}$')}  ({slope:.2f}s per segment)")
+
+args.scheme = args.scheme.replace('GEMBA', ESA.settings.methods["gemba"]["name"])
+plt.title(f"{args.scheme}  ({slope:.2f}s per segment)")
 plt.ylabel("Segment time (s)", labelpad=-2)
 plt.xticks(
     [0, 20, 80, 100],
