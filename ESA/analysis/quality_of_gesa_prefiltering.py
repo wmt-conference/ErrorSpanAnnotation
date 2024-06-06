@@ -46,6 +46,8 @@ def rank_accuracy(method1_v, method2_v):
     hits = []
     for sys1, sys2 in itertools.product(method1_v.keys(), repeat=2):
         hits.append((method1_v[sys1] > method1_v[sys2]) == (method2_v[sys1] > method2_v[sys2]))
+        if not (method1_v[sys1] > method1_v[sys2]) == (method2_v[sys1] > method2_v[sys2]):
+            print(method1_v[sys1], method1_v[sys2])
     return np.average(hits)
 
 for method1, method2 in itertools.combinations(system_scores.keys(), 2):
