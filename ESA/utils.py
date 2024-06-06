@@ -177,7 +177,6 @@ def load_raw_appraise_campaign(protocol):
                      "documentID": None,
                      "systemID": None,
                      "sourceID": None,
-                     "system": row["system"],
                     }
             if hypothesisID not in df['hypothesisID'].values:
                 df = pd.concat([df, pd.DataFrame([data])], ignore_index=True)
@@ -199,7 +198,6 @@ def load_raw_appraise_campaign(protocol):
             df.at[wmtindex, "is_bad"] = row["is_bad"]
             df.at[wmtindex, "start_time"] = row["start_time"]
             df.at[wmtindex, "end_time"] = row["end_time"]
-            df.at[wmtindex, "system"] = row["system"]
 
             if protocol == "LLM":
                 df.at[wmtindex, "error_spans"] = item[3]
@@ -218,9 +216,8 @@ def load_raw_appraise_campaign(protocol):
     # drop BAD rows
     df2 = df2[df2["is_bad"] != "BAD"].reset_index(drop=True)
     df2["score"] = df2["score"].fillna("None")
-    df2 = df2[["system", "score"]]
+    df2 = df2[["systemID", "score"]]
 
     df2.to_csv(f"campaign-ruction-rc5/en-de.{protocol}.seg.score", sep="\t", index=False, header=False)
 
-    df = df.drop(columns=['system'])
     return df
