@@ -14,7 +14,7 @@ class AnnotationLoader:
         self._load_cache(refresh_cache)
 
     def _load_cache(self, refresh_cache):
-        cache_file = 'cache_protocols.pkl'
+        cache_file = 'cache_protocols_v1.pkl'  # using versioning to force change everywhere if coded is changed
         if refresh_cache or not os.path.exists(cache_file):
             self.protocols = {}
             for protocol in PROTOCOL_DEFINITIONS:
@@ -23,6 +23,7 @@ class AnnotationLoader:
             # save protocols into pickle
             with open(cache_file, 'wb') as f:
                 pickle.dump(self.protocols, f)
+
         else:
             with open(cache_file, 'rb') as f:
                 self.protocols = pickle.load(f)
@@ -38,7 +39,7 @@ class AnnotationLoader:
         unique_columns = ['score', 'login', 'is_bad', 'start_time', 'end_time', 'error_spans', 'duration_seconds', 'AnnotatorID']
 
         columns_descriptions = {
-                'login': 'Appraise login unique for each HIT',
+               'login': 'Appraise login unique for each HIT',
                'systemID': 'System ID which produced hypothesis',
                'is_bad': 'Quality control - TGT for valid hypotheses, BAD for quality control items',
                'score': 'Assigned score for given segment as defined by protocol',
@@ -47,7 +48,7 @@ class AnnotationLoader:
                'start_time': 'Appraise start time without any filtering',
                'end_time': 'Appraise end time without any filtering',
                'duration_seconds': 'How long did it take to annotate the segment in seconds, after filtering',  # TODO this is missing
-               'AnnotatorID': 'Unique ID for each human annotator',  # TODO this is missing
+               'AnnotatorID': 'Unique ID for each human annotator',
                }
 
         dfs = None
