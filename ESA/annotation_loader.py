@@ -5,6 +5,7 @@ import logging
 import pandas as pd
 from ESA.protocol import Protocol
 from ESA.utils import PROTOCOL_DEFINITIONS
+from ESA.fixed_segment_ids import FIXED_IDS
 
 
 # This module is used to load the all annotations for all campaigns are return views depending on analysis
@@ -34,9 +35,10 @@ class AnnotationLoader:
 
         return self.protocols[protocol]
 
-    def get_view(self, protocols=None):
+    def get_view(self, protocols=None, only_overlap=True):
         if protocols is None:
             protocols = PROTOCOL_DEFINITIONS.keys()
+
         generic_columns = ['domainID', 'documentID', 'source', 'hypothesis', 'systemID', 'sourceID', 'hypothesisID']
         unique_columns = ['score', 'login', 'is_bad', 'start_time', 'end_time', 'error_spans', 'duration_seconds', 'AnnotatorID']
 
@@ -64,4 +66,7 @@ class AnnotationLoader:
                 df.drop(columns=generic_columns, inplace=True)
                 dfs = dfs.merge(df, how='outer', left_index=True, right_index=True)
 
+        if only_overlap:
+            # keep only FIXED_IDS in the view
+            dfs = dfs[dfs.index.isin(FIXED_IDS)]
         return dfs
