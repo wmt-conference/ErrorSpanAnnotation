@@ -9,7 +9,7 @@ df = MergedAnnotations().df
 
 statistics_collector = {
     schema: collections.defaultdict(list)
-    for schema in ["esa", "gesa", "gemba", "mqm"]
+    for schema in ["esa", "gesa", "gemba", "mqm", "wmt"]
 }
 
 
@@ -20,21 +20,27 @@ for _, row in df.iterrows():
     span_errors_gesa = json.loads(row["span_errors_gemba"])
     span_errors_esa = json.loads(row["span_errors_esa"])
     span_errors_mqm = json.loads(row["span_errors_mqm"])
+    span_errors_wmt = row["wmt_mqm_span_errors"]
+    if span_errors_wmt == "None" or span_errors_wmt is None:
+        span_errors_wmt = []
 
     statistics_collector["gemba"]["segment_count"].append(len(span_errors_gemba))
     statistics_collector["gesa"]["segment_count"].append(len(span_errors_gesa))
     statistics_collector["esa"]["segment_count"].append(len(span_errors_esa))
     statistics_collector["mqm"]["segment_count"].append(len(span_errors_mqm))
+    statistics_collector["wmt"]["segment_count"].append(len(span_errors_wmt))
 
     statistics_collector["gemba"]["segment_count_minor"].append(len([x for x in span_errors_gemba if x["severity"] == "minor"]))
     statistics_collector["gesa"]["segment_count_minor"].append(len([x for x in span_errors_gesa if x["severity"] == "minor"]))
     statistics_collector["esa"]["segment_count_minor"].append(len([x for x in span_errors_esa if x["severity"] == "minor"]))
     statistics_collector["mqm"]["segment_count_minor"].append(len([x for x in span_errors_mqm if x["severity"] == "minor"]))
+    statistics_collector["wmt"]["segment_count_minor"].append(len([x for x in span_errors_wmt if x["severity"] == "minor"]))
 
     statistics_collector["gemba"]["segment_count_major"].append(len([x for x in span_errors_gemba if x["severity"] == "major"]))
     statistics_collector["gesa"]["segment_count_major"].append(len([x for x in span_errors_gesa if x["severity"] == "major"]))
     statistics_collector["esa"]["segment_count_major"].append(len([x for x in span_errors_esa if x["severity"] == "major"]))
     statistics_collector["mqm"]["segment_count_major"].append(len([x for x in span_errors_mqm if x["severity"] in {"major", "critical"}]))
+    statistics_collector["wmt"]["segment_count_major"].append(len([x for x in span_errors_wmt if x["severity"] in {"major", "critical"}]))
 
     statistics_collector["gesa"]["score"].append(row["score_gemba"])
     statistics_collector["esa"]["score"].append(row["score_esa"])
@@ -76,7 +82,7 @@ plt.hist(
 )
 plt.hist(
     np.array(statistics_collector["gesa"]["segment_count"]),
-    label="G.+ESA",
+    label="ESA$^\mathrm{AI}$",
     bins=BINS_BASE,
     weights=[1 / ROW_COUNT for _ in range(ROW_COUNT)],
     **KWARGS
