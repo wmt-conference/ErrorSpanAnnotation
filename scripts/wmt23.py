@@ -58,27 +58,30 @@ data_zhen_clusters = {
 
 
 # generate scatter plot for each set of languages, make each plot exactly square
-fig, ax = plt.subplots(1, 2, figsize=(9, 4))
+fig, ax = plt.subplots(1, 2, figsize=(9, 3))
 
 df_zhen = pd.DataFrame(data_zhen)
 df_ende = pd.DataFrame(data_ende)
-df_ende.plot.scatter(x="DA+SQM", y="MQM", ax=ax[1])
-df_zhen.plot.scatter(x="DA+SQM", y="MQM", ax=ax[0])
+df_ende.plot.scatter(x="DA+SQM", y="MQM", ax=ax[1], color="black")
+df_zhen.plot.scatter(x="DA+SQM", y="MQM", ax=ax[0], color="black")
+# ax[0].set_xlim(73, 89)
+# ax[1].set_xlim(73, 89)
 # show x-axis only with whole numbers, do not jump by 0.5
 ax[1].xaxis.set_major_locator(plt.MaxNLocator(integer=True))
 ax[0].xaxis.set_major_locator(plt.MaxNLocator(integer=True))
 # put title with language pair on top of each plot
-ax[1].set_title("English-German (paragraph-lvl)")
-ax[0].set_title("Chinese-English (sentence-lvl)")
+ax[1].set_title("English-German (paragraph-level)")
+ax[0].set_title("Chinese-English (sentence-level)")
 # to plot ende add vertical lines for clusters of DA+SQM, and horizontal for MQM
 for cluster in data_ende_clusters["DA+SQM"]:
-    ax[1].axvline(cluster, color="red", linestyle="--")
+    ax[1].axvline(cluster, color="#bc272d", linestyle="--")
 for cluster in data_ende_clusters["MQM"]:
-    ax[1].axhline(cluster, color="blue", linestyle="--")
+    ax[1].axhline(cluster, color="#0000a2", linestyle="--")
 # to plot zhen add vertical lines for clusters of DA+SQM, and horizontal for MQM
 for cluster in data_zhen_clusters["DA+SQM"]:
-    ax[0].axvline(cluster, color="red", linestyle="--")
+    ax[0].axvline(cluster, color="#bc272d", linestyle="--")
 for cluster in data_zhen_clusters["MQM"]:
-    ax[0].axhline(cluster, color="blue", linestyle="--")
+    ax[0].axhline(cluster, color="#0000a2", linestyle="--")
 # save the plot into "generated_plots/wmt23_mqm_vs_dasqm.pdf" folder into pdf format
+plt.tight_layout()
 plt.savefig("generated_plots/wmt23_mqm_vs_dasqm.pdf")
