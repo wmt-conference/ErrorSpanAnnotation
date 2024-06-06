@@ -36,14 +36,35 @@ PROTOCOL_DEFINITIONS = {
         "framework": "wmt",
     },
     'LLM': {
-        "framework": "llm",
+        "framework": "appraise",
+        "appraise_scorefile": "240315rc5GEMBA.scores.csv",
+        "appraise_batchefile": "batches_wmt23_en-de_gemba.json",
     }
 }
 
+
+MQM_WEIGHTS = {"minor": -1, "major": -5, "critical": -25, "undecided": 0}
+
+
+def apply_mqm_scoring(span_errors):
+    # missing values needs to be None
+    if not isinstance(span_errors, list):
+        return "None"
+
+    score = 0
+    for error in span_errors:
+        score += MQM_WEIGHTS[error["severity"]]
+    if score < -25:
+        score = -25
+    return score
+
+
 def read_json_spans(spans):
-    if spans == "None":
+    try:
+        spans = json.loads(spans)
+    except:
         return None
-    spans = json.loads(spans)
+
     if "errors" in spans:
         return spans["errors"]
     return spans
@@ -103,135 +124,103 @@ def load_raw_wmt(protocol):
         df['error_spans'] = df.apply(lambda x: ratings.loc[x['hypothesisID'], 'error_spans'], axis=1)
         df['error_spans'] = df['error_spans'].apply(lambda x: read_json_spans(x))
 
+    # convert score to float
+    df['score'] = df['score'].replace("None", float("nan")).astype(float)
+
     return df
 
 
 def load_raw_appraise_campaign(protocol):
     appraise_batches = json.load(open(f"campaign-ruction-rc5/data/{PROTOCOL_DEFINITIONS[protocol]['appraise_batchefile']}"))
 
-    ipdb.set_trace()
-
-    docs_template = pd.read_csv(f"data/mt-metrics-eval-v2/wmt23/documents/en-de.docs", sep="\t", header=None)
-    # drop column 0, which is domain
-    docs_template = docs_template.drop(0, axis=1)
-    # IMPORTANT: since there is a bug in batch indices, we need to map it based on the textual information
-
-    # load mqm annotations for matching
-    mqm = pd.read_csv(f"data/mt-metrics-eval-v2/wmt23/human-scores/en-de.mqm.seg.score", sep="\t", header=None)
-    mqm.columns = ["system", "wmt_mqm_score"]
-
-    # generate df which for each system has the same number of rows as docs_template
-    # load sources and translations
-    # load sources from "mt-metrics-eval-v2/wmt23/sources/en-de.txt" and name the column sources
-    protocol_annotations = []
-    sources = []
-    with open(f"data/mt-metrics-eval-v2/wmt23/sources/en-de.txt") as f:
-        for line in f:
-            sources.append(line.strip())
-    for system in mqm["system"].unique():
-        if system == "refA":
-            translation_path = f"data/mt-metrics-eval-v2/wmt23/references/en-de.refA.txt"
-        else:
-            translation_path = f"data/mt-metrics-eval-v2/wmt23/system-outputs/en-de/{system}.txt"
-        translation = []
-        with open(translation_path) as f:
-            for line in f:
-                translation.append(line.strip())
-        dfcon = pd.concat([docs_template, pd.DataFrame({"source": sources, "translation": translation})], axis=1)
-        dfcon['system'] = system
-        protocol_annotations.append(dfcon)
-
-    df = pd.concat(protocol_annotations).reset_index(drop=True)
-    # add column with score
-    df["score"] = None
-    # rename column 1
-    df = df.rename(columns={1: "documentID"})
-
-
     mapping_line_num = {}
     for batch in appraise_batches:
         for item in batch["items"]:
             if "tutorial" in item["documentID"]:
-                continue
-
-            if "GEMBA" in self.annotation_scheme:
-                mapping_line_num[(item["itemID"], item["documentID"])] = (item["_item"].split(" | ")[1], item["sourceText"], item['targetText'], item['mqm'])
+                itemids = ["", item["itemID"], ""]
             else:
-                mapping_line_num[(item["itemID"], item["documentID"])] = (item["_item"].split(" | ")[1], item["sourceText"], item['targetText'], None)
+                itemids = item["_item"].split(" | ")
 
-    for index, row in self.df.iterrows():
-        if row["is_bad"] != "TGT" or "#duplicate" in row["documentID"]:
+            itemid = f"{item['itemID']}#{item['documentID']}"
+
+            if protocol == "LLM":
+                mapping_line_num[itemid] = (itemids[1], item["sourceText"], item['targetText'], json.dumps(item['mqm']))
+            else:
+                mapping_line_num[itemid] = (itemids[1], item["sourceText"], item['targetText'], "None")
+
+    header = ["login", "system", "itemID", "is_bad", "source_lang", "target_lang", "score", "documentID", "unk_col_always_false", "error_spans", "start_time", "end_time"]
+    scores = pd.read_csv(f"campaign-ruction-rc5/{PROTOCOL_DEFINITIONS[protocol]['appraise_scorefile']}", sep=",", names=header, dtype=str)
+
+    df = load_raw_wmt("WMT-DASQM")
+    df['score'] = "None"
+
+    for index, row in scores.iterrows():
+        if "#duplicate" in row["documentID"] or "tutorial" in row["documentID"]:
+            # duplicate are used to fill documents to have exactly 100 items. It is fine to skip them
             continue
 
-        system = row["system"].replace("wmt23.", "")
-        documentID = row["documentID"].split("#")[0]
-        line_num, source, translation, orig_mqm = mapping_line_num[(row["itemID"], row["documentID"])]
-        score = row["score"]
+        itemid = f"{row['itemID']}#{row['documentID']}"
+        item = mapping_line_num[itemid]
+        hypothesisID = f"{item[0]}#{row['documentID']}"
 
-        assigned = df.loc[(df["system"] == system) & (df["documentID"] == documentID) & (df["source"] == source) & (df["translation"] == translation)]
-
-        if row["documentID"] == 'elitr_minuting-19#GPT4-5shot' and row['login'].endswith("07"):
-            # bug in campaign rc5
-            if row["itemID"] == 90:
-                assigned = df.loc[[955]]
+        if row["is_bad"] != "TGT":
+            data = {"hypothesisID": hypothesisID,
+                     "is_bad": row["is_bad"],
+                     "source": item[1],
+                     "hypothesis": item[2],
+                     "error_spans": row["error_spans"],
+                     "start_time": row["start_time"],
+                     "end_time": row["end_time"],
+                     "login": row["login"],
+                     "score": row["score"],
+                     "domainID": None,
+                     "documentID": None,
+                     "systemID": None,
+                     "sourceID": None,
+                     "system": row["system"],
+                    }
+            if hypothesisID not in df['hypothesisID'].values:
+                df = pd.concat([df, pd.DataFrame([data])], ignore_index=True)
             else:
-                assigned = df.loc[[956]]
+                # replace row with content of data
+                wmtitem = df.loc[df['hypothesisID'] == hypothesisID].index[0]
+                df.loc[wmtitem] = data
+        else:
+            wmtitem = df.loc[df['hypothesisID'] == hypothesisID]
+            assert len(wmtitem) == 1, f"Item {hypothesisID} not found in WMT data or found multiple times"
+            wmtindex = wmtitem.index[0]
 
-        if len(assigned) != 1:
-            if (documentID == "manlycoffee.110351250115060992"):
-                try:
-                    mapping_line_num[(row["itemID"] + 4, row["documentID"])]
-                    index_number = assigned.index[1]
-                except:
-                    index_number = assigned.index[0]
-                # print(system, index_number, index, df.loc[index_number, "score"])
-                if system == "ONLINE-W":
-                    if row['login'] in ["engdeu6908", "engdeu6e08"]:
-                        index_number = 5286
-                    else:
-                        index_number = 5290
+            # assert that source and hypothesis matches
+            assert wmtitem['source'].iloc[0] == item[1], f"Source mismatch for {hypothesisID}"
+            assert wmtitem['hypothesis'].iloc[0] == item[2], f"Translation mismatch for {hypothesisID}"
+
+            df.at[wmtindex, "login"] = row["login"]
+            df.at[wmtindex, "score"] = row["score"]
+            df.at[wmtindex, "is_bad"] = row["is_bad"]
+            df.at[wmtindex, "start_time"] = row["start_time"]
+            df.at[wmtindex, "end_time"] = row["end_time"]
+            df.at[wmtindex, "system"] = row["system"]
+
+            if protocol == "LLM":
+                df.at[wmtindex, "error_spans"] = item[3]
             else:
-                ipdb.set_trace()
-        else:
-            index_number = assigned.index[0]
+                df.at[wmtindex, "error_spans"] = row["error_spans"]
 
-        assigned_score = df.loc[index_number, "score"]
-        # assign score to the correct row in df, first check if the row is None
-        if assigned_score is None or assigned_score == score:
-            df.loc[index_number, "score"] = score
-        else:
-            print("there is a problem, which needs investigation")
-            # ipdb.set_trace()
+    df['error_spans'] = df['error_spans'].apply(lambda x: read_json_spans(x))
 
-        # assign source and system into the df
-        self.df.at[index, "source_seg"] = assigned['source'].iloc[0]
-        self.df.at[index, "translation_seg"] = assigned['translation'].iloc[0]
+    if protocol == "LLM":
+        df = df[df["is_bad"] != "BAD"].reset_index(drop=True)
+        df = df.drop(columns=['login', 'start_time', 'end_time'])
+        df['score'] = df["error_spans"].apply(lambda x: apply_mqm_scoring(x))
 
-        if "GEMBA" in self.annotation_scheme:
-            if 'gemba_mqm_span_errors' not in self.df:
-                self.df['gemba_mqm_span_errors'] = [[] for _ in range(len(self.df))]
-                df['gemba_mqm_span_errors'] = [[] for _ in range(len(df))]
+    # store the data
+    df2 = df.copy()
+    # drop BAD rows
+    df2 = df2[df2["is_bad"] != "BAD"].reset_index(drop=True)
+    df2["score"] = df2["score"].fillna("None")
+    df2 = df2[["system", "score"]]
 
-            if len(orig_mqm) > 0:
-                self.df.at[index, "gemba_mqm_span_errors"] = orig_mqm
-                df.loc[index_number, "gemba_mqm_span_errors"] = orig_mqm
+    df2.to_csv(f"campaign-ruction-rc5/en-de.{protocol}.seg.score", sep="\t", index=False, header=False)
 
-
-    # combine columns from df and mqm on their index
-    df = df.merge(mqm, left_index=True, right_index=True, how="left")
-
-    # also save scores as if the original LLM scores were generated
-    if "GEMBA" in self.annotation_scheme:
-        df2 = df.copy()
-        df2['score'] = df2['gemba_mqm_span_errors'].apply(lambda x: apply_mqm_annotations(x))
-        df2 = df2[["system_x", "score"]]
-        df2.to_csv(f"campaign-ruction-rc5/en-de.LLM.seg.score", sep="\t", index=False, header=False)
-
-    # keep only column system_x and score
-    df = df[["system_x", "score"]]
-    # rename system_x to system
-    df = df.rename(columns={"system_x": "system"})
-    # replace None scores with "None"
-    df["score"] = df["score"].fillna("None")
-    # save df into tsv file
-    df.to_csv(f"campaign-ruction-rc5/en-de.{self.annotation_scheme}.seg.score", sep="\t", index=False, header=False)
+    df = df.drop(columns=['system'])
+    return df

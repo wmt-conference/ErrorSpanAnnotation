@@ -8,8 +8,7 @@ from ESA.annotations import AppraiseAnnotations
 def main(args):
     # class containing all information
     annotations = AnnotationLoader()
-    # annotations.get_view(["ESA-1", "ESAAI-1", "MQM", "ESA-2", "ESAAI-2"])
-    annotations.get_view(["WMT-MQM", "WMT-DASQM"])
+    annotations.get_view(["LLM", "ESA-1", "ESAAI-1", "MQM-1", "ESA-2", "ESAAI-2", "WMT-MQM", "WMT-DASQM"])
 
     df = AppraiseAnnotations("GEMBA").df
 
