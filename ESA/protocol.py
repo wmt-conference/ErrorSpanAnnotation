@@ -1,3 +1,4 @@
+import ipdb
 from ESA.utils import load_raw_appraise_campaign, load_raw_wmt, PROTOCOL_DEFINITIONS
 
 
@@ -11,4 +12,7 @@ class Protocol:
             self.df = load_raw_wmt(protocol)
         else:
             raise NotImplementedError(f"Protocol {protocol} not implemented yet.")
+
+        self.df["hypID"] = self.df['hypothesisID']
+        self.df.set_index('hypID', inplace=True)
 

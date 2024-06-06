@@ -2,14 +2,15 @@ import ipdb
 import numpy as np
 from absl import app
 from ESA.annotation_loader import AnnotationLoader
-from ESA.annotations import AppraiseAnnotations
 
 
 def main(args):
     # class containing all information
-    annotations = AnnotationLoader()
-    annotations.get_view(["MQM-1", "LLM", "ESA-1", "ESAAI-1", "ESA-2", "ESAAI-2", "WMT-MQM", "WMT-DASQM"])
+    annotations = AnnotationLoader(refresh_cache=False)
 
+
+
+    annotations.get_view(["MQM-1", "LLM", "ESA-1", "ESAAI-1", "ESA-2", "ESAAI-2", "WMT-MQM", "WMT-DASQM"])
 
 
 if __name__ == '__main__':
