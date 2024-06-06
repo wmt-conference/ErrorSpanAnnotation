@@ -34,7 +34,9 @@ class AnnotationLoader:
 
         return self.protocols[protocol]
 
-    def get_view(self, protocols):
+    def get_view(self, protocols=None):
+        if protocols is None:
+            protocols = PROTOCOL_DEFINITIONS.keys()
         generic_columns = ['domainID', 'documentID', 'source', 'hypothesis', 'systemID', 'sourceID', 'hypothesisID']
         unique_columns = ['score', 'login', 'is_bad', 'start_time', 'end_time', 'error_spans', 'duration_seconds', 'AnnotatorID']
 
