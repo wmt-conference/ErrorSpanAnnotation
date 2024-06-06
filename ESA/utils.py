@@ -53,10 +53,13 @@ def apply_mqm_scoring(span_errors):
 
     score = 0
     for error in span_errors:
-        score += MQM_WEIGHTS[error["severity"]]
+        if "error_type" in error and "Punctuation" in error['error_type']:
+            score += -0.1
+        else:
+            score += MQM_WEIGHTS[error["severity"]]
     if score < -25:
         score = -25
-    return score
+    return float(score)
 
 
 def read_json_spans(spans):
@@ -78,7 +81,9 @@ def load_raw_wmt(protocol):
     human_annotations = pd.read_csv(f"data/mt-metrics-eval-v2/wmt23/human-scores/en-de.{protocolname}.seg.score", sep="\t", header=None, dtype=str)
     human_annotations.columns = ["systemID", "score"]
 
-    systems = human_annotations["systemID"].unique()
+    # systems = human_annotations["systemID"].unique()
+    # we have to hardwire the order to avoid problems in the future
+    systems = ['AIRC', 'GPT4-5shot', 'Lan-BridgeMT', 'NLLB_Greedy', 'NLLB_MBR_BLEU', 'ONLINE-A', 'ONLINE-B', 'ONLINE-G', 'ONLINE-M', 'ONLINE-W', 'ONLINE-Y', 'ZengHuiMT', 'refA']
 
     # load sources and translations
     protocol_annotations = []
@@ -100,16 +105,13 @@ def load_raw_wmt(protocol):
         dfcon = pd.concat([docs_template, pd.DataFrame({"source": sources, "hypothesis": translation})], axis=1)
         dfcon['systemID'] = system
         dfcon['sourceID'] = range(len(dfcon))
+        dfcon['score'] = human_annotations[human_annotations['systemID'] == system]['score'].values
 
         protocol_annotations.append(dfcon)
 
     df = pd.concat(protocol_annotations).reset_index(drop=True)
     # df['hypothesisID'] = df['sourceID'] + "#" + df['documentID'] + "#" + df['systemID']
     df['hypothesisID'] = df.apply(lambda x: f"{x['sourceID']}#{x['documentID']}#{x['systemID']}", axis=1)
-
-    # map scores to df, but check that files are sorted in the same way
-    assert (human_annotations['systemID'] == df['systemID']).all()
-    df['score'] = human_annotations['score']
 
     # for mqm protocol, load ratings
     if protocol == "WMT-MQM":
@@ -143,10 +145,17 @@ def load_raw_appraise_campaign(protocol):
 
             itemid = f"{item['itemID']}#{item['documentID']}"
 
+            if item["documentID"] == 'elitr_minuting-19#GPT4-5shot':
+                # bug in campaign rc5, one document was split between two accounts, but itemIDs overlapped
+                if "398" in item['_item']:
+                    itemid = "bug1"
+                elif "399" in item['_item']:
+                    itemid = "bug2"
+
             if protocol == "LLM":
-                mapping_line_num[itemid] = (itemids[1], item["sourceText"], item['targetText'], json.dumps(item['mqm']))
+                mapping_line_num[itemid] = [itemids[1], item["sourceText"], item['targetText'], json.dumps(item['mqm'])]
             else:
-                mapping_line_num[itemid] = (itemids[1], item["sourceText"], item['targetText'], "None")
+                mapping_line_num[itemid] = [itemids[1], item["sourceText"], item['targetText'], "None"]
 
     header = ["login", "system", "itemID", "is_bad", "source_lang", "target_lang", "score", "documentID", "unk_col_always_false", "error_spans", "start_time", "end_time"]
     scores = pd.read_csv(f"campaign-ruction-rc5/{PROTOCOL_DEFINITIONS[protocol]['appraise_scorefile']}", sep=",", names=header, dtype=str)
@@ -160,6 +169,13 @@ def load_raw_appraise_campaign(protocol):
             continue
 
         itemid = f"{row['itemID']}#{row['documentID']}"
+
+        if row["documentID"] == 'elitr_minuting-19#GPT4-5shot' and row['login'].endswith("07"):
+            if row["itemID"] == "90":
+                itemid = "bug1"
+            elif row["itemID"] == "91":
+                itemid = "bug2"
+
         item = mapping_line_num[itemid]
         hypothesisID = f"{item[0]}#{row['documentID']}"
 
@@ -193,6 +209,10 @@ def load_raw_appraise_campaign(protocol):
             assert wmtitem['source'].iloc[0] == item[1], f"Source mismatch for {hypothesisID}"
             assert wmtitem['hypothesis'].iloc[0] == item[2], f"Translation mismatch for {hypothesisID}"
 
+            # if annotator already annotated this item, take the newer one
+            if "login" in df and df.loc[wmtindex]["login"] == row['login'] and float(df.loc[wmtindex]['end_time']) > float(row["end_time"]):
+                continue
+
             df.at[wmtindex, "login"] = row["login"]
             df.at[wmtindex, "score"] = row["score"]
             df.at[wmtindex, "is_bad"] = row["is_bad"]
@@ -209,6 +229,8 @@ def load_raw_appraise_campaign(protocol):
     if protocol == "LLM":
         df = df[df["is_bad"] != "BAD"].reset_index(drop=True)
         df = df.drop(columns=['login', 'start_time', 'end_time'])
+        df['score'] = df["error_spans"].apply(lambda x: apply_mqm_scoring(x))
+    if protocol.startswith("MQM-"):
         df['score'] = df["error_spans"].apply(lambda x: apply_mqm_scoring(x))
 
     # store the data
