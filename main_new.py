@@ -2,7 +2,7 @@ import ipdb
 import numpy as np
 from absl import app
 from ESA.annotation_loader import AnnotationLoader
-from ESA.analysis.clusters_and_ranking import ClustersAndRanking
+from ESA.experiments.clusters_and_ranking import ClustersAndRanking
 
 
 def main(args):
