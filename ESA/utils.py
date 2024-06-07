@@ -61,7 +61,7 @@ def apply_mqm_scoring(span_errors):
 
     score = 0
     for error in span_errors:
-        if "error_type" in error and "Punctuation" in error['error_type']:
+        if "error_type" in error and error['error_type'] is not None and "Punctuation" in error['error_type']:
             score += -0.1
         else:
             score += MQM_WEIGHTS[error["severity"]]
@@ -240,6 +240,8 @@ def load_raw_appraise_campaign(protocol):
         df['score'] = df["error_spans"].apply(lambda x: apply_mqm_scoring(x))
     elif protocol.startswith("MQM-"):
         df['score'] = df["error_spans"].apply(lambda x: apply_mqm_scoring(x))
+    elif protocol.startswith("ESA"):
+        df['score_mqm'] = df["error_spans"].apply(lambda x: apply_mqm_scoring(x))
 
     # store the data
     df2 = df.copy()
