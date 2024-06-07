@@ -1,11 +1,11 @@
-raise Exception("This code uses old loader, please refactor.")
-from ESA.annotations import AppraiseAnnotations
+from ESA.annotation_loader import AnnotationLoader
+df = AnnotationLoader(refresh_cache=False).get_view(["ESA-1", "ESAAI-1", "ESA-2", "ESAAI-2"], only_overlap=False).dropna()
 import collections
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import argparse
-from ESA.utils import PROTOCOL_DEFINITIONS
+import ESA.settings
 import matplotlib.patches as patches
 
 args = argparse.ArgumentParser()
@@ -14,44 +14,26 @@ args = args.parse_args()
 
 plt.figure(figsize=(4, 1.5))
 
-anno_esa = AppraiseAnnotations.get_full(args.scheme)
 data_times = collections.defaultdict(list)
 
 
 annot_times = []
-for AnnotatorID in anno_esa.AnnotatorID.unique():
-    df = anno_esa[anno_esa['AnnotatorID'] == AnnotatorID]
-    df = df.sort_values("start_time").reset_index(drop=True)
-    for i in range(0, len(df) - 1):
-        annot_times.append(df.iloc[i + 1]["start_time"] - df.iloc[i]["start_time"])
-df = pd.DataFrame(annot_times).sort_values(by=0)
-quantile = df.quantile(0.95)[0]
-median = df.median()[0]
+def load_times(protocol):
+    times_users = []
+    for _, local in df.groupby(f"{protocol}_AnnotatorID"):
+        times = []
+        local.sort_values(by=f"{protocol}_start_time", inplace=True)
+        time_median = np.median(local[f"{protocol}_duration_seconds"])
+        for _, row in local.iterrows():
+            if row[f"{protocol}_duration_seconds"] > 60*5:
+                times.append(time_median)
+            else:
+                times.append(row[f"{protocol}_duration_seconds"])
 
-df = anno_esa.sort_values("start_time")
-times_users = []
-for AnnotatorID in anno_esa.AnnotatorID.unique():
-    subdf = df[df['AnnotatorID'] == AnnotatorID]
-    reducing_time = 0
-    previous_timestamp = subdf.iloc[0]["start_time"]
-    times_user = []
-    for i in range(1, len(subdf)):
-        index = subdf.index[i]
+        times_users.append(times)
+    return times_users
 
-        diff = df.loc[index]["start_time"] - previous_timestamp
-        if diff > quantile:
-            reducing_time += diff - median
-
-        if diff > quantile:
-            # use the previous value instead of median
-            if times_user:
-                times_user.append(times_user[-1])
-        else:
-            times_user.append(diff)
-        previous_timestamp = df.loc[index]["start_time"]
-    times_users.append(times_user)
-
-
+times_users = load_times(f"{args.scheme}-1") + load_times(f"{args.scheme}-2")
 def smooth(y, box_pts):
     box = np.ones(box_pts) / box_pts
     y_smooth = np.convolve(y, box, mode='valid')
@@ -97,31 +79,6 @@ slope = (np.average(times_users_big[-10:-5])-np.average(times_users_big[5:10]))/
 print(f"Learned slope: {slope:.4f}s")
 slope_init = (times_users_big[15]-times_users_big[1])/15
 print(f"Learned slope (first 15%): {slope_init:.4f}s")
-print(f"ABS variation: {np.average(times_users_var):.4f}s")
-
-
-# _xs = [0, 18]
-# _ys = [np.average(times_users_big[0]), np.average(times_users_big[18])]
-# plt.plot(
-#     _xs, _ys,
-#     color="#050",
-# )
-# _xs = [0, 100]
-# _ys = [np.average(times_users_big[0]), np.average(times_users_big[-1])]
-# plt.plot(
-#     _xs, _ys,
-#     color="#050",
-# )
-# plt.text(
-#     x=np.average(_xs), y=np.average(_ys),
-#     s="average speedup",
-#     color="#050",
-#     rotation=-5,
-#     fontsize=9,
-#     fontweight="black",
-#     ha="center",
-# )
-
 
 plt.plot(
     times_users_big,
@@ -130,8 +87,7 @@ plt.plot(
 
 plt.ylim(10, 120)
 
-
-args.scheme = args.scheme.replace('GEMBA', PROTOCOL_DEFINITIONS["ESAAI"]["name"])
+args.scheme = args.scheme.replace('GEMBA', ESA.settings.METHODS["esaai"]["name"])
 plt.title(f"{args.scheme}  ({slope:.2f}s per segment)")
 plt.ylabel("Segment time (s)", labelpad=-2)
 plt.xticks(
@@ -145,5 +101,5 @@ ax = plt.gca()
 ax.spines[['top', 'right']].set_visible(False)
 
 plt.tight_layout(pad=0.1)
-plt.savefig(f"generated_plots/document_speedup_{args.scheme}.pdf")
+plt.savefig(f"PAPER_ESAAI/generated_plots/document_speedup_{args.scheme}.pdf")
 plt.show()
