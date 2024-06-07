@@ -1,46 +1,37 @@
-raise Exception("This code uses old loader, please refactor.")
-import json
-import numpy as np
-import ESA.settings
-ESA.settings.PROJECT = "GEMBA"
-from ESA.merged_annotations import MergedAnnotations
+import ESA.figutils as figutils
+import matplotlib.pyplot as plt
 import collections
-
-df = MergedAnnotations().df
+import numpy as np
+from ESA.annotation_loader import AnnotationLoader
+df = AnnotationLoader(refresh_cache=False).get_view(
+    ["ESA-1", "ESA-2", "MQM-1"], only_overlap=False).dropna()
+figutils.matplotlib_default()
 
 
 statistics_collector = {
     schema: collections.defaultdict(list)
-    for schema in ["esa", "gesa", "gemba", "mqm"]
+    for schema in ["esa", "mqm"]
 }
 
-# Index(['login_mqm', 'system', 'itemID', 'is_bad', 'source_lang', 'target_lang',
-#        'score_mqm', 'documentID', 'span_errors_mqm', 'start_time_mqm',
-#        'end_time_mqm', 'duration_seconds_mqm', 'AnnotatorID_mqm',
-#        'valid_segment', 'source', 'hypothesis', 'login_esa',
-#        'score_esa', 'span_errors_esa', 'start_time_esa', 'end_time_esa',
-#        'duration_seconds_esa', 'AnnotatorID_esa', 'login_gemba', 'score_gemba',
-#        'span_errors_gemba', 'start_time_gemba', 'end_time_gemba',
-#        'duration_seconds_gemba', 'AnnotatorID_gemba',
-#        'gemba_mqm_span_errors_gemba'],
-#       dtype='object')
 for _, row in df.iterrows():
-    if type(row["gemba_mqm_span_errors_gemba"]) != list:
-        continue
-    span_errors_esa = json.loads(row["span_errors_esa"])
-    span_errors_mqm = json.loads(row["span_errors_mqm"])
+    statistics_collector["esa"]["segment_count"].append(
+        len(row["ESA-1_error_spans"]))
+    statistics_collector["mqm"]["segment_count"].append(
+        len(row["MQM-1_error_spans"]))
 
-    statistics_collector["esa"]["segment_count"].append(len(span_errors_esa))
-    statistics_collector["mqm"]["segment_count"].append(len(span_errors_mqm))
+    statistics_collector["esa"]["segment_count_minor"].append(
+        len([x for x in row["ESA-1_error_spans"] if x["severity"] == "minor"]))
+    statistics_collector["mqm"]["segment_count_minor"].append(
+        len([x for x in row["MQM-1_error_spans"] if x["severity"] == "minor"]))
 
-    statistics_collector["esa"]["segment_count_minor"].append(len([x for x in span_errors_esa if x["severity"] == "minor"]))
-    statistics_collector["mqm"]["segment_count_minor"].append(len([x for x in span_errors_mqm if x["severity"] == "minor"]))
+    statistics_collector["esa"]["segment_count_major"].append(
+        len([x for x in row["ESA-1_error_spans"] if x["severity"] == "major"]))
+    statistics_collector["mqm"]["segment_count_major"].append(len(
+        [x for x in row["MQM-1_error_spans"] if x["severity"] in {"major", "critical"}]))
 
-    statistics_collector["esa"]["segment_count_major"].append(len([x for x in span_errors_esa if x["severity"] == "major"]))
-    statistics_collector["mqm"]["segment_count_major"].append(len([x for x in span_errors_mqm if x["severity"] in {"major", "critical"}]))
-
-    statistics_collector["esa"]["score"].append(row["score_esa"])
-    statistics_collector["esa"]["score"].append(row["score_mqm"])
+    statistics_collector["esa"]["score"].append(row["ESA-1_score"])
+    statistics_collector["esa"]["score_mqm"].append(row["ESA-1_score_mqm"])
+    statistics_collector["mqm"]["score"].append(row["MQM-1_score"])
 
 for schema, schema_v in statistics_collector.items():
     print(schema, {k: f"{np.average(v):.2f}" for k, v in schema_v.items()})
@@ -51,26 +42,16 @@ total_segments = {
     for schema in statistics_collector.keys()
 }
 for schema, schema_v in statistics_collector.items():
-    print(schema, {k: f"{np.sum(v)/total_segments[schema]:.1%}" for k, v in schema_v.items()})
+    print(schema, {
+          k: f"{np.sum(v)/total_segments[schema]:.1%}" for k, v in schema_v.items()})
 
-# plotting part
-import matplotlib.pyplot as plt
-import ESA.figutils as figutils
+# first plot
+fig = plt.figure(figsize=(4, 1.5))
 
-figutils.matplotlib_default()
-
-fig = plt.figure(figsize=(4, 1.8))
-
-KWARGS = {
-    "width": 0.3,
-}
 BINS_BASE = np.linspace(1, 6, 6)
-
 OFFSET_X = 0.3
-
 ROW_COUNT = len(statistics_collector["esa"]["segment_count_minor"])
 
-# TODO: major/minor
 bins_y, _, _ = plt.hist(
     np.array(statistics_collector["esa"]["segment_count_major"])-OFFSET_X,
     label="ESA Major",
@@ -78,7 +59,7 @@ bins_y, _, _ = plt.hist(
     color=figutils.COLORS[0],
     alpha=0.8,
     weights=[1 / ROW_COUNT for _ in range(ROW_COUNT)],
-    **KWARGS
+    width=0.3,
 )
 plt.hist(
     np.array(statistics_collector["esa"]["segment_count_minor"])-OFFSET_X,
@@ -88,7 +69,7 @@ plt.hist(
     bottom=bins_y,
     bins=BINS_BASE-OFFSET_X,
     weights=[1 / ROW_COUNT for _ in range(ROW_COUNT)],
-    **KWARGS
+    width=0.3,
 )
 bins_y, _, _ = plt.hist(
     np.array(statistics_collector["mqm"]["segment_count_major"]),
@@ -97,7 +78,7 @@ bins_y, _, _ = plt.hist(
     alpha=0.8,
     bins=BINS_BASE,
     weights=[1 / ROW_COUNT for _ in range(ROW_COUNT)],
-    **KWARGS
+    width=0.3,
 )
 plt.hist(
     np.array(statistics_collector["mqm"]["segment_count_minor"]),
@@ -107,17 +88,87 @@ plt.hist(
     bottom=bins_y,
     bins=BINS_BASE,
     weights=[1 / ROW_COUNT for _ in range(ROW_COUNT)],
-    **KWARGS
+    width=0.3,
+)
+
+plt.text(
+    0.5, 0.5,
+    s=f"avg ESA error spans {np.average(statistics_collector['esa']['segment_count']):.2f}\n" +
+    f"avg MQM error spans {np.average(statistics_collector['mqm']['segment_count']):.2f}",
+    transform=plt.gca().transAxes,
+    fontsize=9,
+    fontweight="bold"
 )
 
 plt.gca().spines[['top', 'right']].set_visible(False)
-plt.legend()
+plt.legend(ncol=2)
 plt.xlim(None, 4.5)
-# plt.xticks([0, 1, 2, 3, 4])
 plt.yticks([0, 0.2], ["0%", "20%"])
 
 plt.xlabel("Error span count", labelpad=-2)
 plt.ylabel("Frequency" + " "*5, labelpad=-10)
 plt.tight_layout(pad=0)
-plt.savefig("generated_plots/overview_segment_count_esa.pdf")
+plt.savefig("PAPER_ESA/generated_plots/overview_segment_count_esa.pdf")
+plt.show()
+
+
+exit()
+
+
+# second plot
+fig, ax = plt.subplots(3, 1, figsize=(4, 2.2))
+
+
+def half_violin(v1, color, alpha=0.7):
+    for pc in v1['bodies']:
+        pc.set_facecolor(color)
+        pc.set_alpha(alpha)
+        pc.set_aa(True)
+        # get the center
+        m = np.mean(pc.get_paths()[0].vertices[:, 1])
+        # modify the paths to not go further left than the center
+        pc.get_paths()[0].vertices[:, 1] = np.clip(
+            pc.get_paths()[0].vertices[:, 1],
+            m, np.inf
+        )
+
+
+half_violin(ax[0].violinplot(
+    statistics_collector["esa"]["score"],
+    vert=False,
+    showextrema=False,
+), color=figutils.COLORS[0])
+ax[0].set_ylabel("ESA", rotation=0)
+ax[0].yaxis.set_label_coords(0.096, 0.3)
+
+half_violin(ax[1].violinplot(
+    statistics_collector["esa"]["score_mqm"],
+    vert=False,
+    showextrema=False,
+), color=figutils.COLORS[0], alpha=0.4)
+ax[1].set_ylabel(r"ESA$_\mathrm{MQM}$", rotation=0)
+ax[1].yaxis.set_label_coords(0.13, 0.3)
+
+half_violin(ax[2].violinplot(
+    statistics_collector["mqm"]["score"],
+    vert=False,
+    showextrema=False,
+), color=figutils.COLORS[1])
+ax[2].set_ylabel("MQM", rotation=0)
+ax[2].yaxis.set_label_coords(0.1, 0.3)
+
+
+ax[2].set_xlabel("Score")
+for ax_i, ax in enumerate(ax):
+    ax.set_yticks([])
+    if ax_i != 0:
+        ax.set_xlim(-25, 0)
+    else:
+        ax.set_xlim(0, 100)
+    ax.set_ylim(1, None)
+    ax.spines[['top', 'right', 'left']].set_visible(False)
+
+
+plt.tight_layout(pad=0)
+plt.savefig("PAPER_ESA/generated_plots/score_distribution.pdf")
 plt.show()

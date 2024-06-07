@@ -41,6 +41,10 @@ for _, row in df.iterrows():
 
     statistics_collector["esaai"]["score"].append(row["ESAAI-1_score"])
     statistics_collector["esa"]["score"].append(row["ESA-1_score"])
+    statistics_collector["esaai"]["score_mqm"].append(row["ESAAI-1_score_mqm"])
+    statistics_collector["esa"]["score_mqm"].append(row["ESA-1_score_mqm"])
+    statistics_collector["mqm"]["score_mqm"].append(row["MQM-1_score"])
+    statistics_collector["wmt"]["score_mqm"].append(row["WMT-MQM_score"])
 
 for schema, schema_v in statistics_collector.items():
     print(schema, {k: f"{np.average(v):.2f}" for k, v in schema_v.items()})
@@ -101,5 +105,5 @@ plt.yticks([0, 0.2, 0.6, 0.8], ["0%", "20%", "60%", "80%"])
 plt.xlabel("Error span count", labelpad=-2)
 plt.ylabel("Freq.", labelpad=-10)
 plt.tight_layout(pad=0)
-plt.savefig("generated_plots/overview_segment_count_esaai.pdf")
+plt.savefig("PAPER_ESAAI/generated_plots/overview_segment_count_esaai.pdf")
 plt.show()

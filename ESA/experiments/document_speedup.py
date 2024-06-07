@@ -1,5 +1,5 @@
 from ESA.annotation_loader import AnnotationLoader
-df = AnnotationLoader(refresh_cache=False).get_view(["ESA-1", "ESAAI-1", "ESA-2", "ESAAI-2"], only_overlap=False).dropna()
+df = AnnotationLoader(refresh_cache=False).get_view(["MQM-1", "ESA-1", "ESAAI-1", "ESA-2", "ESAAI-2"], only_overlap=False).dropna()
 import collections
 import matplotlib.pyplot as plt
 import numpy as np
@@ -32,7 +32,12 @@ def load_times(protocol):
         times_users.append(times)
     return times_users
 
-times_users = load_times(f"{args.scheme}-1") + load_times(f"{args.scheme}-2")
+if args.scheme == "MQM":
+    times_users = load_times(f"{args.scheme}-1")
+else:
+    times_users = load_times(f"{args.scheme}-1") + load_times(f"{args.scheme}-2")
+
+
 def smooth(y, box_pts):
     box = np.ones(box_pts) / box_pts
     y_smooth = np.convolve(y, box, mode='valid')
