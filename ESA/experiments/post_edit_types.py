@@ -1,13 +1,7 @@
-raise Exception("This code uses old loader, please refactor.")
-import ESA.settings
-ESA.settings.PROJECT = "GEMBA"
-from ESA.merged_annotations import MergedAnnotations
+from ESA.annotation_loader import AnnotationLoader
+df = AnnotationLoader(refresh_cache=False).get_view(only_overlap=True)
 import numpy as np
-import json
 import collections
-import pandas as pd
-
-df = MergedAnnotations().df
 
 to_average = collections.defaultdict(list)
 
@@ -16,11 +10,8 @@ def get_spans(spans):
 	  return {(x["start_i"], x["end_i"]) for x in spans}
 
 for _, row in df.iterrows():
-	if type(row.gemba_mqm_span_errors_gemba) != list:
-			continue
-	
-	spans_gemba = row.gemba_mqm_span_errors_gemba
-	spans_gesa = json.loads(row.span_errors_gemba)
+	spans_gemba = row["LLM_error_spans"]
+	spans_gesa = row["ESAAI-1_error_spans"]
 	spans_removed = [
 		s1 for s1 in spans_gemba
 		if not any([s2["start_i"] == s1["start_i"] and s2["end_i"] == s1["end_i"] for s2 in spans_gesa])
@@ -117,9 +108,9 @@ for _, row in df.iterrows():
     )
 
 	# to find examples
-	if spans_moved_inc and len(spans_gesa) <= 3 and len(row.translation_seg) <= 100:
-		print(row.source_seg)
-		print(row.translation_seg)
+	if spans_moved_inc and len(spans_gesa) <= 3 and len(row.hypothesis) <= 100:
+		print(row.source)
+		print(row.hypothesis)
 		print(spans_gesa)
 		print()
 	

@@ -60,21 +60,21 @@ def fit_lr(df, data_true, force_coef=None):
 		model.coef_ = np.array(force_coef)
 	return [x+100 for x in model.predict(data_x)]
 
-df = df[~ df.translation_seg.isnull()]
+df = df[~ df.hypothesis.isnull()]
 
 esa_true = [x.score_esa for _, x in df.iterrows()]
 gesa_true = [x.score_gemba for _, x in df.iterrows()]
 mqm_pred_mqm = [mqm_like_score(json.loads(x.span_errors_mqm)) for _, x in df.iterrows()]
 esa_pred_mqm = [mqm_like_score(json.loads(x.span_errors_esa)) for _, x in df.iterrows()]
-gesa_pred_mqm = [mqm_like_score(x.gemba_mqm_span_errors_gemba) for _, x in df.iterrows()]
-mqm_pred_lor = fit_lr(df[["translation_seg", "span_errors_mqm"]], esa_true)
-esa_pred_lor = fit_lr(df[["translation_seg", "span_errors_esa"]], esa_true)
-esa_pred_lor_gesa = fit_lr(df[["translation_seg", "span_errors_esa"]], gesa_true)
-esa_pred_lor_reg = fit_lr(df[["translation_seg", "span_errors_esa"]], esa_true, force_coef=[-0.2, -5.1, -11.7, -16.5, -71.9, -217.6, -48.5])
-gesa_pred_lor = fit_lr(df[["translation_seg", "gemba_mqm_span_errors_gemba"]], esa_true)
-gesa_pred_lor_reg = fit_lr(df[["translation_seg", "gemba_mqm_span_errors_gemba"]], esa_true, force_coef=[-0.2, -5.1, -11.7, -16.5, -71.9, -217.6, -48.5])
-gesa_pred_lor_gesa = fit_lr(df[["translation_seg", "gemba_mqm_span_errors_gemba"]], gesa_true)
-gesa_pred_lor_reg_gesa = fit_lr(df[["translation_seg", "gemba_mqm_span_errors_gemba"]], gesa_true, force_coef=[-0.2, -5.1, -11.7, -16.5, -71.9, -217.6, -48.5])
+gesa_pred_mqm = [mqm_like_score(x["LLM_error_spans"]) for _, x in df.iterrows()]
+mqm_pred_lor = fit_lr(df[["hypothesis", "span_errors_mqm"]], esa_true)
+esa_pred_lor = fit_lr(df[["hypothesis", "span_errors_esa"]], esa_true)
+esa_pred_lor_gesa = fit_lr(df[["hypothesis", "span_errors_esa"]], gesa_true)
+esa_pred_lor_reg = fit_lr(df[["hypothesis", "span_errors_esa"]], esa_true, force_coef=[-0.2, -5.1, -11.7, -16.5, -71.9, -217.6, -48.5])
+gesa_pred_lor = fit_lr(df[["hypothesis", "gemba_mqm_span_errors_gemba"]], esa_true)
+gesa_pred_lor_reg = fit_lr(df[["hypothesis", "gemba_mqm_span_errors_gemba"]], esa_true, force_coef=[-0.2, -5.1, -11.7, -16.5, -71.9, -217.6, -48.5])
+gesa_pred_lor_gesa = fit_lr(df[["hypothesis", "gemba_mqm_span_errors_gemba"]], gesa_true)
+gesa_pred_lor_reg_gesa = fit_lr(df[["hypothesis", "gemba_mqm_span_errors_gemba"]], gesa_true, force_coef=[-0.2, -5.1, -11.7, -16.5, -71.9, -217.6, -48.5])
 
 import scipy.stats
 import sklearn.metrics

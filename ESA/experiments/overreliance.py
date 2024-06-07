@@ -16,7 +16,7 @@ per_progress = collections.defaultdict(list)
 for annotator in df.AnnotatorID_gemba.unique():
     df_local = df[df.AnnotatorID_gemba == annotator]
     df_local = df_local.sort_values(by="start_time_gemba")
-    for line_i, (span_gemba, span_gesa) in enumerate(zip(df_local.gemba_mqm_span_errors_gemba.tolist(), df_local.span_errors_gemba.tolist())):
+    for line_i, (span_gemba, span_gesa) in enumerate(zip(df_local["LLM_error_spans"].tolist(), df_local["ESAAI-1_error_spans"].tolist())):
         if type(span_gemba) != list:
             continue
         span_gemba = span_gemba

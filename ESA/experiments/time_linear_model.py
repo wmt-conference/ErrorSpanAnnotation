@@ -15,15 +15,15 @@ data_gesa = collections.defaultdict(list)
 data_esa = collections.defaultdict(list)
 data_mqm = collections.defaultdict(list)
 for _, row in df.iterrows():
-    if type(row.gemba_mqm_span_errors_gemba) is not list:
+    if type(row["LLM_error_spans"]) is not list:
         continue
     df_local = df[df.AnnotatorID_gemba == row.AnnotatorID_gemba]
     data_gesa[row.AnnotatorID_gemba].append({
         "Time": row.end_time_gemba-row.start_time_gemba,
         "Progress": np.average(df_local.end_time_gemba <= row.start_time_gemba),
-        "Words": len(str(row.translation_seg).split()),
-        "ErrorsIn": len(row.gemba_mqm_span_errors_gemba),
-        "ErrorsOut": len(json.loads(row.span_errors_gemba)),
+        "Words": len(str(row.hypothesis).split()),
+        "ErrorsIn": len(row["LLM_error_spans"]),
+        "ErrorsOut": len(json.loads(row["ESAAI-1_error_spans"])),
         "Score": row.score_gemba,
         "DocumentSize": np.sum(df_local.documentID == row.documentID),
     })
@@ -33,7 +33,7 @@ for _, row in df.iterrows():
     data_esa[row.AnnotatorID_esa].append({
         "Time": row.end_time_esa-row.start_time_esa,
         "Progress": np.average(df_local.end_time_esa <= row.start_time_esa),
-        "Words": len(str(row.translation_seg).split()),
+        "Words": len(str(row.hypothesis).split()),
         "ErrorsOut": len(json.loads(row.span_errors_esa)),
         "Score": row.score_esa,
         "DocumentSize": np.sum(df_local.documentID == row.documentID),
@@ -43,7 +43,7 @@ for _, row in df.iterrows():
     data_mqm[row.AnnotatorID_mqm].append({
         "Time": row.end_time_mqm-row.start_time_mqm,
         "Progress": np.average(df_local.end_time_mqm <= row.start_time_mqm),
-        "Words": len(str(row.translation_seg).split()),
+        "Words": len(str(row.hypothesis).split()),
         "ErrorsOut": len(json.loads(row.span_errors_mqm)),
         "Score": row.score_mqm,
         "DocumentSize": np.sum(df_local.documentID == row.documentID),

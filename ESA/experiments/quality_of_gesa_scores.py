@@ -23,7 +23,7 @@ for _, row in df.iterrows():
 
     all_sets.append({
           "gemba_mqm": row["LLM_score"],
-          "gesa_mqm": get_score_mqm(row.span_errors_gemba),
+          "gesa_mqm": get_score_mqm(row["ESAAI-1_error_spans"]),
           "gesa_score": row.score_gemba,
           "esa_mqm": get_score_mqm(json.loads(row.span_errors_esa)),
           "esa_score": row.score_esa,

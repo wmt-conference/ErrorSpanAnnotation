@@ -17,7 +17,7 @@ statistics_collector = {
 # Index(['login_mqm', 'system', 'itemID', 'is_bad', 'source_lang', 'target_lang',
 #        'score_mqm', 'documentID', 'span_errors_mqm', 'start_time_mqm',
 #        'end_time_mqm', 'duration_seconds_mqm', 'AnnotatorID_mqm',
-#        'valid_segment', 'source_seg', 'translation_seg', 'login_esa',
+#        'valid_segment', 'source', 'hypothesis', 'login_esa',
 #        'score_esa', 'span_errors_esa', 'start_time_esa', 'end_time_esa',
 #        'duration_seconds_esa', 'AnnotatorID_esa', 'login_gemba', 'score_gemba',
 #        'span_errors_gemba', 'start_time_gemba', 'end_time_gemba',

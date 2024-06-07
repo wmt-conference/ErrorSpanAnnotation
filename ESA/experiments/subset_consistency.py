@@ -25,12 +25,12 @@ for _, row in df.iterrows():
 	row["span_errors_mqm"] = json.loads(row["span_errors_mqm"])
 	row["span_errors_gemba"] = json.loads(row["span_errors_gemba"])
 
-	system_scores[row.source_seg]["esa_score"][row["system"]]= row["score_esa"]
-	system_scores[row.source_seg]["gesa_score"][row["system"]]= row["score_gemba"]
-	system_scores[row.source_seg]["esa_mqm"][row["system"]]= mqm_like_score(row["span_errors_esa"])
-	system_scores[row.source_seg]["mqm_mqm"][row["system"]]= mqm_like_score(row["span_errors_mqm"])
-	system_scores[row.source_seg]["gesa_mqm"][row["system"]]= mqm_like_score(row["span_errors_gemba"])
-	system_scores[row.source_seg]["gemba_mqm"][row["system"]]= mqm_like_score(row["gemba_mqm_span_errors_gemba"])
+	system_scores[row.source]["esa_score"][row["system"]]= row["score_esa"]
+	system_scores[row.source]["gesa_score"][row["system"]]= row["score_gemba"]
+	system_scores[row.source]["esa_mqm"][row["system"]]= mqm_like_score(row["span_errors_esa"])
+	system_scores[row.source]["mqm_mqm"][row["system"]]= mqm_like_score(row["span_errors_mqm"])
+	system_scores[row.source]["gesa_mqm"][row["system"]]= mqm_like_score(row["span_errors_gemba"])
+	system_scores[row.source]["gemba_mqm"][row["system"]]= mqm_like_score(row["gemba_mqm_span_errors_gemba"])
 
 
 system_scores = list(system_scores.values())
