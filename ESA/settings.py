@@ -1,28 +1,17 @@
-raise Exception("This code uses old loader, please refactor.")
-PROJECT = "GEMBA" # used for Vilem's and Tom's side project
-#PROJECT = "ESA" # used for WMT ESA protocol
-
-
-methods = {
+METHODS = {
     "esa": {
         "name": "ESA"
-    },
-    "esa_severity": {
-        "name": "ESA (severities)"
     },
     "mqm": {
         "name": "MQM"
     },
     "wmt-dasqm": {
-        "name": "DA+SQM (WMT23)"
+        "name": r"DA+SQM$^\mathrm{WMT}$"
     },
     "wmt-mqm": {
-        "name": "MQM (WMT23)"
+        "name": r"MQM$^\mathrm{WMT}$"
     },
-    "gemba_severity": {
-        "name": r"ESA$^\mathrm{AI}$ (severities)"
-    },
-    "gemba": {
+    "esaai": {
         "name": r"ESA$^\mathrm{AI}$"
     },
     "llm": {
