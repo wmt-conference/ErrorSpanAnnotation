@@ -69,13 +69,12 @@ def plot_clusters(data, data_clusters, protocols, filename):
 
         # merge the two dataframes
         df = pd.merge(df1, df2, left_index=True, right_index=True)
-        # calculate pearson correlation
-        corr = df.corr(method='pearson', numeric_only=True)["WMT-MQM"][protocol]
+        # calculate spearman correlation as we want to measure monotonic relationship
+        corr = df.corr(method='spearman')["WMT-MQM"][protocol]
 
         # Plotting the scatter plots for each dataset
         df.plot.scatter(x=protocol, y="WMT-MQM", ax=axs[i], color='black')
 
-        # rename x-axis and y-axis based on methods[scheme]
         axs[i].set_xlabel(PROTOCOL_DEFINITIONS[protocol]['name'])
         if i == 0:
             axs[i].set_ylabel(PROTOCOL_DEFINITIONS["WMT-MQM"]['name'], labelpad=-2)

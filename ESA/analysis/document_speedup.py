@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import argparse
-import ESA.settings
+from ESA.utils import PROTOCOL_DEFINITIONS
 import matplotlib.patches as patches
 
 args = argparse.ArgumentParser()
@@ -131,7 +131,7 @@ plt.plot(
 plt.ylim(10, 120)
 
 
-args.scheme = args.scheme.replace('GEMBA', ESA.settings.methods["gemba"]["name"])
+args.scheme = args.scheme.replace('GEMBA', PROTOCOL_DEFINITIONS["ESAAI"]["name"])
 plt.title(f"{args.scheme}  ({slope:.2f}s per segment)")
 plt.ylabel("Segment time (s)", labelpad=-2)
 plt.xticks(
