@@ -145,5 +145,5 @@ ax = plt.gca()
 ax.spines[['top', 'right']].set_visible(False)
 
 plt.tight_layout(pad=0.1)
-plt.savefig(f"figures/document_speedup_{args.scheme}.pdf")
+plt.savefig(f"generated_plots/document_speedup_{args.scheme}.pdf")
 plt.show()

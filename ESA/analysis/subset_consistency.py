@@ -113,5 +113,5 @@ plt.ylabel("Rank\naccuracy", labelpad=-24)
 plt.gca().spines[['top', 'right']].set_visible(False)
 
 plt.tight_layout(pad=0)
-plt.savefig("figures/subset_consistency.pdf")
+plt.savefig("generated_plots/subset_consistency.pdf")
 plt.show()

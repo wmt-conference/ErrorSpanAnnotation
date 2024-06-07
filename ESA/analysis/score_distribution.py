@@ -86,5 +86,5 @@ for ax_i, ax in enumerate(ax):
 
 
 plt.tight_layout(pad=0)
-plt.savefig("figures/score_distribution.pdf")
+plt.savefig("generated_plots/score_distribution.pdf")
 plt.show()

@@ -134,7 +134,7 @@ def plot_complex(to_average_users, scheme):
     ax1.set_ylim(5, 85)
 
     plt.tight_layout(pad=0.1)
-    plt.savefig(f"figures/edit_degree_{scheme}.pdf")
+    plt.savefig(f"generated_plots/edit_degree_{scheme}.pdf")
     plt.show()
         
 plot_complex(to_average_users, scheme="GEMBA")

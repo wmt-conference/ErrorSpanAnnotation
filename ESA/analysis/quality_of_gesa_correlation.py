@@ -1,13 +1,6 @@
-raise Exception("This code uses old loader, please refactor.")
-import ESA.settings
-ESA.settings.PROJECT = "GEMBA"
-from ESA.merged_annotations import MergedAnnotations
-import json
-import ESA.figutils
+from ESA.annotation_loader import AnnotationLoader
+df = AnnotationLoader(refresh_cache=False).get_view()
 import numpy as np
-ESA.figutils.matplotlib_default()
-
-df = MergedAnnotations().df
 
 all_sets = []
 
@@ -15,25 +8,21 @@ def get_spans(spans):
     return {(x["start_i"], x["end_i"]) for x in spans}
 
 def get_spans_wmt(spans):
-    if spans == "None":
-        return None
     return {(x["start"], x["end"]) for x in spans}
 
 for _, row in df.iterrows():
-    if type(row.gemba_mqm_span_errors_gemba) != list:
-            continue
-    spans_gemba = get_spans(row.gemba_mqm_span_errors_gemba)
-    spans_gesa = get_spans(json.loads(row.span_errors_gemba))
-    spans_esa = get_spans(json.loads(row.span_errors_esa))
-    spans_mqm = get_spans(json.loads(row.span_errors_mqm))
-    spans_wmt = get_spans_wmt(row.wmt_mqm_span_errors)
+    spans_gemba = get_spans(row["LLM_error_spans"])
+    spans_esaai = get_spans(row["ESAAI-1_error_spans"])
+    spans_esa = get_spans(row["ESA-1_error_spans"])
+    spans_mqm = get_spans(row["MQM-1_error_spans"])
+    spans_wmt = get_spans_wmt(row["WMT-MQM_error_spans"])
 
     all_sets.append({
           "gemba": spans_gemba,
-          "gesa": spans_gesa,
-          "gesa_kept": spans_gemba & spans_gesa,
-          "gesa_removed": spans_gemba - spans_gesa,
-          "gesa_added": spans_gesa - spans_gemba,
+          "esaai": spans_esaai,
+          "esaai_kept": spans_gemba & spans_esaai,
+          "esaai_removed": spans_gemba - spans_esaai,
+          "esaai_added": spans_esaai - spans_gemba,
           "esa": spans_esa,
           "mqm": spans_mqm,
           "wmt": spans_wmt,
@@ -54,7 +43,7 @@ for key1 in all_sets[0].keys():
     for key2 in ["esa", "mqm", "wmt"]:
     # for key2 in all_sets[0].keys():
         # we are not interested in subsets of that
-        if key2.startswith("gesa_"):
+        if key2.startswith("esaai_"):
             continue
         
         sim = np.average([

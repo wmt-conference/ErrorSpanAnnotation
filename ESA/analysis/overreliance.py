@@ -87,5 +87,5 @@ plt.ylim(-1.8, 2.0)
 plt.gca().spines[["top", "right"]].set_visible(False)
 
 plt.tight_layout(pad=0.1)
-plt.savefig("figures/overreliance.pdf")
+plt.savefig("generated_plots/overreliance.pdf")
 plt.show()

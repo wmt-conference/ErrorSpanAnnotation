@@ -1,13 +1,11 @@
 raise Exception("This code uses old loader, please refactor.")
-import ESA.settings
-ESA.settings.PROJECT = "GEMBA"
-from ESA.merged_annotations import MergedAnnotations
+
+from ESA.annotation_loader import AnnotationLoader
+df = AnnotationLoader(refresh_cache=False).get_view()
 import json
 import ESA.figutils
 import numpy as np
 ESA.figutils.matplotlib_default()
-
-df = MergedAnnotations().df
 
 all_sets = []
 
@@ -15,19 +13,17 @@ def get_spans(spans):
     return {(x["start_i"], x["end_i"]) for x in spans}
 
 def get_score_mqm(spans):
-    if spans == "None":
-        return None
     return -sum([{"minor": 1, "major": 5, "undecided": 0}[x["severity"]] for x in spans])
 
 for _, row in df.iterrows():
-    if type(row.gemba_mqm_span_errors_gemba) != list:
-            continue
+    print(row.keys())
+    exit()
     if row.wmt_mqm_span_errors == "None":
          continue
 
     all_sets.append({
-          "gemba_mqm": get_score_mqm(row.gemba_mqm_span_errors_gemba),
-          "gesa_mqm": get_score_mqm(json.loads(row.span_errors_gemba)),
+          "gemba_mqm": row["LLM_score"],
+          "gesa_mqm": get_score_mqm(row.span_errors_gemba),
           "gesa_score": row.score_gemba,
           "esa_mqm": get_score_mqm(json.loads(row.span_errors_esa)),
           "esa_score": row.score_esa,
