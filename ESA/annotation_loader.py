@@ -15,7 +15,7 @@ class AnnotationLoader:
         self._load_cache(refresh_cache)
 
     def _load_cache(self, refresh_cache):
-        cache_file = 'cache_protocols_v1.pkl'  # using versioning to force change everywhere if coded is changed
+        cache_file = 'cache_protocols_v2.pkl'  # using versioning to force change everywhere if coded is changed
         if refresh_cache or not os.path.exists(cache_file):
             self.protocols = {}
             for protocol in PROTOCOL_DEFINITIONS:
@@ -57,13 +57,13 @@ class AnnotationLoader:
 
         dfs = None
         for protocol in protocols:
-            df = self._get_protocol_data(protocol).df
+            df = self._get_protocol_data(protocol).df.copy()
             # append protocol name to columns except for generic columns
             df.columns = [f"{protocol}_{col}" if col not in generic_columns else col for col in df.columns]
             if dfs is None:
                 dfs = df
             else:
-                df.drop(columns=generic_columns, inplace=True)
+                df = df.drop(columns=generic_columns)
                 dfs = dfs.merge(df, how='outer', left_index=True, right_index=True)
 
         if only_overlap:

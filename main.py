@@ -26,9 +26,6 @@ def main(args):
 
 
     # GENERATE RESOURCES FOR PAPER
-    ranks = HumanScores("en-de")
-    ranks.generate_ranks()
-    # ranks.calculate_inter_annotator_with_mqm()
     # analyse_annotation_durations()
 
 

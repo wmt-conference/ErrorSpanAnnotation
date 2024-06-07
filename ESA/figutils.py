@@ -1,4 +1,3 @@
-raise Exception("This code uses old loader, please refactor.")
 COLORS = [
     "#bc272d",  # red
     "#3a5",  # green

@@ -8,37 +8,45 @@ PROTOCOL_DEFINITIONS = {
         "framework": "appraise",
         "appraise_scorefile": "240315rc5MQM.scores.csv",
         "appraise_batchefile": "batches_wmt23_en-de_mqm.json",
+        "name": "MQM",
     },
     'ESA-1': {
         "framework": "appraise",
         "appraise_scorefile": "240315rc5ESA.scores.csv",
         "appraise_batchefile": "batches_wmt23_en-de_esa.json",
+        "name": "ESA$_1$",
     },
     'ESAAI-1': {
         "framework": "appraise",
         "appraise_scorefile": "240315rc5GEMBA.scores.csv",
         "appraise_batchefile": "batches_wmt23_en-de_gemba.json",
+        "name": r"ESA$^\mathrm{AI}_1$",
     },
     'ESA-2': {
         "framework": "appraise",
         "appraise_scorefile": "240520rc6ESA.scores.csv",
         "appraise_batchefile": "batches_wmt23_en-de_esa.json",
+        "name": "ESA$_2$",
     },
     'ESAAI-2': {
         "framework": "appraise",
         "appraise_scorefile": "240520rc6GEMBA.scores.csv",
         "appraise_batchefile": "batches_wmt23_en-de_gemba.json",
+        "name": r"ESA$^\mathrm{AI}_2$",
     },
     'WMT-MQM': {
         "framework": "wmt",
+        "name": "MQM (WMT23)",
     },
     'WMT-DASQM': {
         "framework": "wmt",
+        "name": "DA+SQM (WMT23)",
     },
     'LLM': {
         "framework": "appraise",
         "appraise_scorefile": "240315rc5GEMBA.scores.csv",
         "appraise_batchefile": "batches_wmt23_en-de_gemba.json",
+        "name": "LLM (no humans)",
     }
 }
 
@@ -230,7 +238,7 @@ def load_raw_appraise_campaign(protocol):
         df = df[df["is_bad"] != "BAD"].reset_index(drop=True)
         df = df.drop(columns=['login', 'start_time', 'end_time'])
         df['score'] = df["error_spans"].apply(lambda x: apply_mqm_scoring(x))
-    if protocol.startswith("MQM-"):
+    elif protocol.startswith("MQM-"):
         df['score'] = df["error_spans"].apply(lambda x: apply_mqm_scoring(x))
 
     # store the data
@@ -239,7 +247,7 @@ def load_raw_appraise_campaign(protocol):
     df2 = df2[df2["is_bad"] != "BAD"].reset_index(drop=True)
     df2["score"] = df2["score"].fillna("None")
     df2 = df2[["systemID", "score"]]
-
     df2.to_csv(f"campaign-ruction-rc5/en-de.{protocol}.seg.score", sep="\t", index=False, header=False)
 
+    df['score'] = df['score'].replace("None", float("nan")).astype(float)
     return df
