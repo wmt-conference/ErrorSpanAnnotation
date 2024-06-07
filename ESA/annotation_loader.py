@@ -15,7 +15,7 @@ class AnnotationLoader:
         self._load_cache(refresh_cache)
 
     def _load_cache(self, refresh_cache):
-        cache_file = 'cache_protocols_v3.pkl'  # using versioning to force change everywhere if coded is changed
+        cache_file = 'cache_protocols_v4.pkl'  # using versioning to force change everywhere if coded is changed
         if refresh_cache or not os.path.exists(cache_file):
             self.protocols = {}
             for protocol in PROTOCOL_DEFINITIONS:

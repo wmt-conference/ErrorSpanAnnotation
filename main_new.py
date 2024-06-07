@@ -10,7 +10,7 @@ def main(args):
     annotations = AnnotationLoader(refresh_cache=False)
 
     # ["MQM-1", "LLM", "ESA-1", "ESAAI-1", "ESA-2", "ESAAI-2", "WMT-MQM", "WMT-DASQM"]
-    df = annotations.get_view()
+    df = annotations.get_view(only_overlap=True)
 
     # generate to papers
     ClustersAndRanking(annotations)

@@ -46,6 +46,7 @@ def ClustersAndRanking(annotations_loader):
 
     plot_clusters(data, data_clusters, ["MQM-1", "ESA-1", "WMT-DASQM"], "PAPER_ESA/generated_plots/ranking_and_clusters.pdf")
     plot_clusters(data, data_clusters, ["ESA-1", "ESAAI-1", "LLM"], "PAPER_ESAAI/generated_plots/ranking_and_clusters.pdf")
+    plot_clusters(data, data_clusters, ["MQM-1", "LLM", "ESA-1", "ESAAI-1", "ESA-2", "ESAAI-2", "WMT-DASQM"], "archive/all.pdf")
 
 
 def plot_clusters(data, data_clusters, protocols, filename):
