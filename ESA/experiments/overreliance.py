@@ -1,33 +1,23 @@
-raise Exception("This code uses old loader, please refactor.")
-import ESA.settings
-ESA.settings.PROJECT = "GEMBA"
-from ESA.merged_annotations import MergedAnnotations
+from ESA.annotation_loader import AnnotationLoader
+df = AnnotationLoader(refresh_cache=False).get_view(["ESAAI-1", "LLM"], only_overlap=False).dropna()
 import matplotlib.pyplot as plt
-import json
 import collections
 import ESA.figutils
 import numpy as np
 ESA.figutils.matplotlib_default()
 
-df = MergedAnnotations().df
-
-
 per_progress = collections.defaultdict(list)
-for annotator in df.AnnotatorID_gemba.unique():
-    df_local = df[df.AnnotatorID_gemba == annotator]
-    df_local = df_local.sort_values(by="start_time_gemba")
-    for line_i, (span_gemba, span_gesa) in enumerate(zip(df_local["LLM_error_spans"].tolist(), df_local["ESAAI-1_error_spans"].tolist())):
-        if type(span_gemba) != list:
-            continue
-        span_gemba = span_gemba
-        span_gesa = json.loads(span_gesa)
+for annotator in df["ESAAI-1_AnnotatorID"].unique():
+    df_local = df[df["ESAAI-1_AnnotatorID"] == annotator]
+    df_local = df_local.sort_values(by="ESAAI-1_start_time")
+    for line_i, (span_gemba, span_esaai) in enumerate(zip(df_local["LLM_error_spans"].tolist(), df_local["ESAAI-1_error_spans"].tolist())):
         span_gemba = {(x["start_i"], x["end_i"]) for x in span_gemba}
-        span_gesa = {(x["start_i"], x["end_i"]) for x in span_gesa}
+        span_esaai = {(x["start_i"], x["end_i"]) for x in span_esaai}
 
         per_progress[int(line_i*100/len(df_local))].append({
-            "span_kept": len(span_gemba & span_gesa),
-            "span_removed": len(span_gemba - span_gesa),
-            "span_added": len(span_gesa - span_gemba),
+            "span_kept": len(span_gemba & span_esaai),
+            "span_removed": len(span_gemba - span_esaai),
+            "span_added": len(span_esaai - span_gemba),
         })
 
 # average across timestamps
@@ -55,7 +45,7 @@ plt.bar(
     height=[user['span_kept'] for user in per_progress],
     color=ESA.figutils.COLORS[3],
     label="Kept",
-    width=1,
+    width=1.05,
     clip_on=False,
 )
 plt.bar(
@@ -63,7 +53,7 @@ plt.bar(
     height=[-user['span_added'] for user in per_progress],
     color=ESA.figutils.COLORS[1],
     label="Added",
-    width=1,
+    width=1.05,
     clip_on=False,
 )
 
@@ -87,5 +77,5 @@ plt.ylim(-1.8, 2.0)
 plt.gca().spines[["top", "right"]].set_visible(False)
 
 plt.tight_layout(pad=0.1)
-plt.savefig("generated_plots/overreliance.pdf")
+plt.savefig("PAPER_ESAAI/generated_plots/overreliance.pdf")
 plt.show()
