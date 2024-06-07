@@ -118,7 +118,7 @@ def plot_complex(to_average_users, scheme):
         [user["time"] for user in to_average_users],
         color="black",
     )
-    ax1.set_ylabel("Time")
+    ax1.set_ylabel("Time", labelpad=-2)
     ax1.set_xlabel(f"User ({scheme.replace('ESAAI', ESA.settings.METHODS['esaai']['name'])})")
     ax1.set_xticks(range(len(to_average_users)), [""]*len(to_average_users))
     ax1.spines[["top", "right"]].set_visible(False)
