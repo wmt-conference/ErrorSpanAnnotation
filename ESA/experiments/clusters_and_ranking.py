@@ -76,6 +76,23 @@ def plot_clusters(data, data_clusters, protocols, filename):
 
         # Plotting the scatter plots for each dataset
         df.plot.scatter(x=protocol, y="WMT-MQM", ax=axs[i], color='black')
+        # Add correlation to the plot to the bottom right
+        axs[i].text(0.95, 0.05, f"ρ={corr:.3f}", transform=axs[i].transAxes, ha='right', va='bottom')
+
+        if protocol in ["ESA-1", "ESAAI-1"]:
+            protocol2 = protocol.replace("1", "2")
+            df3 = pd.DataFrame(data[protocol2])
+            df3.set_index("system", inplace=True)
+            df = pd.merge(df1, df3, left_index=True, right_index=True)
+            corr = df.corr(method='spearman')["WMT-MQM"][protocol2]
+            df.plot.scatter(x=protocol2, y="WMT-MQM", ax=axs[i], color='blue')
+            axs[i].text(0.95, 0.15, f"ρ={corr:.3f}", transform=axs[i].transAxes, ha='right', va='bottom')
+        else:
+            # Plotting vertical lines for scheme clusters and horizontal for MQM
+            for cluster in data_clusters[protocol]:
+                axs[i].axvline(cluster, color=figutils.COLORS[0], linestyle="--")
+            for cluster in data_clusters["WMT-MQM"]:
+                axs[i].axhline(cluster, color=figutils.COLORS[2], linestyle="--")
 
         axs[i].set_xlabel(PROTOCOL_DEFINITIONS[protocol]['name'])
         if i == 0:
@@ -87,15 +104,6 @@ def plot_clusters(data, data_clusters, protocols, filename):
 
         # Ensuring x-axis only shows whole numbers
         axs[i].xaxis.set_major_locator(plt.MaxNLocator(integer=True, nbins=8))
-
-        # Plotting vertical lines for scheme clusters and horizontal for MQM
-        for cluster in data_clusters[protocol]:
-            axs[i].axvline(cluster, color=figutils.COLORS[0], linestyle="--")
-        for cluster in data_clusters["WMT-MQM"]:
-            axs[i].axhline(cluster, color=figutils.COLORS[2], linestyle="--")
-
-        # Add correlation to the plot to the bottom right
-        axs[i].text(0.95, 0.05, f"ρ={corr:.3f}", transform=axs[i].transAxes, ha='right', va='bottom')
 
         i += 1
 
