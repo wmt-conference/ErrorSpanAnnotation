@@ -1,5 +1,5 @@
 from ESA.annotation_loader import AnnotationLoader
-df = AnnotationLoader(refresh_cache=False).get_view()
+df = AnnotationLoader(refresh_cache=False).get_view(["ESAAI-1", "LLM"], only_overlap=False).dropna()
 import numpy as np
 import pandas as pd
 
