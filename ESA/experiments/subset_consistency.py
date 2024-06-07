@@ -1,41 +1,29 @@
-raise Exception("This code uses old loader, please refactor.")
-import json
+from ESA.annotation_loader import AnnotationLoader
+df = AnnotationLoader(refresh_cache=False).get_view(["LLM", "ESA-1", "ESAAI-1", "ESA-2", "ESAAI-2", "MQM-1"], only_overlap=False).dropna()
 import numpy as np
-import ESA.settings
-ESA.settings.PROJECT = "GEMBA"
-from ESA.merged_annotations import MergedAnnotations
 import collections
-
-df = MergedAnnotations().df
-
 import random
 
 def mqm_like_score(spans):
-	return 100-sum([{"critical": 25, "major": 5, "minor": 1, "undecided": 0}[x["severity"]] for x in spans])
+	return -sum([{"critical": 25, "major": 5, "minor": 1, "undecided": 0}[x["severity"]] for x in spans])
 
 system_scores = collections.defaultdict(lambda: {
 	k: {}
-	for k in ["esa_score", "gesa_score", "esa_mqm", "gesa_mqm", "gemba_mqm", "mqm_mqm"]
+	for k in ["esa_score", "esaai_score", "esa_mqm", "esaai_mqm", "gemba_mqm", "mqm_mqm"]
 })
 
 for _, row in df.iterrows():
-	if type(row["gemba_mqm_span_errors_gemba"]) != list:
-		continue
-	row["span_errors_esa"] = json.loads(row["span_errors_esa"])
-	row["span_errors_mqm"] = json.loads(row["span_errors_mqm"])
-	row["span_errors_gemba"] = json.loads(row["span_errors_gemba"])
-
-	system_scores[row.source]["esa_score"][row["system"]]= row["score_esa"]
-	system_scores[row.source]["gesa_score"][row["system"]]= row["score_gemba"]
-	system_scores[row.source]["esa_mqm"][row["system"]]= mqm_like_score(row["span_errors_esa"])
-	system_scores[row.source]["mqm_mqm"][row["system"]]= mqm_like_score(row["span_errors_mqm"])
-	system_scores[row.source]["gesa_mqm"][row["system"]]= mqm_like_score(row["span_errors_gemba"])
-	system_scores[row.source]["gemba_mqm"][row["system"]]= mqm_like_score(row["gemba_mqm_span_errors_gemba"])
+	system_scores[row.source]["esa_score"][row["systemID"]]= row["ESA-1_score"]
+	system_scores[row.source]["esaai_score"][row["systemID"]]= row["ESAAI-1_score"]
+	system_scores[row.source]["esa_mqm"][row["systemID"]]= row["ESA-1_score_mqm"]
+	system_scores[row.source]["mqm_mqm"][row["systemID"]]= row["MQM-1_score"]
+	system_scores[row.source]["esaai_mqm"][row["systemID"]]= row["ESAAI-1_score_mqm"]
+	system_scores[row.source]["gemba_mqm"][row["systemID"]]= mqm_like_score(row["LLM_error_spans"])
 
 
 system_scores = list(system_scores.values())
 	
-def get_sys_ranking(count=206, scoring="esa_score"):
+def get_sys_ranking(count=207, scoring="esa_score"):
 	scores = [x[scoring] for x in random.sample(system_scores, k=min(len(system_scores), count))]
 	# transpose
 	scores = {sys: [x[sys] for x in scores] for sys in scores[0].keys()}
@@ -71,16 +59,16 @@ def evaluate_scoring(scoring: str, color="black", linestyle="-"):
 			acc_local.append(rank_acc(rank_global, rank_local))
 		acc.append(np.average(acc_local))
 	
+	print(scoring)
 	plt.plot(
 		xticks,
 		acc,
 		label=(
 			scoring
 				.upper()
-				.replace("_", "-")
-				.replace("-SCORE", "")
-				.replace("-MQM", r"$_\mathrm{MQM}$")
-				.replace("GESA", r"ESA$^\mathrm{AI}$")
+				.replace("_SCORE", "")
+				.replace("_MQM", r"$_\mathrm{MQM}$")
+				.replace("ESAAI", r"ESA$^\mathrm{AI}$")
 		),
 		color=color,
 		linestyle=linestyle,
@@ -93,12 +81,12 @@ def evaluate_scoring(scoring: str, color="black", linestyle="-"):
 	)
 	tick_i+=1
 
+evaluate_scoring("esaai_mqm", color=figutils.COLORS[1], linestyle="-.")
+evaluate_scoring("gemba_mqm", color=figutils.COLORS[2], linestyle="-.")
+evaluate_scoring("esaai_score", color=figutils.COLORS[1])
 evaluate_scoring("esa_score", color=figutils.COLORS[0])
 evaluate_scoring("esa_mqm", color=figutils.COLORS[0], linestyle="-.")
-evaluate_scoring("gesa_score", color=figutils.COLORS[1])
-evaluate_scoring("gesa_mqm", color=figutils.COLORS[1], linestyle="-.")
 evaluate_scoring("mqm_mqm", linestyle="-.")
-evaluate_scoring("gemba_mqm", color=figutils.COLORS[2], linestyle="-.")
 
 plt.legend(handlelength=1.6, labelspacing=0.07, framealpha=0, loc=(0.4, 0))
 plt.xticks(list(range(10, 210, 50))+[206])
@@ -113,5 +101,5 @@ plt.ylabel("Rank\naccuracy", labelpad=-24)
 plt.gca().spines[['top', 'right']].set_visible(False)
 
 plt.tight_layout(pad=0)
-plt.savefig("generated_plots/subset_consistency.pdf")
+plt.savefig("PAPER_ESAAI/generated_plots/subset_consistency.pdf")
 plt.show()

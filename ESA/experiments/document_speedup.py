@@ -1,7 +1,6 @@
 from ESA.annotation_loader import AnnotationLoader
 df = AnnotationLoader(refresh_cache=False).get_view(["ESA-1", "ESAAI-1", "ESA-2", "ESAAI-2"], only_overlap=False).dropna()
 import collections
-import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import argparse
