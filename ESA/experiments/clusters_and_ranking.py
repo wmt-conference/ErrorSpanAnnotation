@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import ranksums
 from itertools import combinations
 from ESA.utils import PROTOCOL_DEFINITIONS
+from ESA.annotation_loader import AnnotationLoader
 
 
 def ClustersAndRanking(annotations_loader):
@@ -111,3 +112,7 @@ def plot_clusters(data, data_clusters, protocols, filename):
 #     print(f"Intra-annotator agreement against WMT-MQM:")
 #     print(df.corr(method='kendall', numeric_only=True)['wmt-mqm'])
 #     print("-"*50)
+
+
+if __name__ == '__main__':
+    ClustersAndRanking(AnnotationLoader(refresh_cache=False))
