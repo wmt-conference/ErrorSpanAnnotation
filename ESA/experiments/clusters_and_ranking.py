@@ -113,15 +113,5 @@ def plot_clusters(data, data_clusters, protocols, filename):
     plt.savefig(filename)
 
 
-
-# def calculate_inter_annotator_with_mqm(self):
-#     df = self.resources
-#     df = df.dropna()
-#     print("-"*50)
-#     print(f"Intra-annotator agreement against WMT-MQM:")
-#     print(df.corr(method='kendall', numeric_only=True)['wmt-mqm'])
-#     print("-"*50)
-
-
 if __name__ == '__main__':
     ClustersAndRanking(AnnotationLoader(refresh_cache=False))

@@ -3,7 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-
 def overlaps(error, error2):
     if "start" in error2:
         error2['start_i'] = error2['start']

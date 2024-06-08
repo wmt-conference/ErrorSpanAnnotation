@@ -18,6 +18,9 @@ def main(args):
 
 
 
+
+
+
     # df = annotations.get_view(only_overlap=False)
     # df2 = df[['systemID', 'WMT-MQM_error_spans', 'WMT-DASQM_score']].dropna()
     # df2 = df2[df2['systemID'].isin(['refA', 'GPT4-5shot'])]
@@ -38,8 +41,8 @@ def main(args):
     # errs = pd.DataFrame(errors, columns=['error', 'score'])
     # er = errs.groupby('error').agg(['mean', 'count']).reset_index()
 
-    #
-    # ipdb.set_trace()
+
+    ipdb.set_trace()
 
 
     # generate to papers
