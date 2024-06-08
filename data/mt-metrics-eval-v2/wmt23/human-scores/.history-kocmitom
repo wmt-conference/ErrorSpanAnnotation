@@ -1,3 +1,0 @@
-_T=20240415_11:52:48_215759	 less en-de.mqm.seg.score
-_T=20240415_11:52:52_215759	 less en-de.mqm.seg.score | cut -f1
-_T=20240415_11:52:58_215759	 less en-de.mqm.seg.score | cut -f1 | uniq
