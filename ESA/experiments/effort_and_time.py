@@ -4,7 +4,7 @@ import numpy as np
 import collections
 import matplotlib.pyplot as plt
 import ESA.figutils as figutils
-import ESA.settings
+import ESA.utils
 
 figutils.matplotlib_default()
 
@@ -119,7 +119,7 @@ def plot_complex(to_average_users, scheme):
         color="black",
     )
     ax1.set_ylabel("Time", labelpad=-2)
-    ax1.set_xlabel(f"User ({scheme.replace('ESAAI', ESA.settings.METHODS['esaai']['name'])})")
+    ax1.set_xlabel(f"User ({scheme.replace('ESAAI', ESA.utils.PROTOCOL_DEFINITIONS['ESAAI']['name'])})")
     ax1.set_xticks(range(len(to_average_users)), [""]*len(to_average_users))
     ax1.spines[["top", "right"]].set_visible(False)
     ax1.set_ylim(0, 100)

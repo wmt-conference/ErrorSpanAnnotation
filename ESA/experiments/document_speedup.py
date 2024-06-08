@@ -4,11 +4,11 @@ import collections
 import matplotlib.pyplot as plt
 import numpy as np
 import argparse
-import ESA.settings
+import ESA.utils
 import matplotlib.patches as patches
 
 args = argparse.ArgumentParser()
-args.add_argument("scheme", default="ESA")
+args.add_argument("scheme", default="ESA", choices=["ESA", "ESAAI", "LLM"])
 args = args.parse_args()
 
 plt.figure(figsize=(4, 1.5))
@@ -91,7 +91,7 @@ plt.plot(
 
 plt.ylim(10, 120)
 
-args.scheme = args.scheme.replace('GEMBA', ESA.settings.METHODS["esaai"]["name"])
+args.scheme = args.scheme.replace('LLM', ESA.utils.PROTOCOL_DEFINITIONS["ESAAI"]["name"])
 plt.title(f"{args.scheme}  ({slope:.2f}s per segment)")
 plt.ylabel("Segment time (s)", labelpad=-2)
 plt.xticks(
