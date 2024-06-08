@@ -46,7 +46,7 @@ PROTOCOL_DEFINITIONS = {
         "framework": "appraise",
         "appraise_scorefile": "240315rc5GEMBA.scores.csv",
         "appraise_batchefile": "batches_wmt23_en-de_gemba.json",
-        "name": "LLM (no humans)",
+        "name": "GEMBA (no humans)",
     },
     'MQM-IAA': {
         "framework": "appraise",
