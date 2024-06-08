@@ -47,7 +47,25 @@ PROTOCOL_DEFINITIONS = {
         "appraise_scorefile": "240315rc5GEMBA.scores.csv",
         "appraise_batchefile": "batches_wmt23_en-de_gemba.json",
         "name": "LLM (no humans)",
-    }
+    },
+    'MQM-IAA': {
+        "framework": "appraise",
+        "appraise_scorefile": "240521rc6MQM.scores.csv",
+        "appraise_batchefile": "batches_wmt23_en-de_mqm.json",
+        "name": "MQM$_IAA$",
+    },
+    'ESA-IAA': {
+        "framework": "appraise",
+        "appraise_scorefile": "240521rc6ESA.scores.csv",
+        "appraise_batchefile": "batches_wmt23_en-de_esa.json",
+        "name": "ESA$_IAA$",
+    },
+    'ESAAI-IAA': {
+        "framework": "appraise",
+        "appraise_scorefile": "240521rc6GEMBA.scores.csv",
+        "appraise_batchefile": "batches_wmt23_en-de_gemba.json",
+        "name": r"ESA$^\mathrm{AI}_IAA$",
+    },
 }
 
 
