@@ -71,8 +71,7 @@ def plot_clusters(data, data_clusters, protocols, filename):
 
         # merge the two dataframes
         df = pd.merge(df1, df2, left_index=True, right_index=True)
-        # calculate spearman correlation as we want to measure monotonic relationship
-        corr = df.corr(method='spearman')["WMT-MQM"][protocol]
+        corr = df.corr(method='kendall')["WMT-MQM"][protocol]
 
         # Plotting the scatter plots for each dataset
         df.plot.scatter(x=protocol, y="WMT-MQM", ax=axs[i], color='black')
@@ -84,9 +83,9 @@ def plot_clusters(data, data_clusters, protocols, filename):
             df3 = pd.DataFrame(data[protocol2])
             df3.set_index("system", inplace=True)
             df = pd.merge(df1, df3, left_index=True, right_index=True)
-            corr = df.corr(method='spearman')["WMT-MQM"][protocol2]
-            df.plot.scatter(x=protocol2, y="WMT-MQM", ax=axs[i], color='blue')
-            axs[i].text(0.95, 0.15, f"ρ={corr:.3f}", transform=axs[i].transAxes, ha='right', va='bottom')
+            corr = df.corr(method='kendall')["WMT-MQM"][protocol2]
+            df.plot.scatter(x=protocol2, y="WMT-MQM", ax=axs[i], color=figutils.COLORS[1])
+            axs[i].text(0.95, 0.15, f"ρ={corr:.3f}", transform=axs[i].transAxes, ha='right', va='bottom', color=figutils.COLORS[1])
         else:
             # Plotting vertical lines for scheme clusters and horizontal for MQM
             for cluster in data_clusters[protocol]:
@@ -94,7 +93,7 @@ def plot_clusters(data, data_clusters, protocols, filename):
             for cluster in data_clusters["WMT-MQM"]:
                 axs[i].axhline(cluster, color=figutils.COLORS[2], linestyle="--")
 
-        axs[i].set_xlabel(PROTOCOL_DEFINITIONS[protocol]['name'])
+        axs[i].set_xlabel(PROTOCOL_DEFINITIONS[protocol]['name'].replace("_1", "").replace("$$", ""))
         if i == 0:
             axs[i].set_ylabel(PROTOCOL_DEFINITIONS["WMT-MQM"]['name'], labelpad=-2)
         else:

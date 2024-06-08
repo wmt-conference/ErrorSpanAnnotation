@@ -3,6 +3,7 @@ cache_protocols*
 
 # added by zouharvi
 demo.ipynb
+archive/
 .history*
 *.xlsx
 .idea
