@@ -30,7 +30,7 @@ per_progress = [
     for x_v in per_progress.values()
 ]
 
-plt.figure(figsize=(4, 2))
+plt.figure(figsize=(4, 1.5))
 
 plt.bar(
     range(len(per_progress)),

@@ -30,7 +30,7 @@ for _, row in df.iterrows():
     system_scores["esaai"][row.systemID].append(row["ESAAI-1_score"])
     if len(row["LLM_error_spans"]) == 0:
         substitute_100_count += 1
-        system_scores["substitute_100"][row.systemID].append(95) 
+        system_scores["substitute_100"][row.systemID].append(100)
         scores_for_no_gemba_errors.append(row["ESAAI-1_score"])
     else:
         system_scores["substitute_100"][row.systemID].append(row["ESAAI-1_score"])
@@ -70,7 +70,7 @@ system_colors_filter = ["black" if sys not in systems_mismatch_filter else ESA.f
 print(f"average score when 0 gemba errors: {np.average(scores_for_no_gemba_errors):.1f}")
 print(f"average score when 0 esaai errors: {np.average(scores_for_no_esaai_errors):.1f}")
 
-plt.figure(figsize=(2, 1.5))
+plt.figure(figsize=(2, 1.3))
 plt.scatter(
     system_scores_sub,
     system_scores_base,
@@ -78,15 +78,15 @@ plt.scatter(
     s=40,
     linewidth=0,
 )
-plt.text(79, 58, f"Mismatched\npairs={mismatch_count_sub}", ha="center", fontsize=9)
+plt.text(79, 58, f"{mismatch_count_sub} pair\nmismatched", ha="center", fontsize=9, color=ESA.figutils.COLORS[0])
 plt.gca().spines[['top', 'right']].set_visible(False)
 plt.xlabel("Sys. scores w/ substitution" + " " * 5, size=9)
-plt.ylabel("Original sys. score" + " " * 5, size=9)
+plt.ylabel("Original sys. score" + " " * 7, size=9)
 plt.tight_layout(pad=0.1)
 plt.savefig("PAPER_ESAAI/generated_plots/filtering_with_gemba_sub.pdf")
 plt.show()
 
-plt.figure(figsize=(2, 1.5))
+plt.figure(figsize=(2, 1.3))
 plt.scatter(
     system_scores_filter,
     system_scores_base,
@@ -94,10 +94,10 @@ plt.scatter(
     s=40,
     linewidth=0,
 )
-plt.text(75, 58, f"Mismatched\npairs={mismatch_count_easy}", ha="center", fontsize=9)
+plt.text(75, 58, f"{mismatch_count_easy} pair\nmismatched", ha="center", fontsize=9, color=ESA.figutils.COLORS[0])
 plt.gca().spines[['top', 'right']].set_visible(False)
 plt.xlabel("Sys. scores w/ filtering", size=9)
-plt.ylabel("Original sys. score" + " " * 5, size=9)
+plt.ylabel("Original sys. score" + " " * 7, size=9)
 plt.tight_layout(pad=0.1)
 plt.savefig("PAPER_ESAAI/generated_plots/filtering_with_gemba_easy.pdf")
 plt.show()
