@@ -112,8 +112,6 @@ plt.savefig("PAPER_ESA/generated_plots/overview_segment_count_esa.pdf")
 plt.show()
 
 
-exit()
-
 
 # second plot
 fig, ax = plt.subplots(3, 1, figsize=(4, 2.2))
@@ -133,27 +131,27 @@ def half_violin(v1, color, alpha=0.7):
         )
 
 
-half_violin(ax[0].violinplot(
+ax[0].hist(
     statistics_collector["esa"]["score"],
-    vert=False,
-    showextrema=False,
-), color=figutils.COLORS[0])
+    color=figutils.COLORS[0],
+    bins=20,
+)
 ax[0].set_ylabel("ESA", rotation=0)
 ax[0].yaxis.set_label_coords(0.096, 0.3)
 
-half_violin(ax[1].violinplot(
+ax[1].hist(
     statistics_collector["esa"]["score_mqm"],
-    vert=False,
-    showextrema=False,
-), color=figutils.COLORS[0], alpha=0.4)
+    color=figutils.COLORS[0], alpha=0.4,
+    bins=20,
+)
 ax[1].set_ylabel(r"ESA$_\mathrm{MQM}$", rotation=0)
 ax[1].yaxis.set_label_coords(0.13, 0.3)
 
-half_violin(ax[2].violinplot(
+ax[2].hist(
     statistics_collector["mqm"]["score"],
-    vert=False,
-    showextrema=False,
-), color=figutils.COLORS[1])
+    color=figutils.COLORS[1],
+    bins=20,
+)
 ax[2].set_ylabel("MQM", rotation=0)
 ax[2].yaxis.set_label_coords(0.1, 0.3)
 
@@ -165,7 +163,7 @@ for ax_i, ax in enumerate(ax):
         ax.set_xlim(-25, 0)
     else:
         ax.set_xlim(0, 100)
-    ax.set_ylim(1, None)
+    # ax.set_ylim(1, None)
     ax.spines[['top', 'right', 'left']].set_visible(False)
 
 
