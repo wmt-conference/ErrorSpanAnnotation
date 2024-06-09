@@ -4,6 +4,7 @@ import re
 import collections
 import numpy as np
 import os
+import ipdb
 
 df_bad = df[df["ESAAI-1_is_bad"] == "BAD"]
 df_tgt = df[df["ESAAI-1_is_bad"] == "TGT"]
@@ -100,7 +101,7 @@ for hypothesisID, doc_bad in df_bad.groupby("hypothesisID"):
 
 
 data_agg = {
-	k:np.average(v) for k, v in data_agg.items()
+	k: np.average(v) for k, v in data_agg.items()
 }
 
 prev_k = None

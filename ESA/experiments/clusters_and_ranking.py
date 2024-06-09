@@ -2,6 +2,7 @@ import os
 import ipdb
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
 from scipy.stats import ranksums
 from itertools import combinations
 from ESA.utils import PROTOCOL_DEFINITIONS
@@ -73,10 +74,26 @@ def plot_clusters(data, data_clusters, protocols, filename):
         df = pd.merge(df1, df2, left_index=True, right_index=True)
         corr = df.corr(method='spearman')["WMT-MQM"][protocol]
 
+        # calculate pairwise accuracy
+        systems = df.index
+        valid = 0
+        total = 0
+        for system1, system2 in combinations(systems, 2):
+            gold_diff = df.at[system1, "WMT-MQM"] - df.at[system2, "WMT-MQM"]
+            system_diff = df.at[system1, protocol] - df.at[system2, protocol]
+            if gold_diff * system_diff > 0:
+                valid += 1
+            total += 1
+
+        pairwise_accuracy = 100*valid / total
+
         # Plotting the scatter plots for each dataset
         df.plot.scatter(x=protocol, y="WMT-MQM", ax=axs[i], color='black')
-        # Add correlation to the plot to the bottom right
-        axs[i].text(0.95, 0.05, f"ρ={corr:.3f}", transform=axs[i].transAxes, ha='right', va='bottom')
+
+        if "ESAAI-1" not in protocols:
+            best_system = df["WMT-MQM"].idxmax()
+            axs[i].scatter(df.at[best_system, protocol], df.at[best_system, "WMT-MQM"], color='orange', zorder=-1, s=70)
+
 
         # zouharvi: plotting only the first campaign for now
         if False and protocol in {"ESA-1", "ESAAI-1"}:
@@ -94,6 +111,19 @@ def plot_clusters(data, data_clusters, protocols, filename):
                 axs[i].axvline(cluster, color=figutils.COLORS[0], linestyle="--")
             for cluster in data_clusters["WMT-MQM"]:
                 axs[i].axhline(cluster, color=figutils.COLORS[2], linestyle="--")
+
+        axs[i].add_patch(
+                Rectangle(
+                    (0.6, 0.05), 0.38, 0.17,
+                    facecolor='#ddd',
+                    fill=True,
+                    linewidth=0,
+                    transform=axs[i].transAxes,
+                    zorder=10
+                ))
+
+        # Add correlation to the plot to the bottom right
+        axs[i].text(0.95, 0.05, f"ρ={corr:.3f}\nAcc={pairwise_accuracy:.1f}%", transform=axs[i].transAxes, ha='right', va='bottom', zorder=15)
 
         axs[i].set_xlabel(PROTOCOL_DEFINITIONS[protocol]['name'].replace("_1", "").replace("$$", ""))
         if i == 0:
