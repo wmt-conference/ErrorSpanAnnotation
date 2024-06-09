@@ -216,7 +216,7 @@ def plot_confusion_plot(df, protocols):
             scores[(iaa, protocolname)]["Minor E. recall"] = f"{recall_minor:.1f}\%"
             scores[(iaa, protocolname)]["Major E. recall"] = f"{recall_major:.1f}\%"
 
-            if iaa == "inter":
+            if iaa == "Inter AA":
                 continue
 
             subdf.plot.scatter(x=f'score', y=f'score_iaa', ax=axs[i], color="black", s=1)
