@@ -7,6 +7,7 @@ from ESA.annotation_loader import AnnotationLoader
 from ESA.experiments.clusters_and_ranking import ClustersAndRanking
 from ESA.experiments.intra_annotator_agreement import IntraAnnotatorAgreement
 from ESA.experiments.overview_segment_count_esa import overview_segment_count_esa
+from ESA.experiments.esa_corr_others import esa_corr_others
 from ESA.utils import PROTOCOL_DEFINITIONS
 
 
@@ -63,6 +64,7 @@ def main(args):
     ClustersAndRanking(annotations)
     IntraAnnotatorAgreement(annotations)
     overview_segment_count_esa(annotations)
+    esa_corr_others(annotations)
 
 
 if __name__ == '__main__':

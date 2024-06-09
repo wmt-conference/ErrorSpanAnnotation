@@ -16,19 +16,11 @@ PROTOCOL_DEFINITIONS = {
         "appraise_batchefile": "batches_wmt23_en-de_esa.json",
         "name": "ESA$_1$",
     },
-    'ESA': {
-        "framework": "appraise",
-        "name": "ESA",
-    },
     'ESAAI-1': {
         "framework": "appraise",
         "appraise_scorefile": "240315rc5GEMBA.scores.csv",
         "appraise_batchefile": "batches_wmt23_en-de_gemba.json",
         "name": r"ESA$^\mathrm{AI}_1$",
-    },
-    'ESAAI': {
-        "framework": "appraise",
-        "name": r"ESA$^\mathrm{AI}$",
     },
     'ESA-2': {
         "framework": "appraise",

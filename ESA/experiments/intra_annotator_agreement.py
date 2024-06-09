@@ -1,5 +1,6 @@
 import ipdb
 import pandas as pd
+import scipy.stats
 import matplotlib.pyplot as plt
 
 
@@ -157,9 +158,9 @@ def plot_confusion_plot(df, protocols):
         axs[i].set_ylabel("")
         # print the protocol name into the plot
         axs[i].set_title(protocol)
-        pearson = subdf.corr().iloc[0, 1]
+        kendall = scipy.stats.kendalltau(subdf[f'{protocol}-1_score'], subdf[f'{protocol}-IAA_score'], variant="c")[0]
         # print(f"{protocol} pearson: {pearson:.3f} on {len(subdf)} samples")
-        scores[protocol]["pearson"] = pearson
+        scores[protocol]["kendall"] = kendall
 
         # Next calculate how frequently does the annotator agree if there is error or there is none
         subdf = df[[f'{protocol}-1_error_spans', f'{protocol}-IAA_error_spans']].dropna()
@@ -174,7 +175,7 @@ def plot_confusion_plot(df, protocols):
         # print into the plot IAA via pearson to the bottom right corner: Intra-AA={pearson:.3f}\nError recall={recall:.1f}
         # axs[i].text(0.05, 0.05, f"Intra-AA={pearson:.3f}\nError recall={recall:.1f}%", transform=axs[i].transAxes, ha='left', va='bottom')
         # but make it bold
-        axs[i].text(0.05, 0.05, f"Intra-AA={pearson:.3f}\nError recall={recall:.1f}%", transform=axs[i].transAxes, ha='left', va='bottom', weight='bold')
+        axs[i].text(0.05, 0.05, f"Intra-AA={kendall:.3f}\nError recall={recall:.1f}%", transform=axs[i].transAxes, ha='left', va='bottom', weight='bold')
 
     # save the plot
     if "ESAAI" in protocols:
