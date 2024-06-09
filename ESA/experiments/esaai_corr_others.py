@@ -15,8 +15,8 @@ for method in ["ESA-1_score", "ESAAI-1_score", "MQM-1_score", "WMT-MQM_score", "
 
 methods = list(method_scores.keys())
 for method1_i, method1 in enumerate(methods):
-    for _, method2 in enumerate(methods[method1_i+1:]):
-        print(
+	for _, method2 in enumerate(methods[method1_i+1:]):
+		print(
 			f"{method1:>20}-{method2:<20}:",
-			f"{scipy.stats.kendalltau(method_scores[method1], method_scores[method2])[0]:.3f}"
-        )
+			f"{scipy.stats.kendalltau(method_scores[method1], method_scores[method2], variant='c')[0]:.3f}"
+		)

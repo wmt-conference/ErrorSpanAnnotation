@@ -87,7 +87,8 @@ def plot_clusters(data, data_clusters, protocols, filename):
             corr = df.corr(method='spearman')["WMT-MQM"][protocol2]
             df.plot.scatter(x=protocol2, y="WMT-MQM", ax=axs[i], color=figutils.COLORS[1])
             axs[i].text(0.95, 0.15, f"ρ={corr:.3f}", transform=axs[i].transAxes, ha='right', va='bottom', color=figutils.COLORS[1])
-        elif protocol in {"LLM"}:
+        # kocmi: let's keep clusters for ESA
+        elif "ESAAI-1" not in protocol:
             # Plotting vertical lines for scheme clusters and horizontal for MQM
             for cluster in data_clusters[protocol]:
                 axs[i].axvline(cluster, color=figutils.COLORS[0], linestyle="--")

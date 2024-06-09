@@ -91,8 +91,9 @@ def apply_mqm_scoring(span_errors):
             score += -0.1
         else:
             score += MQM_WEIGHTS[error["severity"]]
-    if score < -25:
-        score = -25
+    # REMOVED AS PER GOOGLE'S PAPER
+    # if score < -25:
+    #     score = -25
     return float(score)
 
 

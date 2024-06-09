@@ -335,7 +335,7 @@ AIRC	0.0
 AIRC	0.0
 AIRC	0.0
 AIRC	None
-AIRC	-25.0
+AIRC	-30.0
 AIRC	None
 AIRC	None
 AIRC	None
@@ -507,7 +507,7 @@ AIRC	None
 AIRC	None
 AIRC	None
 AIRC	None
-AIRC	-25.0
+AIRC	-33.0
 AIRC	-21.0
 AIRC	-1.0
 AIRC	0.0
@@ -1752,7 +1752,7 @@ NLLB_Greedy	0.0
 NLLB_Greedy	None
 NLLB_Greedy	None
 NLLB_Greedy	None
-NLLB_Greedy	-25.0
+NLLB_Greedy	-36.0
 NLLB_Greedy	-2.0
 NLLB_Greedy	-1.0
 NLLB_Greedy	None
@@ -2049,7 +2049,7 @@ NLLB_Greedy	-1.0
 NLLB_Greedy	-5.0
 NLLB_Greedy	-6.0
 NLLB_Greedy	0.0
-NLLB_Greedy	-25.0
+NLLB_Greedy	-29.1
 NLLB_Greedy	None
 NLLB_Greedy	None
 NLLB_Greedy	None
@@ -4407,7 +4407,7 @@ ONLINE-G	None
 ONLINE-G	None
 ONLINE-G	None
 ONLINE-G	0.0
-ONLINE-G	-25.0
+ONLINE-G	-26.0
 ONLINE-G	-1.0
 ONLINE-G	-6.1
 ONLINE-G	None
