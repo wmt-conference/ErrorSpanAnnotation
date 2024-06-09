@@ -9,9 +9,6 @@ df_bad = df[df["ESAAI-1_is_bad"] == "BAD"]
 df_tgt = df[df["ESAAI-1_is_bad"] == "TGT"]
 data_agg = collections.defaultdict(list)
 
-def mqm_like_score(spans):
-	return 100-sum([{"critical": 25, "major": 5, "minor": 1, "undecided": 0}[x["severity"]] for x in spans])
-
 def get_perturbation_index(hyp_bad, hyp_tgt):
 	start_i = len(os.path.commonprefix([hyp_bad, hyp_tgt]))
 	end_len = len(os.path.commonprefix([hyp_bad[::-1], hyp_tgt[::-1]]))
@@ -95,10 +92,10 @@ for hypothesisID, doc_bad in df_bad.groupby("hypothesisID"):
 
 	data_agg[("bad", "mqm_spans")].append(len(line_bad["MQM-1_error_spans"]))
 	data_agg[("tgt", "mqm_spans")].append(len(line_tgt["MQM-1_error_spans"]))
-	data_agg[("tgt", "mqm_score")].append(mqm_like_score(line_tgt["MQM-1_error_spans"]))
-	data_agg[("bad", "mqm_score")].append(mqm_like_score(line_bad["MQM-1_error_spans"]))
+	data_agg[("tgt", "mqm_score")].append(line_tgt["MQM-1_score"])
+	data_agg[("bad", "mqm_score")].append(line_bad["MQM-1_score"])
 	data_agg[("OK", "mqm_spans")].append(len(line_bad["MQM-1_error_spans"])>len(line_tgt["MQM-1_error_spans"]))
-	data_agg[("OK", "mqm_score")].append(mqm_like_score(line_bad["MQM-1_error_spans"])<mqm_like_score(line_tgt["MQM-1_error_spans"]))
+	data_agg[("OK", "mqm_score")].append(line_bad["MQM-1_score"]<line_tgt["MQM-1_score"])
 	data_agg[("OK", "mqm_mark")].append(did_mark_perturbation(line_bad, line_tgt, "MQM-1"))
 
 
