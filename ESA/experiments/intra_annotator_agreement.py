@@ -2,6 +2,7 @@ import ipdb
 import pandas as pd
 import scipy.stats
 import matplotlib.pyplot as plt
+import ESA.figutils
 
 
 def overlaps(error, error2):
@@ -144,7 +145,7 @@ def mqm_categories(df, protocol1, protocol2):
 def plot_confusion_plot(df, protocols):
     columns = len(protocols)
 
-    fig, axs = plt.subplots(1, columns, figsize=(2.7 * columns, 2.2 * 1))
+    fig, axs = plt.subplots(1, columns, figsize=(2.3 * columns, 2.2 * 1))
     axs = axs.flatten()
     scores = {}
     for i, protocol in enumerate(protocols):
@@ -152,7 +153,8 @@ def plot_confusion_plot(df, protocols):
 
         subdf = df[[f'{protocol}-1_score', f'{protocol}-IAA_score']].dropna()
         # plot subdf into x-y plot, make the points smaller
-        subdf.plot.scatter(x=f'{protocol}-1_score', y=f'{protocol}-IAA_score', ax=axs[i], color='darkblue', s=1)
+        # zouharvi: as Tufte said, don't use colors unless they mean something
+        subdf.plot.scatter(x=f'{protocol}-1_score', y=f'{protocol}-IAA_score', ax=axs[i], color="black", s=1)
         # do not show the axis title
         axs[i].set_xlabel("")
         axs[i].set_ylabel("")
@@ -177,6 +179,8 @@ def plot_confusion_plot(df, protocols):
         # but make it bold
         axs[i].text(0.05, 0.05, f"Intra-AA={kendall:.3f}\nError recall={recall:.1f}%", transform=axs[i].transAxes, ha='left', va='bottom', weight='bold')
 
+    plt.tight_layout(pad=0.1)
+
     # save the plot
     if "ESAAI" in protocols:
         plt.savefig("PAPER_ESAAI/generated_plots/intra_annotator_agreement.pdf")
@@ -186,6 +190,7 @@ def plot_confusion_plot(df, protocols):
 
 
 def IntraAnnotatorAgreement(annotations):
+    ESA.figutils.matplotlib_default()
     df = annotations.get_view(only_overlap=True).dropna()
 
     plot_confusion_plot(df, ["MQM", "ESA"])
@@ -199,3 +204,6 @@ def IntraAnnotatorAgreement(annotations):
     #
     # df = pd.DataFrame([a, b, c, d], index=["MQM-1 vs MQM-IAA", "MQM-IAA vs MQM-1", "MQM-1 vs WMT-MQM", "MQM-IAA vs WMT-MQM"])
 
+if __name__ == "__main__":
+    from ESA.annotation_loader import AnnotationLoader
+    IntraAnnotatorAgreement(AnnotationLoader(refresh_cache=False))
