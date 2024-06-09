@@ -118,7 +118,7 @@ def overview_segment_count_esa(annotations_loader):
     plt.ylabel("Frequency" + " "*5, labelpad=-10)
     plt.tight_layout(pad=0)
     plt.savefig("PAPER_ESA/generated_plots/overview_segment_count_esa.pdf")
-    # plt.show()
+    plt.show()
 
     # second plot
     fig, ax = plt.subplots(4, 1, figsize=(4, 3))
@@ -145,7 +145,7 @@ def overview_segment_count_esa(annotations_loader):
     ax[0].yaxis.set_label_coords(0.096, 0.3)
 
     ax[1].hist(
-        statistics_collector["ESA-1"]["score_mqm"],
+        [x for x in statistics_collector["ESA-1"]["score_mqm"] if x >= -15],
         color=figutils.COLORS[0], alpha=0.4,
         bins=40,
     )
@@ -153,7 +153,7 @@ def overview_segment_count_esa(annotations_loader):
     ax[1].yaxis.set_label_coords(0.13, 0.3)
 
     ax[2].hist(
-        statistics_collector["MQM-1"]["score_mqm"],
+        [x for x in statistics_collector["MQM-1"]["score_mqm"] if x >= -15],
         color=figutils.COLORS[1],
         bins=40,
     )
@@ -161,22 +161,26 @@ def overview_segment_count_esa(annotations_loader):
     ax[2].yaxis.set_label_coords(0.1, 0.3)
 
     ax[3].hist(
-        statistics_collector["WMT-MQM"]["score_mqm"],
+        [x for x in statistics_collector["WMT-MQM"]["score_mqm"] if x >= -15],
         color=figutils.COLORS[1], alpha=0.4,
         bins=40,
     )
-    ax[3].set_ylabel("MQM$^{WMT}$", rotation=0)
-    ax[3].yaxis.set_label_coords(0.1, 0.3)
+    ax[3].set_ylabel("MQM$^\mathrm{WMT}$", rotation=0)
+    ax[3].yaxis.set_label_coords(0.14, 0.3)
 
-    ax[2].set_xlabel("Score")
+    ax[3].set_xlabel("Score")
     for ax_i, ax in enumerate(ax):
         ax.set_yticks([])
-        # ax.set_ylim(1, None)
+        if ax_i == 0:
+            ax.set_xlim(0, 100)
+        else:
+            ax.set_xlim(-15, 0)
         ax.spines[['top', 'right', 'left']].set_visible(False)
 
     plt.tight_layout(pad=0)
+    plt.subplots_adjust(hspace=0.5)
     plt.savefig("PAPER_ESA/generated_plots/score_distribution.pdf")
-    # plt.show()
+    plt.show()
 
 
 if __name__ == '__main__':
