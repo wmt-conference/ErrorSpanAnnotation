@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import ESA.figutils
+import ipdb
 from ESA.utils import PROTOCOL_DEFINITIONS
 
 
@@ -201,7 +202,7 @@ def plot_confusion_plot(df, protocols):
                 transform=axs[i].transAxes,
             ))
 
-        axs[i].text(0.05, 0.05, f"Kendall={kendall:.3f}", transform=axs[i].transAxes, ha='left', va='bottom', weight='bold')
+        axs[i].text(0.05, 0.05, f"Kendall={kendall:.3f}\nPearson={pearson:.3f}", transform=axs[i].transAxes, ha='left', va='bottom', weight='bold')
 
     plt.tight_layout(pad=0.1)
     df = pd.DataFrame(scores)
@@ -213,7 +214,7 @@ def plot_confusion_plot(df, protocols):
     else:
         plt.savefig("PAPER_ESA/generated_plots/intra_annotator_agreement.pdf")
         df.to_latex("PAPER_ESA/generated_plots/intra_annotator_agreement.tex", escape=False)
-
+    plt.show()
 
 
 def IntraAnnotatorAgreement(annotations):
