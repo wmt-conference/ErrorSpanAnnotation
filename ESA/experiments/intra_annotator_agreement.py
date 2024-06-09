@@ -1,7 +1,6 @@
-import ipdb
-import pandas as pd
 import scipy.stats
 import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
 import ESA.figutils
 
 
@@ -155,7 +154,8 @@ def plot_confusion_plot(df, protocols):
         # plot subdf into x-y plot, make the points smaller
         # zouharvi: as Tufte said, don't use colors unless they mean something
         # kocmi: the graph is badly readable, let's use colors
-        subdf.plot.scatter(x=f'{protocol}-1_score', y=f'{protocol}-IAA_score', ax=axs[i], color="darkblue", s=1)
+        # zouharvi: solved in a different way
+        subdf.plot.scatter(x=f'{protocol}-1_score', y=f'{protocol}-IAA_score', ax=axs[i], color="black", s=1)
         # do not show the axis title
         axs[i].set_xlabel("")
         axs[i].set_ylabel("")
@@ -188,7 +188,16 @@ def plot_confusion_plot(df, protocols):
 
         # print into the plot IAA via pearson to the bottom right corner: Intra-AA={pearson:.3f}\nError recall={recall:.1f}
         # axs[i].text(0.05, 0.05, f"Intra-AA={pearson:.3f}\nError recall={recall:.1f}%", transform=axs[i].transAxes, ha='left', va='bottom')
-        # but make it bold
+
+        axs[i].add_patch(
+            Rectangle(
+                (0.04, 0.05), 0.85, 0.2,
+                facecolor = '#ccca',
+                fill=True,
+                linewidth=0,
+                transform=axs[i].transAxes,
+            ))
+
         axs[i].text(0.05, 0.05, f"Intra-AA={kendall:.3f}\nError recall={recall:.1f}%", transform=axs[i].transAxes, ha='left', va='bottom', weight='bold')
 
     plt.tight_layout(pad=0.1)
@@ -199,6 +208,8 @@ def plot_confusion_plot(df, protocols):
         plt.savefig("PAPER_ESAAI/generated_plots/intra_annotator_agreement.pdf")
     else:
         plt.savefig("PAPER_ESA/generated_plots/intra_annotator_agreement.pdf")
+    plt.show()
+
 
 
 

@@ -36,11 +36,11 @@ PROTOCOL_DEFINITIONS = {
     },
     'WMT-MQM': {
         "framework": "wmt",
-        "name": "MQM$^\mathrm{WMT}$",
+        "name": r"MQM$^\mathrm{WMT}$",
     },
     'WMT-DASQM': {
         "framework": "wmt",
-        "name": "DA+SQM$^\mathrm{WMT}$",
+        "name": r"DA+SQM$^\mathrm{WMT}$",
     },
     'LLM': {
         "framework": "appraise",
