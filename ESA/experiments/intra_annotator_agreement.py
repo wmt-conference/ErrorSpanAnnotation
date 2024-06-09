@@ -188,22 +188,20 @@ def plot_confusion_plot(df, protocols):
         protocolname = protocol
         scores[protocolname]["Kendall's Tau-c"] = f"{kendall:.3f}"
         scores[protocolname]["Pearson's ρ"] = f"{pearson:.3f}"
-        scores[protocolname]["Error recall"] = f"{recall:.1f}"
-        scores[protocolname]["Minor E. recall"] = f"{recallmin:.1f}"
-        scores[protocolname]["Major E. recall"] = f"{recallmaj:.1f}"
-
-        # print into the plot IAA via pearson to the bottom right corner: Intra-AA={pearson:.3f}\nError recall={recall:.1f}
+        scores[protocolname]["Error recall"] = f"{recall:.1f}\%"
+        scores[protocolname]["Minor E. recall"] = f"{recallmin:.1f}\%"
+        scores[protocolname]["Major E. recall"] = f"{recallmaj:.1f}\%"
 
         axs[i].add_patch(
             Rectangle(
                 (0.04, 0.05), 0.85, 0.2,
-                facecolor = '#ccca',
+                facecolor='#ccca',
                 fill=True,
                 linewidth=0,
                 transform=axs[i].transAxes,
             ))
 
-        axs[i].text(0.05, 0.05, f"Intra-AA={kendall:.3f}\nError recall={recall:.1f}%", transform=axs[i].transAxes, ha='left', va='bottom', weight='bold')
+        axs[i].text(0.05, 0.05, f"Kendall={kendall:.3f}", transform=axs[i].transAxes, ha='left', va='bottom', weight='bold')
 
     plt.tight_layout(pad=0.1)
     df = pd.DataFrame(scores)
@@ -211,7 +209,7 @@ def plot_confusion_plot(df, protocols):
     # save the plot
     if "ESAAI" in protocols:
         plt.savefig("PAPER_ESAAI/generated_plots/intra_annotator_agreement.pdf")
-        df.to_latex("PAPER_ESA/generated_plots/intra_annotator_agreement.tex", escape=False)
+        df.to_latex("PAPER_ESAAI/generated_plots/intra_annotator_agreement.tex", escape=False)
     else:
         plt.savefig("PAPER_ESA/generated_plots/intra_annotator_agreement.pdf")
         df.to_latex("PAPER_ESA/generated_plots/intra_annotator_agreement.tex", escape=False)
@@ -222,8 +220,8 @@ def IntraAnnotatorAgreement(annotations):
     ESA.figutils.matplotlib_default()
     df = annotations.get_view(only_overlap=True).dropna()
 
-    plot_confusion_plot(df, ["MQM", "ESA"])
-    plot_confusion_plot(df, ["MQM", "ESA", "ESAAI"])
+    plot_confusion_plot(df, ["ESA", "MQM"])
+    plot_confusion_plot(df, ["ESA", "ESAAI", "MQM"])
 
 
     # a = mqm_categories(df, "MQM-1", "MQM-IAA")
