@@ -1,7 +1,9 @@
 import scipy.stats
+import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import ESA.figutils
+from ESA.utils import PROTOCOL_DEFINITIONS
 
 
 def overlaps(error, error2):
@@ -162,8 +164,8 @@ def plot_confusion_plot(df, protocols):
         # print the protocol name into the plot
         axs[i].set_title(protocol)
         kendall = scipy.stats.kendalltau(subdf[f'{protocol}-1_score'], subdf[f'{protocol}-IAA_score'], variant="c")[0]
+        pearson = scipy.stats.pearsonr(subdf[f'{protocol}-1_score'], subdf[f'{protocol}-IAA_score'])[0]
         # print(f"{protocol} pearson: {pearson:.3f} on {len(subdf)} samples")
-        scores[protocol]["kendall"] = kendall
 
         # Next calculate how frequently does the annotator agree if there is error or there is none
         subdf = df[[f'{protocol}-1_error_spans', f'{protocol}-IAA_error_spans']].dropna()
@@ -182,12 +184,15 @@ def plot_confusion_plot(df, protocols):
         recall = 100*agree/len(subdf)
         recallmin = 100*agreemin/len(subdf)
         recallmaj = 100*agreemaj/len(subdf)
-        scores[protocol]["error_agreement"] = recall
-        scores[protocol]["minor_agreement"] = recallmin
-        scores[protocol]["major_agreement"] = recallmaj
+
+        protocolname = protocol
+        scores[protocolname]["Kendall's Tau-c"] = f"{kendall:.3f}"
+        scores[protocolname]["Pearson's ρ"] = f"{pearson:.3f}"
+        scores[protocolname]["Error recall"] = f"{recall:.1f}"
+        scores[protocolname]["Minor E. recall"] = f"{recallmin:.1f}"
+        scores[protocolname]["Major E. recall"] = f"{recallmaj:.1f}"
 
         # print into the plot IAA via pearson to the bottom right corner: Intra-AA={pearson:.3f}\nError recall={recall:.1f}
-        # axs[i].text(0.05, 0.05, f"Intra-AA={pearson:.3f}\nError recall={recall:.1f}%", transform=axs[i].transAxes, ha='left', va='bottom')
 
         axs[i].add_patch(
             Rectangle(
@@ -201,15 +206,15 @@ def plot_confusion_plot(df, protocols):
         axs[i].text(0.05, 0.05, f"Intra-AA={kendall:.3f}\nError recall={recall:.1f}%", transform=axs[i].transAxes, ha='left', va='bottom', weight='bold')
 
     plt.tight_layout(pad=0.1)
-    print(scores)
+    df = pd.DataFrame(scores)
 
     # save the plot
     if "ESAAI" in protocols:
         plt.savefig("PAPER_ESAAI/generated_plots/intra_annotator_agreement.pdf")
+        df.to_latex("PAPER_ESA/generated_plots/intra_annotator_agreement.tex", escape=False)
     else:
         plt.savefig("PAPER_ESA/generated_plots/intra_annotator_agreement.pdf")
-    plt.show()
-
+        df.to_latex("PAPER_ESA/generated_plots/intra_annotator_agreement.tex", escape=False)
 
 
 
