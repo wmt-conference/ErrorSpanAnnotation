@@ -154,7 +154,8 @@ def plot_confusion_plot(df, protocols):
         subdf = df[[f'{protocol}-1_score', f'{protocol}-IAA_score']].dropna()
         # plot subdf into x-y plot, make the points smaller
         # zouharvi: as Tufte said, don't use colors unless they mean something
-        subdf.plot.scatter(x=f'{protocol}-1_score', y=f'{protocol}-IAA_score', ax=axs[i], color="black", s=1)
+        # kocmi: the graph is badly readable, let's use colors
+        subdf.plot.scatter(x=f'{protocol}-1_score', y=f'{protocol}-IAA_score', ax=axs[i], color="blue", s=1)
         # do not show the axis title
         axs[i].set_xlabel("")
         axs[i].set_ylabel("")
@@ -182,6 +183,8 @@ def plot_confusion_plot(df, protocols):
         recallmin = 100*agreemin/len(subdf)
         recallmaj = 100*agreemaj/len(subdf)
         scores[protocol]["error_agreement"] = recall
+        scores[protocol]["minor_agreement"] = recallmin
+        scores[protocol]["major_agreement"] = recallmaj
 
         # print into the plot IAA via pearson to the bottom right corner: Intra-AA={pearson:.3f}\nError recall={recall:.1f}
         # axs[i].text(0.05, 0.05, f"Intra-AA={pearson:.3f}\nError recall={recall:.1f}%", transform=axs[i].transAxes, ha='left', va='bottom')
@@ -189,6 +192,7 @@ def plot_confusion_plot(df, protocols):
         axs[i].text(0.05, 0.05, f"Intra-AA={kendall:.3f}\nError recall={recall:.1f}%", transform=axs[i].transAxes, ha='left', va='bottom', weight='bold')
 
     plt.tight_layout(pad=0.1)
+    print(scores)
 
     # save the plot
     if "ESAAI" in protocols:
