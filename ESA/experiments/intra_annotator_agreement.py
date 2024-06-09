@@ -150,27 +150,28 @@ def plot_confusion_plot(df, protocols):
     fig, axs = plt.subplots(1, columns, figsize=(2.3 * columns, 2.2 * 1))
     axs = axs.flatten()
     scores = {}
-    for i, protocol in enumerate(protocols):
-        scores[protocol] = {}
+    for i, protocoltype in enumerate(protocols):
+        scores[protocoltype] = {}
 
-        subdf = df[[f'{protocol}-1_score', f'{protocol}-IAA_score']].dropna()
-        # plot subdf into x-y plot, make the points smaller
-        # zouharvi: as Tufte said, don't use colors unless they mean something
-        # kocmi: the graph is badly readable, let's use colors
-        # zouharvi: solved in a different way
-        subdf.plot.scatter(x=f'{protocol}-1_score', y=f'{protocol}-IAA_score', ax=axs[i], color="black", s=1)
-        # do not show the axis title
+        protocolname = protocoltype
+        protocol = protocoltype.replace("-mqm", "")
+
+        if protocoltype.endswith("-mqm"):
+            subdf = df[[f'{protocol}-1_score_mqm', f'{protocol}-IAA_score_mqm']].dropna()
+        else:
+            subdf = df[[f'{protocol}-1_score', f'{protocol}-IAA_score']].dropna()
+        # rename columns to score vs score_iaa
+        subdf.columns = [f'score', f'score_iaa']
+
+        subdf.plot.scatter(x=f'score', y=f'score_iaa', ax=axs[i], color="black", s=1)
         axs[i].set_xlabel("")
         axs[i].set_ylabel("")
-        # print the protocol name into the plot
-        axs[i].set_title(protocol)
-        kendall = scipy.stats.kendalltau(subdf[f'{protocol}-1_score'], subdf[f'{protocol}-IAA_score'], variant="c")[0]
-        pearson = scipy.stats.pearsonr(subdf[f'{protocol}-1_score'], subdf[f'{protocol}-IAA_score'])[0]
-        # print(f"{protocol} pearson: {pearson:.3f} on {len(subdf)} samples")
+        axs[i].set_title(protocolname)
+        kendall = scipy.stats.kendalltau(subdf['score'], subdf['score_iaa'], variant="c")[0]
+        pearson = scipy.stats.pearsonr(subdf['score'], subdf['score_iaa'])[0]
 
         # Next calculate how frequently does the annotator agree if there is error or there is none
         subdf = df[[f'{protocol}-1_error_spans', f'{protocol}-IAA_error_spans']].dropna()
-        # ipdb.set_trace()
         subdf[f'{protocol}-1_minor'] = subdf[f'{protocol}-1_error_spans'].apply(lambda x: len([xx for xx in x if xx['severity']=="minor"]) > 0)
         subdf[f'{protocol}-IAA_minor'] = subdf[f'{protocol}-IAA_error_spans'].apply(lambda x: len([xx for xx in x if xx['severity']=="minor"]) > 0)
         subdf[f'{protocol}-1_major'] = subdf[f'{protocol}-1_error_spans'].apply(lambda x: len([xx for xx in x if xx['severity']=="major"]) > 0)
@@ -186,9 +187,8 @@ def plot_confusion_plot(df, protocols):
         recallmin = 100*agreemin/len(subdf)
         recallmaj = 100*agreemaj/len(subdf)
 
-        protocolname = protocol
         scores[protocolname]["Kendall's Tau-c"] = f"{kendall:.3f}"
-        scores[protocolname]["Pearson's ρ"] = f"{pearson:.3f}"
+        scores[protocolname]["Pearson"] = f"{pearson:.3f}"
         scores[protocolname]["Error recall"] = f"{recall:.1f}\%"
         scores[protocolname]["Minor E. recall"] = f"{recallmin:.1f}\%"
         scores[protocolname]["Major E. recall"] = f"{recallmaj:.1f}\%"
