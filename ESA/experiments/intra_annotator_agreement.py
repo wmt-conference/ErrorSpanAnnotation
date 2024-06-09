@@ -155,7 +155,7 @@ def plot_confusion_plot(df, protocols):
         # plot subdf into x-y plot, make the points smaller
         # zouharvi: as Tufte said, don't use colors unless they mean something
         # kocmi: the graph is badly readable, let's use colors
-        subdf.plot.scatter(x=f'{protocol}-1_score', y=f'{protocol}-IAA_score', ax=axs[i], color="blue", s=1)
+        subdf.plot.scatter(x=f'{protocol}-1_score', y=f'{protocol}-IAA_score', ax=axs[i], color="darkblue", s=1)
         # do not show the axis title
         axs[i].set_xlabel("")
         axs[i].set_ylabel("")
