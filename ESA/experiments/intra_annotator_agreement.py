@@ -144,65 +144,96 @@ def mqm_categories(df, protocol1, protocol2):
         "overlap_severity_agreement": 100*overlapping_severities/total,
     }
 
+
+def get_iaa(df):
+    kendall = scipy.stats.kendalltau(df['score'], df['score_iaa'], variant="c")[0]
+    pearson = scipy.stats.pearsonr(df['score'], df['score_iaa'])[0]
+    # Next calculate how frequently does the annotator agree if there is error or there is none
+
+    df[f'minor'] = df['error_spans'].apply(lambda x: len([xx for xx in x if xx['severity']=="minor"]) > 0)
+    df[f'IAA_minor'] = df['error_spans_iaa'].apply(lambda x: len([xx for xx in x if xx['severity']=="minor"]) > 0)
+    df[f'major'] = df['error_spans'].apply(lambda x: len([xx for xx in x if xx['severity']=="major"]) > 0)
+    df[f'IAA_major'] = df['error_spans_iaa'].apply(lambda x: len([xx for xx in x if xx['severity']=="major"]) > 0)
+    df['error_spans'] = df['error_spans'].apply(lambda x: len(x) > 0)
+    df['error_spans_iaa'] = df['error_spans_iaa'].apply(lambda x: len(x) > 0)
+
+    agree = (df['error_spans'] == df['error_spans_iaa']).sum()
+    agreemin = (df[f'minor'] == df[f'IAA_minor']).sum()
+    agreemaj = (df[f'major'] == df[f'IAA_major']).sum()
+
+    recall = 100*agree/len(df)
+    recallmin = 100*agreemin/len(df)
+    recallmaj = 100*agreemaj/len(df)
+
+    return kendall, pearson, recall, recallmin, recallmaj
+
+
+def get_df_scores(df, protocoltype, iaa_type):
+    protocol = protocoltype.replace("-mqm", "")
+    if iaa_type == "Intra AA":
+        iaa_protocol = f"{protocol}-IAA"
+    else:
+        if protocol == "MQM":
+            iaa_protocol = "WMT-MQM"
+        else:
+            iaa_protocol = f"{protocol}-2"
+    if protocol.endswith("-mqm"):
+        subdf = df[[
+            f'{protocol}-1_score_mqm',
+            f'{iaa_protocol}_score_mqm',
+            f'{protocol}-1_error_spans',
+            f'{iaa_protocol}_error_spans',
+        ]].dropna()
+    else:
+        subdf = df[[f'{protocol}-1_score',
+                    f'{iaa_protocol}_score',
+                    f'{protocol}-1_error_spans',
+                    f'{iaa_protocol}_error_spans']].dropna()
+
+    # rename columns to score vs score_iaa
+    subdf.columns = [f'score', f'score_iaa', f'error_spans', f'error_spans_iaa']
+    return subdf
+
+
 def plot_confusion_plot(df, protocols):
     columns = len(protocols)
 
     fig, axs = plt.subplots(1, columns, figsize=(2.3 * columns, 2.2 * 1))
     axs = axs.flatten()
     scores = {}
-    for i, protocoltype in enumerate(protocols):
-        scores[protocoltype] = {}
+    for iaa in ["Intra AA", "Inter AA"]:
+        for i, protocoltype in enumerate(protocols):
+            protocolname = protocoltype
+            scores[(iaa, protocolname)] = {}
 
-        protocolname = protocoltype
-        protocol = protocoltype.replace("-mqm", "")
+            subdf = get_df_scores(df, protocoltype, iaa)
 
-        if protocoltype.endswith("-mqm"):
-            subdf = df[[f'{protocol}-1_score_mqm', f'{protocol}-IAA_score_mqm']].dropna()
-        else:
-            subdf = df[[f'{protocol}-1_score', f'{protocol}-IAA_score']].dropna()
-        # rename columns to score vs score_iaa
-        subdf.columns = [f'score', f'score_iaa']
+            kendall, pearson, recall, recall_minor, recall_major = get_iaa(subdf)
 
-        subdf.plot.scatter(x=f'score', y=f'score_iaa', ax=axs[i], color="black", s=1)
-        axs[i].set_xlabel("")
-        axs[i].set_ylabel("")
-        axs[i].set_title(protocolname)
-        kendall = scipy.stats.kendalltau(subdf['score'], subdf['score_iaa'], variant="c")[0]
-        pearson = scipy.stats.pearsonr(subdf['score'], subdf['score_iaa'])[0]
+            scores[(iaa, protocolname)]["Kendall's Tau-c"] = f"{kendall:.3f}"
+            scores[(iaa, protocolname)]["Pearson"] = f"{pearson:.3f}"
+            scores[(iaa, protocolname)]["Error recall"] = f"{recall:.1f}\%"
+            scores[(iaa, protocolname)]["Minor E. recall"] = f"{recall_minor:.1f}\%"
+            scores[(iaa, protocolname)]["Major E. recall"] = f"{recall_major:.1f}\%"
 
-        # Next calculate how frequently does the annotator agree if there is error or there is none
-        subdf = df[[f'{protocol}-1_error_spans', f'{protocol}-IAA_error_spans']].dropna()
-        subdf[f'{protocol}-1_minor'] = subdf[f'{protocol}-1_error_spans'].apply(lambda x: len([xx for xx in x if xx['severity']=="minor"]) > 0)
-        subdf[f'{protocol}-IAA_minor'] = subdf[f'{protocol}-IAA_error_spans'].apply(lambda x: len([xx for xx in x if xx['severity']=="minor"]) > 0)
-        subdf[f'{protocol}-1_major'] = subdf[f'{protocol}-1_error_spans'].apply(lambda x: len([xx for xx in x if xx['severity']=="major"]) > 0)
-        subdf[f'{protocol}-IAA_major'] = subdf[f'{protocol}-IAA_error_spans'].apply(lambda x: len([xx for xx in x if xx['severity']=="major"]) > 0)
-        subdf[f'{protocol}-1_error_spans'] = subdf[f'{protocol}-1_error_spans'].apply(lambda x: len(x) > 0)
-        subdf[f'{protocol}-IAA_error_spans'] = subdf[f'{protocol}-IAA_error_spans'].apply(lambda x: len(x) > 0)
+            if iaa == "inter":
+                continue
 
-        agree = (subdf[f'{protocol}-1_error_spans'] == subdf[f'{protocol}-IAA_error_spans']).sum()
-        agreemin = (subdf[f'{protocol}-1_minor'] == subdf[f'{protocol}-IAA_minor']).sum()
-        agreemaj = (subdf[f'{protocol}-1_major'] == subdf[f'{protocol}-IAA_major']).sum()
-        # print(f"{protocol} error agreement: {agree/len(subdf):.2f} out of {len(subdf)} samples")
-        recall = 100*agree/len(subdf)
-        recallmin = 100*agreemin/len(subdf)
-        recallmaj = 100*agreemaj/len(subdf)
+            subdf.plot.scatter(x=f'score', y=f'score_iaa', ax=axs[i], color="black", s=1)
+            axs[i].set_xlabel("")
+            axs[i].set_ylabel("")
+            axs[i].set_title(protocolname)
 
-        scores[protocolname]["Kendall's Tau-c"] = f"{kendall:.3f}"
-        scores[protocolname]["Pearson"] = f"{pearson:.3f}"
-        scores[protocolname]["Error recall"] = f"{recall:.1f}\%"
-        scores[protocolname]["Minor E. recall"] = f"{recallmin:.1f}\%"
-        scores[protocolname]["Major E. recall"] = f"{recallmaj:.1f}\%"
+            axs[i].add_patch(
+                Rectangle(
+                    (0.04, 0.05), 0.85, 0.2,
+                    facecolor='#ccca',
+                    fill=True,
+                    linewidth=0,
+                    transform=axs[i].transAxes,
+                ))
 
-        axs[i].add_patch(
-            Rectangle(
-                (0.04, 0.05), 0.85, 0.2,
-                facecolor='#ccca',
-                fill=True,
-                linewidth=0,
-                transform=axs[i].transAxes,
-            ))
-
-        axs[i].text(0.05, 0.05, f"Kendall={kendall:.3f}\nPearson={pearson:.3f}", transform=axs[i].transAxes, ha='left', va='bottom', weight='bold')
+            axs[i].text(0.05, 0.05, f"Kendall={kendall:.3f}\nPearson={pearson:.3f}", transform=axs[i].transAxes, ha='left', va='bottom', weight='bold')
 
     plt.tight_layout(pad=0.1)
     df = pd.DataFrame(scores)
@@ -210,10 +241,10 @@ def plot_confusion_plot(df, protocols):
     # save the plot
     if "ESAAI" in protocols:
         plt.savefig("PAPER_ESAAI/generated_plots/intra_annotator_agreement.pdf")
-        df.to_latex("PAPER_ESAAI/generated_plots/intra_annotator_agreement.tex", escape=False)
+        df.to_latex("PAPER_ESAAI/generated_plots/intra_annotator_agreement.tex", escape=False, multicolumn=True, column_format="l|ll|ll")
     else:
         plt.savefig("PAPER_ESA/generated_plots/intra_annotator_agreement.pdf")
-        df.to_latex("PAPER_ESA/generated_plots/intra_annotator_agreement.tex", escape=False)
+        df.to_latex("PAPER_ESA/generated_plots/intra_annotator_agreement.tex", escape=False, multicolumn=True, column_format="l|ll|ll")
     plt.show()
 
 
