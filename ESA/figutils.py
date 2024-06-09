@@ -16,3 +16,7 @@ def matplotlib_default():
     mpl.rcParams["legend.fontsize"] = 9
     mpl.rcParams["legend.borderpad"] = 0.1
     mpl.rcParams["legend.labelspacing"] = 0.2
+
+    import os
+    if "NOPLOTS" in os.environ:
+        plt.ion()
