@@ -166,12 +166,21 @@ def plot_confusion_plot(df, protocols):
 
         # Next calculate how frequently does the annotator agree if there is error or there is none
         subdf = df[[f'{protocol}-1_error_spans', f'{protocol}-IAA_error_spans']].dropna()
+        # ipdb.set_trace()
+        subdf[f'{protocol}-1_minor'] = subdf[f'{protocol}-1_error_spans'].apply(lambda x: len([xx for xx in x if xx['severity']=="minor"]) > 0)
+        subdf[f'{protocol}-IAA_minor'] = subdf[f'{protocol}-IAA_error_spans'].apply(lambda x: len([xx for xx in x if xx['severity']=="minor"]) > 0)
+        subdf[f'{protocol}-1_major'] = subdf[f'{protocol}-1_error_spans'].apply(lambda x: len([xx for xx in x if xx['severity']=="major"]) > 0)
+        subdf[f'{protocol}-IAA_major'] = subdf[f'{protocol}-IAA_error_spans'].apply(lambda x: len([xx for xx in x if xx['severity']=="major"]) > 0)
         subdf[f'{protocol}-1_error_spans'] = subdf[f'{protocol}-1_error_spans'].apply(lambda x: len(x) > 0)
         subdf[f'{protocol}-IAA_error_spans'] = subdf[f'{protocol}-IAA_error_spans'].apply(lambda x: len(x) > 0)
 
         agree = (subdf[f'{protocol}-1_error_spans'] == subdf[f'{protocol}-IAA_error_spans']).sum()
+        agreemin = (subdf[f'{protocol}-1_minor'] == subdf[f'{protocol}-IAA_minor']).sum()
+        agreemaj = (subdf[f'{protocol}-1_major'] == subdf[f'{protocol}-IAA_major']).sum()
         # print(f"{protocol} error agreement: {agree/len(subdf):.2f} out of {len(subdf)} samples")
         recall = 100*agree/len(subdf)
+        recallmin = 100*agreemin/len(subdf)
+        recallmaj = 100*agreemaj/len(subdf)
         scores[protocol]["error_agreement"] = recall
 
         # print into the plot IAA via pearson to the bottom right corner: Intra-AA={pearson:.3f}\nError recall={recall:.1f}
