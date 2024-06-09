@@ -50,7 +50,7 @@ import ESA.figutils as figutils
 import matplotlib.pyplot as plt
 
 figutils.matplotlib_default()
-plt.figure(figsize=(2, 1.6))
+plt.figure(figsize=(2, 1.4))
 
 xticks = list(np.arange(10, 210+1, 15))
 tick_i = 0
@@ -80,8 +80,8 @@ def evaluate_scoring(scoring: str, color="black", linestyle="-"):
 		linestyle=linestyle,
 	)
 	plt.text(
-		175,
-		0.855-tick_i*0.03,
+		170,
+		0.87-tick_i*0.035,
 		f"{np.average(acc):.1%}",
 		fontsize=8
 	)
@@ -97,7 +97,7 @@ elif args.group == "2":
 	evaluate_scoring("mqm_mqm", linestyle="-.")
 
 plt.legend(
-	handlelength=1.5, labelspacing=0.07, framealpha=0, loc=(0.15 if args.group == "1" else 0.24, 0),
+	handlelength=1.5, labelspacing=0.07 if args.group == "1" else 0.3, framealpha=0, loc=(0.15 if args.group == "1" else 0.24, 0),
 	markerfirst=False, handletextpad=0.2,
 )
 # plt.xticks(list(range(10, 210, 50))+[206])
