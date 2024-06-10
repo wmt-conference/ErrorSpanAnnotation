@@ -1,6 +1,7 @@
 import os
 import ipdb
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 from scipy.stats import ranksums, mannwhitneyu, wilcoxon
@@ -30,6 +31,7 @@ def ClustersAndRanking(annotations_loader):
 
         # Step 2: Perform Wilcoxon rank-sum tests for each pair of systems
         p_values = pd.DataFrame(index=system_scores.index, columns=system_scores.index)
+        head_to_head_diffs = pd.DataFrame(index=system_scores.index, columns=system_scores.index)
         for (sys1, scores1), (sys2, scores2) in combinations(system_scores.iterrows(), 2):
             # attempt to use wilcoxon's test
             # sdf = pd.DataFrame({sys1: scores1['scores'], sys2: scores2['scores']})
@@ -37,6 +39,8 @@ def ClustersAndRanking(annotations_loader):
             # _, p_value = wilcoxon(diffs, alternative='greater')
             _, p_value = mannwhitneyu(scores1['scores'], scores2['scores'], alternative='greater')
             p_values.at[sys1, sys2] = p_value
+            mark = "*" if p_value < 0.05 else ""
+            head_to_head_diffs.at[sys1, sys2] = f"{(scores1['mean'] - scores2['mean']):.1f}{mark}"
 
         # Fill diagonal with 1s for easier interpretation
         p_values = p_values.fillna(1)  # assume no significant difference with itself
