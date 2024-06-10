@@ -1,11 +1,10 @@
 import collections
-import numpy as np
 import scipy.stats
-from sklearn.model_selection import cross_val_score
-from sklearn.linear_model import LinearRegression, HuberRegressor
+import matplotlib.pyplot as plt
+import ESA.figutils
 from ESA.annotation_loader import AnnotationLoader
-df = AnnotationLoader(refresh_cache=False).get_view(
-    ["LLM", "ESA-1", "MQM-1", "ESA-2"], only_overlap=False).dropna()
+df = AnnotationLoader(refresh_cache=False).get_view(["LLM", "ESA-1", "MQM-1", "ESA-2"], only_overlap=False).dropna()
+ESA.figutils.matplotlib_default()
 
 
 def featurize_line(item, protocol):
@@ -28,47 +27,34 @@ for item in data_raw:
 data = list(data.values())
 
 data_true = [x[1] for l in data for x in l]
-data_pred_15 = [r["ESA-1_score_mqm"] for _, r in df.iterrows()]
-data_pred_lr = []
-for i in range(len(data)):
-    data_test = data[i]
-    data_train = data[:i] + data[i+1:]
-    data_train = [x for l in data_train for x in l]
-     
-    model = LinearRegression()
-    model.fit([x[0] for x in data_train], [x[1] for x in data_train])
-    data_pred_lr += list(model.predict([x[0] for x in data_test]))
-
-print("ESA1-learned->ESA1:", scipy.stats.pearsonr(data_pred_lr, data_true)[0])
-print("ESA1-MQM->ESA1    :", scipy.stats.pearsonr(data_pred_15, data_true)[0])
-
-# compute coefficients
-model = LinearRegression()
-model.fit([x[0] for l in data for x in l], data_true)
-print(list(zip(["minor", "major", "missing"], model.coef_)))
+prev_max = None
+corrs = []
+for fv in range(0, 100+1, 1):
+    fv = fv / 10
+    def predict_mqm_like_custom(spans):
+        return -sum([{"minor": 1, "major": fv, "undecided": 0}[x["severity"]] for x in spans])
+    data_pred_lr = [predict_mqm_like_custom(r["ESA-1_error_spans"]) for _, r in df.iterrows()]
+    corr = scipy.stats.pearsonr(data_pred_lr, data_true)[0]
+    if prev_max is None or corr > prev_max:
+        print(f"1-{fv:0>4}->ESA1: {corr:.8f} *")
+        prev_max = corr
+    else:
+        print(f"1-{fv:0>4}->ESA1: {corr:.8f}")
+    corrs.append(corr)
 
 
-data_raw = [featurize_line(r, "MQM-1") for _, r in df.iterrows()]
-data = collections.defaultdict(list)
-for item in data_raw:
-    data[item[0][0]].append((item[1], item[0][1]))
-data = list(data.values())
-
-data_true = [x[1] for l in data for x in l]
-data_pred_15 = [r["MQM-1_score"] for _, r in df.iterrows()]
-data_pred_lr = []
-for i in range(len(data)):
-    data_test = data[i]
-    data_train = data[:i] + data[i+1:]
-    data_train = [x for l in data_train for x in l]
-     
-    model = LinearRegression()
-    model.fit([x[0] for x in data_train], [x[1] for x in data_train])
-    data_pred_lr += list(model.predict([x[0] for x in data_test]))
-
-
-print("MQM1-learned->ESA1:", scipy.stats.pearsonr(data_pred_lr, data_true)[0])
-print("MQM1-MQM->ESA1    :", scipy.stats.pearsonr(data_pred_15, data_true)[0])
+plt.figure(figsize=(3, 2))
+plt.plot(corrs, color="black")
+plt.xticks([0, 50,100], [0, 5, 10])
+plt.vlines(x=50, ymin=min(corrs), ymax=corrs[50], color=ESA.figutils.COLORS[0])
+plt.vlines(x=48, ymin=min(corrs), ymax=corrs[48], color=ESA.figutils.COLORS[2])
+plt.text(30, 0.3, "Optimal\nx=4.8", ha="center", color=ESA.figutils.COLORS[2])
+plt.text(70, 0.3, "Default\nx=5", ha="center", color=ESA.figutils.COLORS[0])
+plt.ylabel("Correlation")
+plt.xlabel("minor: -1, major: -$x$ error weights")
+plt.tight_layout()
+plt.savefig("PAPER_ESA/generated_plots/predicting_score.pdf")
+plt.show()
 
 
 # compute feature importance
