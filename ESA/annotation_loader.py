@@ -69,4 +69,7 @@ class AnnotationLoader:
         if only_overlap:
             # keep only FIXED_IDS in the view
             dfs = dfs[dfs.index.isin(FIXED_IDS)]
+
+        dfs['segmentID'] = dfs.apply(lambda x: f"{x['documentID']}#{x['sourceID']}", axis=1)
+
         return dfs

@@ -21,7 +21,7 @@ def ClustersAndRanking(annotations_loader):
         # if protocol != "WMT-DASQM":
         #     continue
 
-        subdf = df[['systemID', protocol_scores]].dropna()
+        subdf = df[['systemID', 'segmentID', protocol_scores]].dropna()
 
         # Step 1: Calculate average scores for each system
         # system_scores = df[['systemID', protocol_scores]].groupby('systemID')[protocol_scores].agg(['mean', list]).rename(columns={'list': 'scores'})
@@ -32,15 +32,17 @@ def ClustersAndRanking(annotations_loader):
         # Step 2: Perform Wilcoxon rank-sum tests for each pair of systems
         p_values = pd.DataFrame(index=system_scores.index, columns=system_scores.index)
         head_to_head_diffs = pd.DataFrame(index=system_scores.index, columns=system_scores.index)
-        for (sys1, scores1), (sys2, scores2) in combinations(system_scores.iterrows(), 2):
-            # attempt to use wilcoxon's test
-            # sdf = pd.DataFrame({sys1: scores1['scores'], sys2: scores2['scores']})
-            # diffs = sdf[sys1] - sdf[sys2]
+        for sys1, sys2 in combinations(system_scores.index, 2):
+            sysA = subdf[subdf['systemID'] == sys1].set_index('segmentID')[protocol_scores]
+            sysB = subdf[subdf['systemID'] == sys2].set_index('segmentID')[protocol_scores]
+            scores = pd.DataFrame({sys1: sysA, sys2: sysB}).dropna()  # dropna is only for IAA calculation
+            diffs = list(scores[sys1] - scores[sys2])
+            # use wilcoxon's test
             # _, p_value = wilcoxon(diffs, alternative='greater')
-            _, p_value = mannwhitneyu(scores1['scores'], scores2['scores'], alternative='greater')
+            _, p_value = mannwhitneyu(scores[sys1], scores[sys2], alternative='greater')
             p_values.at[sys1, sys2] = p_value
             mark = "*" if p_value < 0.05 else ""
-            head_to_head_diffs.at[sys1, sys2] = f"{(scores1['mean'] - scores2['mean']):.1f}{mark}"
+            head_to_head_diffs.at[sys1, sys2] = f"{((scores[sys1] - scores[sys2]).mean()):.1f}{mark}"
 
         # Fill diagonal with 1s for easier interpretation
         p_values = p_values.fillna(1)  # assume no significant difference with itself
