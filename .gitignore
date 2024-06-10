@@ -4,6 +4,8 @@ cache_protocols*
 
 # added by zouharvi
 demo.ipynb
+data/survey_esa.csv
+data/survey_esaai.csv
 archive/
 .history*
 *.xlsx
