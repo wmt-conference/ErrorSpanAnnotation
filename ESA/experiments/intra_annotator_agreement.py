@@ -123,26 +123,26 @@ def mqm_categories(df, protocol1, protocol2):
             if found_overlap_severity:
                 overlapping_severities += 1
 
-    # print("#"*50)
-    # print(f"Protocol {protocol1} vs {protocol2}\n")
-    # print(f"{100*overlapping_errors/total:.1f}% for MQM error span overlap with ANY other (total {total} errors)")
-    # print(f"{100*agreed_subcategories/total:.1f}% for MQM error category agreement with ANY (total {total} errors)")
-    # print(f"{100*overlapping_categories/total:.1f}% for MQM error span overlap + category agreement (total {total} errors)")
-    # print(f"{100*overlapping_severities/total:.1f}% for MQM error span overlap + severity agreement (total {total} errors)")
-    # print(f"{100*overlapping_categories_severity/total:.1f}% for MQM error span overlap + severity & category agreement (total {total} errors)")
-    # print("#"*50)
-
     return {
-        "error_count": total,
-        "subcategory_agreement": 100*agreed_subcategories/total,
-        "overlap_subcategory_agreement": 100*overlapping_subcategories/total,
-        "overlap_severity_subcategory_agreement": 100*overlapping_severity_subcategories/total,
-        "category_agreement": 100*agreed_categories/total,
-        "overlap_category_agreement": 100*overlapping_categories/total,
-        "overlap_severity_category_agreement": 100*overlapping_severity_categories/total,
-        "overlap_agreement": 100*overlapping_errors/total,
-        "overlap_severity_agreement": 100*overlapping_severities/total,
+        # "# Errors": total,
+        "Any errors": f"{100*overlapping_errors/total:.1f}\%",
+        "Same severity": f"{100*overlapping_severities/total:.1f}\%",
+        "Same category": f"{100*overlapping_categories/total:.1f}\%",
+        "Same sev. + categ.": f"{100*overlapping_severity_categories/total:.1f}\%",
+        "Same sev. + subcateg.": (f"{100*overlapping_severity_subcategories/total:.1f}\%" if protocol2 != "WMT-MQM" else "-")
+
     }
+    # return {
+    #     "error_count": total,
+    #     "overlap_agreement": 100*overlapping_errors/total,
+    #     "overlap_severity_agreement": 100*overlapping_severities/total,
+    #     "subcategory_agreement": 100*agreed_subcategories/total,
+    #     "overlap_subcategory_agreement": 100*overlapping_subcategories/total,
+    #     "overlap_severity_subcategory_agreement": 100*overlapping_severity_subcategories/total,
+    #     "category_agreement": 100*agreed_categories/total,
+    #     "overlap_category_agreement": 100*overlapping_categories/total,
+    #     "overlap_severity_category_agreement": 100*overlapping_severity_categories/total,
+    # }
 
 
 def get_iaa(df):
@@ -256,12 +256,12 @@ def IntraAnnotatorAgreement(annotations):
     plot_confusion_plot(df, ["ESA", "ESAAI", "MQM"])
 
 
-    # a = mqm_categories(df, "MQM-1", "MQM-IAA")
-    # b = mqm_categories(df, "MQM-IAA", "MQM-1")
-    # c = mqm_categories(df, "MQM-1", "WMT-MQM")
-    # d = mqm_categories(df, "MQM-IAA", "WMT-MQM")
-    #
-    # df = pd.DataFrame([a, b, c, d], index=["MQM-1 vs MQM-IAA", "MQM-IAA vs MQM-1", "MQM-1 vs WMT-MQM", "MQM-IAA vs WMT-MQM"])
+    a = mqm_categories(df, "MQM-1", "MQM-IAA")
+    c = mqm_categories(df, "MQM-1", "WMT-MQM")
+
+    df = pd.DataFrame([a, c], index=["Intra:", "Inter:"]).transpose()
+    df.to_latex("PAPER_ESA/generated_plots/mqm_categories.tex", escape=False)
+    ipdb.set_trace()
 
 if __name__ == "__main__":
     from ESA.annotation_loader import AnnotationLoader
