@@ -1,5 +1,3 @@
-from itertools import combinations
-
 from ESA.annotation_loader import AnnotationLoader
 from ESA.utils import PROTOCOL_DEFINITIONS
 from scipy.stats import kendalltau

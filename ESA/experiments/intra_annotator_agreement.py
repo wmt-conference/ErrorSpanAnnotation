@@ -213,8 +213,8 @@ def plot_confusion_plot(df, protocols):
             scores[(iaa, protocolname)]["Kendall's Tau-c"] = f"{kendall:.3f}"
             scores[(iaa, protocolname)]["Pearson"] = f"{pearson:.3f}"
             scores[(iaa, protocolname)]["Error recall"] = f"{recall:.1f}\%"
-            scores[(iaa, protocolname)]["Minor E. recall"] = f"{recall_minor:.1f}\%"
-            scores[(iaa, protocolname)]["Major E. recall"] = f"{recall_major:.1f}\%"
+            scores[(iaa, protocolname)]["Minor e. recall"] = f"{recall_minor:.1f}\%"
+            scores[(iaa, protocolname)]["Major e. recall"] = f"{recall_major:.1f}\%"
 
             if iaa == "Inter AA":
                 continue
