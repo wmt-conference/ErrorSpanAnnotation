@@ -3,32 +3,40 @@ import ipdb
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
-from scipy.stats import ranksums
+from scipy.stats import ranksums, mannwhitneyu, wilcoxon
 from itertools import combinations
 from ESA.utils import PROTOCOL_DEFINITIONS
 from ESA.annotation_loader import AnnotationLoader
 
 
 def ClustersAndRanking(annotations_loader):
-    df = annotations_loader.get_view()
+    df = annotations_loader.get_view(only_overlap=True)
 
     data = {}
     data_clusters = {}
 
     for protocol in PROTOCOL_DEFINITIONS.keys():
         protocol_scores = f"{protocol}_score"
+        # if protocol != "WMT-DASQM":
+        #     continue
+
+        subdf = df[['systemID', protocol_scores]].dropna()
 
         # Step 1: Calculate average scores for each system
-        system_scores = df[['systemID', protocol_scores]].groupby('systemID')[protocol_scores].agg(['mean', list]).rename(columns={'list': 'scores'})
+        # system_scores = df[['systemID', protocol_scores]].groupby('systemID')[protocol_scores].agg(['mean', list]).rename(columns={'list': 'scores'})
+        system_scores = subdf.groupby('systemID')[protocol_scores].agg(['mean', list]).rename(columns={'list': 'scores'})
         # sort by mean score
         system_scores = system_scores.sort_values(by='mean', ascending=False)
 
         # Step 2: Perform Wilcoxon rank-sum tests for each pair of systems
         p_values = pd.DataFrame(index=system_scores.index, columns=system_scores.index)
         for (sys1, scores1), (sys2, scores2) in combinations(system_scores.iterrows(), 2):
-            stat, p_value = ranksums(scores1['scores'], scores2['scores'], alternative='greater')
+            # attempt to use wilcoxon's test
+            # sdf = pd.DataFrame({sys1: scores1['scores'], sys2: scores2['scores']})
+            # diffs = sdf[sys1] - sdf[sys2]
+            # _, p_value = wilcoxon(diffs, alternative='greater')
+            _, p_value = mannwhitneyu(scores1['scores'], scores2['scores'], alternative='greater')
             p_values.at[sys1, sys2] = p_value
-            p_values.at[sys2, sys1] = p_value
 
         # Fill diagonal with 1s for easier interpretation
         p_values = p_values.fillna(1)  # assume no significant difference with itself

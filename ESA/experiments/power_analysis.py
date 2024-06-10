@@ -1,7 +1,7 @@
 import pandas as pd
 import ipdb
 from itertools import combinations
-from scipy.stats import ranksums
+from scipy.stats import ranksums, mannwhitneyu
 import numpy as np
 import scipy.stats as stats
 import matplotlib.pyplot as plt
@@ -19,7 +19,7 @@ def get_observable_minimum_detectable_effect(df, protocol, alpha=0.05, beta=0.95
             sys1_scores, sys2_scores = sys2_scores, sys1_scores
 
         diff = sys1_scores.mean() - sys2_scores.mean()
-        _, p_value = ranksums(sys1_scores, sys2_scores, alternative='greater')
+        _, p_value = mannwhitneyu(sys1_scores, sys2_scores, alternative='greater')
         pvalues.append([p_value < alpha, diff])
 
     pdf = pd.DataFrame(pvalues, columns=['pvalue', 'diff']).sort_values(by='diff', ascending=True)
