@@ -259,7 +259,7 @@ def IntraAnnotatorAgreement(annotations):
     a = mqm_categories(df, "MQM-1", "MQM-IAA")
     c = mqm_categories(df, "MQM-1", "WMT-MQM")
 
-    df = pd.DataFrame([a, c], index=["Intra:", "Inter:"]).transpose()
+    df = pd.DataFrame([a, c], index=["Intra AA", "Inter AA"]).transpose()
     df.to_latex("PAPER_ESA/generated_plots/mqm_categories.tex", escape=False)
     ipdb.set_trace()
 
