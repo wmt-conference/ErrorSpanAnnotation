@@ -54,8 +54,6 @@ def effect_size_for_n_clusters(df, protocol):
     return clusters_effect_sizes
 
 
-
-
 def calculate_power(sample_size, params, alpha, num_simulations=1000, operator="greater"):
     k = None
     if len(params) == 2:
@@ -73,7 +71,7 @@ def calculate_power(sample_size, params, alpha, num_simulations=1000, operator="
             data1 = np.random.gamma(k[0], theta[0], sample_size)
             data2 = np.random.gamma(k[1], theta[1], sample_size)
 
-        t_stat, p_value = ranksums(data1, data2, alternative=operator)
+        t_stat, p_value = mannwhitneyu(data1, data2, alternative=operator)
 
         # Check if null hypothesis is rejected
         if p_value < alpha:

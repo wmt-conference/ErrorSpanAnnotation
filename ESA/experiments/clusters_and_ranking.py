@@ -10,8 +10,26 @@ from ESA.utils import PROTOCOL_DEFINITIONS
 from ESA.annotation_loader import AnnotationLoader
 
 
+UNBABEL_MQM_WEIGHTS = {"minor": -1, "major": -5, "critical": -10, "undecided": 0}
+def apply_mqm_scoring(span_errors, length):
+    # missing values needs to be None
+    if not isinstance(span_errors, list):
+        return "None"
+
+    score = 0
+    for error in span_errors:
+        score += UNBABEL_MQM_WEIGHTS[error["severity"]]
+    score /= length
+
+    return float(score)
+
+
 def ClustersAndRanking(annotations_loader):
     df = annotations_loader.get_view(only_overlap=True)
+
+    # for protocol in ["MQM-1"]:
+    #     df[f"{protocol}_score"] = df.apply(lambda x: apply_mqm_scoring(x[f"{protocol}_error_spans"], len(x["source"].split(" "))), axis=1)
+
 
     data = {}
     data_clusters = {}
@@ -59,7 +77,7 @@ def ClustersAndRanking(annotations_loader):
             data[protocol]["system"].append(system)
             data[protocol][protocol].append(system_scores.at[system, 'mean'])
 
-    plot_clusters(data, data_clusters, ["MQM-1", "ESA-1", "WMT-DASQM"], "PAPER_ESA/generated_plots/ranking_and_clusters.pdf")
+    plot_clusters(data, data_clusters, ["WMT-DASQM", "ESA-1", "MQM-1"], "PAPER_ESA/generated_plots/ranking_and_clusters.pdf")
     plot_clusters(data, data_clusters, ["ESA-1", "ESAAI-1", "LLM"], "PAPER_ESAAI/generated_plots/ranking_and_clusters.pdf")
     plot_clusters(data, data_clusters, ["MQM-1", "LLM", "ESA-1", "ESAAI-1", "ESA-2", "ESAAI-2", "WMT-DASQM"], "archive/all.pdf")
 
