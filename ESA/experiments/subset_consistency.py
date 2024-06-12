@@ -53,6 +53,8 @@ figutils.matplotlib_default()
 plt.figure(figsize=(2, 1.4))
 
 xticks = list(np.arange(10, 210+1, 15))
+DISPLAY_POS = [10, 40, 115, 190]
+DISPLAY_POS_i = [i for i, x in enumerate(xticks) if x in DISPLAY_POS]
 tick_i = 0
 def evaluate_scoring(scoring: str, color="black", linestyle="-"):
 	global tick_i
@@ -65,17 +67,22 @@ def evaluate_scoring(scoring: str, color="black", linestyle="-"):
 			acc_local.append(rank_acc(rank_global, rank_local))
 		acc.append(np.average(acc_local))
 	
-	print(scoring)
+	scoring = (scoring
+		.upper()
+		.replace("_SCORE", "")
+		.replace("_MQM", r"$_\mathrm{MQM}$")
+		.replace("ESAAI", r"ESA$^\mathrm{AI}$")
+	)
+	print(
+		scoring,
+		*[f"{acc[i]:.2%}".replace("%", r"\%") for i in DISPLAY_POS_i],
+		sep=" & ",
+		end=" \\\\\n",
+	)
 	plt.plot(
 		xticks,
 		acc,
-		label=(
-			scoring
-				.upper()
-				.replace("_SCORE", "")
-				.replace("_MQM", r"$_\mathrm{MQM}$")
-				.replace("ESAAI", r"ESA$^\mathrm{AI}$")
-		),
+		label=scoring,
 		color=color,
 		linestyle=linestyle,
 	)
