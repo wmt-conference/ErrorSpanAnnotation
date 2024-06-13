@@ -222,7 +222,7 @@ def plot_confusion_plot(df, protocols):
             subdf.plot.scatter(x=f'score', y=f'score_iaa', ax=axs[i], color="black", s=1)
             axs[i].set_xlabel("")
             axs[i].set_ylabel("")
-            axs[i].set_title(protocolname)
+            axs[i].set_title(protocolname.replace("ESAAI", r"ESA$^\mathrm{AI}$"))
 
             axs[i].add_patch(
                 Rectangle(
@@ -261,7 +261,6 @@ def IntraAnnotatorAgreement(annotations):
 
     df = pd.DataFrame([a, c], index=["Intra AA", "Inter AA"]).transpose()
     df.to_latex("PAPER_ESA/generated_plots/mqm_categories.tex", escape=False)
-    ipdb.set_trace()
 
 if __name__ == "__main__":
     from ESA.annotation_loader import AnnotationLoader
