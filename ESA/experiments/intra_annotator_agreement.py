@@ -220,13 +220,13 @@ def plot_confusion_plot(df, protocols):
                 continue
 
             subdf.plot.scatter(x=f'score', y=f'score_iaa', ax=axs[i], color="black", s=1)
-            axs[i].set_xlabel("")
+            # axs[i].set_xlabel("")
             axs[i].set_ylabel("")
-            axs[i].set_title(protocolname.replace("ESAAI", r"ESA$^\mathrm{AI}$"))
+            axs[i].set_xlabel(protocolname.replace("ESAAI", r"ESA$^\mathrm{AI}$"))
 
             axs[i].add_patch(
                 Rectangle(
-                    (0.04, 0.05), 0.85, 0.2,
+                    (0.04, 0.05), 0.7, 0.2,
                     facecolor='#ccca',
                     fill=True,
                     linewidth=0,

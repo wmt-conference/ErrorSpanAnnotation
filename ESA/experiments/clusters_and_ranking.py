@@ -89,7 +89,7 @@ def plot_clusters(data, data_clusters, protocols, filename):
 
     rows = 1
     columns = len(protocols)
-    fig, axs = plt.subplots(rows, columns, figsize=(3 * columns, 2.5 * rows))
+    fig, axs = plt.subplots(1, columns, figsize=(2.3 * columns, 2.2 * rows))
 
     axs = axs.flatten()
 
@@ -144,7 +144,7 @@ def plot_clusters(data, data_clusters, protocols, filename):
 
         axs[i].add_patch(
                 Rectangle(
-                    (0.6, 0.05), 0.38, 0.17,
+                    (0.4, 0.05), 0.58, 0.21,
                     facecolor='#ddd',
                     fill=True,
                     linewidth=0,
@@ -153,7 +153,12 @@ def plot_clusters(data, data_clusters, protocols, filename):
                 ))
 
         # Add correlation to the plot to the bottom right
-        axs[i].text(0.95, 0.05, f"ρ={corr:.3f}\nAcc={pairwise_accuracy:.1f}%", transform=axs[i].transAxes, ha='right', va='bottom', zorder=15)
+        axs[i].text(
+            0.95, 0.05,
+            f"ρ={corr:.3f}\nAcc={pairwise_accuracy:.1f}%",
+            transform=axs[i].transAxes, ha='right', va='bottom', zorder=15,
+            weight="bold"
+        )
 
         axs[i].set_xlabel(PROTOCOL_DEFINITIONS[protocol]['name'].replace("_1", "").replace("$$", ""))
         if i == 0:
