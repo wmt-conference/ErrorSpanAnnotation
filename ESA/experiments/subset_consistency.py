@@ -70,7 +70,7 @@ def evaluate_scoring(scoring: str, color="black", linestyle="-"):
 	scoring = (scoring
 		.upper()
 		.replace("_SCORE", "")
-		.replace("_MQM", r"$_\mathrm{MQM}$")
+		.replace("_MQM", r"$_\mathrm{spans}$")
 		.replace("ESAAI", r"ESA$^\mathrm{AI}$")
 	)
 	print(
@@ -104,7 +104,10 @@ elif args.group == "2":
 	evaluate_scoring("mqm_mqm", linestyle="-.")
 
 plt.legend(
-	handlelength=1.5, labelspacing=0.07 if args.group == "1" else 0.3, framealpha=0, loc=(0.15 if args.group == "1" else 0.24, 0),
+	handlelength=1.5,
+	labelspacing=0.07 if args.group == "1" else 0.3,
+	framealpha=0,
+	loc=(0.12 if args.group == "1" else 0.21, 0),
 	markerfirst=False, handletextpad=0.2,
 )
 # plt.xticks(list(range(10, 210, 50))+[206])

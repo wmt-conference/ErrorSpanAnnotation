@@ -149,7 +149,7 @@ def overview_segment_count_esa(annotations_loader):
         color=figutils.COLORS[0], alpha=0.4,
         bins=40,
     )
-    ax[1].set_ylabel(r"ESA$_\mathrm{MQM}$", rotation=0)
+    ax[1].set_ylabel(r"ESA$_\mathrm{spans}$", rotation=0)
     ax[1].yaxis.set_label_coords(0.13, 0.3)
 
     ax[2].hist(

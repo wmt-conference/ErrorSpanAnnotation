@@ -22,6 +22,12 @@ PROTOCOL_DEFINITIONS = {
         "appraise_batchefile": "batches_wmt23_en-de_gemba.json",
         "name": r"ESA$^\mathrm{AI}_1$",
     },
+    'ESAAI': {
+        "framework": "appraise",
+        "appraise_scorefile": "240315rc5GEMBA.scores.csv",
+        "appraise_batchefile": "batches_wmt23_en-de_gemba.json",
+        "name": r"ESA$^\mathrm{AI}$",
+    },
     'ESA-2': {
         "framework": "appraise",
         "appraise_scorefile": "240520rc6ESA.scores.csv",
@@ -58,13 +64,13 @@ PROTOCOL_DEFINITIONS = {
         "framework": "appraise",
         "appraise_scorefile": "240521rc6ESA.scores.csv",
         "appraise_batchefile": "batches_wmt23_en-de_esa.json",
-        "name": "ESA$_IAA$",
+        "name": r"ESA$_\mathrm{IAA}$",
     },
     'ESAAI-IAA': {
         "framework": "appraise",
         "appraise_scorefile": "240521rc6GEMBA.scores.csv",
         "appraise_batchefile": "batches_wmt23_en-de_gemba.json",
-        "name": r"ESA$^\mathrm{AI}_IAA$",
+        "name": r"ESA$^\mathrm{AI}_\mathrm{IAA}$",
     },
 }
 

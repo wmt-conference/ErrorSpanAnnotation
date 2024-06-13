@@ -8,7 +8,7 @@ import ESA.utils
 import matplotlib.patches as patches
 
 args = argparse.ArgumentParser()
-args.add_argument("scheme", default="ESA", choices=["ESA", "ESAAI", "LLM"])
+args.add_argument("scheme", default="ESA", choices=["ESA", "ESAAI", "MQM"])
 args = args.parse_args()
 
 plt.figure(figsize=(4, 1.5))
@@ -91,8 +91,7 @@ plt.plot(
 
 plt.ylim(10, 120)
 
-args.scheme = args.scheme.replace('LLM', ESA.utils.PROTOCOL_DEFINITIONS["ESAAI"]["name"])
-plt.title(f"{args.scheme}  ({slope:.2f}s per segment)")
+plt.title(f"{args.scheme.replace('ESAAI', ESA.utils.PROTOCOL_DEFINITIONS['ESAAI']['name'])}  ({slope:.2f}s per segment)")
 plt.ylabel("Segment time (s)", labelpad=-2)
 plt.xticks(
     [0, 20, 80, 100],

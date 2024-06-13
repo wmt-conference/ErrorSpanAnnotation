@@ -128,21 +128,19 @@ def plot_clusters(data, data_clusters, protocols, filename):
 
 
         # zouharvi: plotting only the first campaign for now
-        if False and protocol in {"ESA-1", "ESAAI-1"}:
-            protocol2 = protocol.replace("1", "2")
-            df3 = pd.DataFrame(data[protocol2])
-            df3.set_index("system", inplace=True)
-            df = pd.merge(df1, df3, left_index=True, right_index=True)
-            corr = df.corr(method='spearman')["WMT-MQM"][protocol2]
-            df.plot.scatter(x=protocol2, y="WMT-MQM", ax=axs[i], color=figutils.COLORS[1])
-            axs[i].text(0.95, 0.15, f"ρ={corr:.3f}", transform=axs[i].transAxes, ha='right', va='bottom', color=figutils.COLORS[1])
+        # protocol2 = protocol.replace("1", "2")
+        # df3 = pd.DataFrame(data[protocol2])
+        # df3.set_index("system", inplace=True)
+        # df = pd.merge(df1, df3, left_index=True, right_index=True)
+        # corr = df.corr(method='spearman')["WMT-MQM"][protocol2]
+        # df.plot.scatter(x=protocol2, y="WMT-MQM", ax=axs[i], color=figutils.COLORS[1])
+        # axs[i].text(0.95, 0.15, f"ρ={corr:.3f}", transform=axs[i].transAxes, ha='right', va='bottom', color=figutils.COLORS[1])
         # kocmi: let's keep clusters for ESA
-        elif "ESAAI-1" not in protocol:
-            # Plotting vertical lines for scheme clusters and horizontal for MQM
-            for cluster in data_clusters[protocol]:
-                axs[i].axvline(cluster, color=figutils.COLORS[0], linestyle="--")
-            for cluster in data_clusters["WMT-MQM"]:
-                axs[i].axhline(cluster, color=figutils.COLORS[2], linestyle="--")
+        # Plotting vertical lines for scheme clusters and horizontal for MQM
+        for cluster in data_clusters[protocol]:
+            axs[i].axvline(cluster, color=figutils.COLORS[0], linestyle="--")
+        for cluster in data_clusters["WMT-MQM"]:
+            axs[i].axhline(cluster, color=figutils.COLORS[2], linestyle="--")
 
         axs[i].add_patch(
                 Rectangle(
