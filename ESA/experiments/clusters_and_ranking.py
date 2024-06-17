@@ -168,7 +168,7 @@ def plot_clusters(data, data_clusters, protocols, filename):
             weight="bold"
         )
         if protocol.endswith("SPANS"):
-            axs[i].set_xlabel(PROTOCOL_DEFINITIONS[protocol.replace("-SPANS", "")]['name'].replace("_1", "_{spans}").replace("_2", "_{2-spans}"))
+            axs[i].set_xlabel(PROTOCOL_DEFINITIONS[protocol.replace("-SPANS", "")]['name'].replace("_1", r"_{\mathrm{spans}}").replace("_2", r"_{2-\mathrm{spans}}"))
         else:
             axs[i].set_xlabel(PROTOCOL_DEFINITIONS[protocol]['name'].replace("_1", "").replace("$$", ""))
         if i == 0:
