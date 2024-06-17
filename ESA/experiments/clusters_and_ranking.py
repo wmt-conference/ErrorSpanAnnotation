@@ -34,8 +34,14 @@ def ClustersAndRanking(annotations_loader):
     data = {}
     data_clusters = {}
 
-    for protocol in PROTOCOL_DEFINITIONS.keys():
-        protocol_scores = f"{protocol}_score"
+    all_protocols = ["WMT-MQM", "ESA-1", "ESAAI-1", "ESA-2", "ESAAI-2", "ESA-1-SPANS", "ESAAI-1-SPANS", "ESA-2-SPANS", "ESAAI-2-SPANS", "MQM-1", "LLM", "WMT-DASQM"]
+
+    for protocol in all_protocols:
+        if protocol.endswith("SPANS"):
+            protocol_scores = f'{protocol.replace("-SPANS", "")}_score_mqm'
+        else:
+            protocol_scores = f"{protocol}_score"
+
         # if protocol != "WMT-DASQM":
         #     continue
 
@@ -54,6 +60,8 @@ def ClustersAndRanking(annotations_loader):
             sysA = subdf[subdf['systemID'] == sys1].set_index('segmentID')[protocol_scores]
             sysB = subdf[subdf['systemID'] == sys2].set_index('segmentID')[protocol_scores]
             scores = pd.DataFrame({sys1: sysA, sys2: sysB}).dropna()  # dropna is only for IAA calculation
+            # convert to floats, especially needed for MQM-like
+            scores = scores.applymap(lambda x: float(x))
             diffs = list(scores[sys1] - scores[sys2])
             # use wilcoxon's test
             # _, p_value = wilcoxon(diffs, alternative='greater')
@@ -77,9 +85,9 @@ def ClustersAndRanking(annotations_loader):
             data[protocol]["system"].append(system)
             data[protocol][protocol].append(system_scores.at[system, 'mean'])
 
-    plot_clusters(data, data_clusters, ["WMT-DASQM", "ESA-1", "MQM-1"], "PAPER_ESA/generated_plots/ranking_and_clusters.pdf")
+    plot_clusters(data, data_clusters, ["WMT-DASQM", "ESA-1", "ESA-1-SPANS", "MQM-1"], "PAPER_ESA/generated_plots/ranking_and_clusters.pdf")
     plot_clusters(data, data_clusters, ["ESA-1", "ESAAI-1", "LLM"], "PAPER_ESAAI/generated_plots/ranking_and_clusters.pdf")
-    plot_clusters(data, data_clusters, ["MQM-1", "LLM", "ESA-1", "ESAAI-1", "ESA-2", "ESAAI-2", "WMT-DASQM"], "archive/all.pdf")
+    plot_clusters(data, data_clusters, ["ESA-1", "ESA-2", "ESAAI-1", "ESAAI-2", "MQM-1", "WMT-DASQM", "ESA-1-SPANS", "ESA-2-SPANS", "ESAAI-1-SPANS", "ESAAI-2-SPANS", "LLM"], "archive/all.pdf")
 
 
 def plot_clusters(data, data_clusters, protocols, filename):
@@ -87,9 +95,9 @@ def plot_clusters(data, data_clusters, protocols, filename):
 
     figutils.matplotlib_default()
 
-    rows = 1
-    columns = len(protocols)
-    fig, axs = plt.subplots(1, columns, figsize=(2.3 * columns, 2.2 * rows))
+    rows = 1 if len(protocols) < 5 else 2
+    columns = len(protocols) if len(protocols) < 5 else int(np.ceil(len(protocols) / 2))
+    fig, axs = plt.subplots(rows, columns, figsize=(2.3 * columns, 2.2 * rows))
 
     axs = axs.flatten()
 
@@ -159,8 +167,10 @@ def plot_clusters(data, data_clusters, protocols, filename):
             transform=axs[i].transAxes, ha='right', va='bottom', zorder=15,
             weight="bold"
         )
-
-        axs[i].set_xlabel(PROTOCOL_DEFINITIONS[protocol]['name'].replace("_1", "").replace("$$", ""))
+        if protocol.endswith("SPANS"):
+            axs[i].set_xlabel(PROTOCOL_DEFINITIONS[protocol.replace("-SPANS", "")]['name'].replace("_1", "_{spans}").replace("_2", "_{2-spans}"))
+        else:
+            axs[i].set_xlabel(PROTOCOL_DEFINITIONS[protocol]['name'].replace("_1", "").replace("$$", ""))
         if i == 0:
             axs[i].set_ylabel(PROTOCOL_DEFINITIONS["WMT-MQM"]['name'], labelpad=-2)
         else:
