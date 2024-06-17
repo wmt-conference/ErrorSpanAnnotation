@@ -16,8 +16,8 @@ def esa_corr_others(annotation_loader):
             method_scores[f"{method}_score_mqm"] = df[f"{method}_score_mqm"].tolist()
 
     names = PROTOCOL_DEFINITIONS.copy()
-    names["ESA-1_mqm"] = {"name": f'{names["ESA-1"]["name"]}' + '$^\mathrm{MQM}$'}
-    names["ESA-2_mqm"] = {"name": f'{names["ESA-2"]["name"]}' + '$^\mathrm{MQM}$'}
+    names["ESA-1_mqm"] = {"name": f'{names["ESA-1"]["name"]}' + r'$_\mathrm{\,spans}$'}
+    names["ESA-2_mqm"] = {"name": f'{names["ESA-2"]["name"]}' + r'$_\mathrm{\,spans}$'}
 
     table = {}
     for method1_i, method1 in enumerate(method_scores.keys()):

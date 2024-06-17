@@ -58,7 +58,7 @@ PROTOCOL_DEFINITIONS = {
         "framework": "appraise",
         "appraise_scorefile": "240521rc6MQM.scores.csv",
         "appraise_batchefile": "batches_wmt23_en-de_mqm.json",
-        "name": "MQM$_IAA$",
+        "name": r"MQM$_\mathrm{IAA}$",
     },
     'ESA-IAA': {
         "framework": "appraise",
