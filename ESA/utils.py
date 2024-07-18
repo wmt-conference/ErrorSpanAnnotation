@@ -166,7 +166,7 @@ def load_raw_wmt(protocol):
 
 
 def load_raw_appraise_campaign(protocol):
-    appraise_batches = json.load(open(f"campaign-ruction-rc5/data/{PROTOCOL_DEFINITIONS[protocol]['appraise_batchefile']}"))
+    appraise_batches = json.load(open(f"data/campaign-ruction-rc5/data/{PROTOCOL_DEFINITIONS[protocol]['appraise_batchefile']}"))
 
     mapping_line_num = {}
     for batch in appraise_batches:
@@ -191,7 +191,7 @@ def load_raw_appraise_campaign(protocol):
                 mapping_line_num[itemid] = [itemids[1], item["sourceText"], item['targetText'], "None"]
 
     header = ["login", "system", "itemID", "is_bad", "source_lang", "target_lang", "score", "documentID", "unk_col_always_false", "error_spans", "start_time", "end_time"]
-    scores = pd.read_csv(f"campaign-ruction-rc5/{PROTOCOL_DEFINITIONS[protocol]['appraise_scorefile']}", sep=",", names=header, dtype=str)
+    scores = pd.read_csv(f"data/campaign-ruction-rc5/{PROTOCOL_DEFINITIONS[protocol]['appraise_scorefile']}", sep=",", names=header, dtype=str)
 
     df = load_raw_wmt("WMT-DASQM")
     df['score'] = "None"
@@ -274,7 +274,7 @@ def load_raw_appraise_campaign(protocol):
     df2 = df2[df2["is_bad"] != "BAD"].reset_index(drop=True)
     df2["score"] = df2["score"].fillna("None")
     df2 = df2[["systemID", "score"]]
-    df2.to_csv(f"campaign-ruction-rc5/en-de.{protocol}.seg.score", sep="\t", index=False, header=False)
+    df2.to_csv(f"data/campaign-ruction-rc5/en-de.{protocol}.seg.score", sep="\t", index=False, header=False)
 
     df['score'] = df['score'].replace("None", float("nan")).astype(float)
     return df

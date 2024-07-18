@@ -14,9 +14,9 @@ PAPER/
 generated_plots/
 figures/
 preparation/data/
-campaign-ruction-rc5/data
 data/mt-metrics-eval-v2
-campaign-ruction-rc5/*.pkl
+data/campaign-ruction-rc5/*.pkl
+data/campaign-ruction-rc5/data/batches_wmt23_en-de_esa_gemba.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
