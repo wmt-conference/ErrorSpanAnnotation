@@ -1,0 +1,127 @@
+[
+    {
+        "mqm": {
+            "tutorial": {
+                "instruction": "This translation seems to be all correct. Please click 'mark complete' and continue."
+            },
+            "payload": []
+        },
+        "documentID": "ende-tutorial1",
+        "sourceID": "ende-tutorial1",
+        "targetID": "ende-tutorial1",
+        "itemType": "TGT",
+        "sourceText": "Der Hund ist rausgerannt.",
+        "targetText": "The dog ran outside.",
+        "itemID": 1000000
+    },
+    {
+        "mqm": {
+            "tutorial": {
+                "instruction": "The word <u>\"walked\"</u> is incorrect. Mark it minor error (light pink) using the instructions above. The error type should be <u>Accuracy > Mistranslation</u>.",
+                "mqm_target": [
+                    {
+                        "start_i": 8,
+                        "end_i": 14,
+                        "severity": "minor"
+                    }
+                ]
+            },
+            "payload": []
+        },
+        "documentID": "ende-tutorial1",
+        "sourceID": "ende-tutorial1",
+        "targetID": "ende-tutorial1",
+        "itemType": "TGT",
+        "sourceText": "Der Hund ist rausgerannt.",
+        "targetText": "The dog walked outside.",
+        "itemID": 1000001
+    },
+    {
+        "mqm": {
+            "tutorial": {
+                "instruction": "The words <u>\"stayed inside\"</u> are very wrong. Mark them using the instructions and raise its severity to <u>major</u>. The error type should again be <u>Accuracy > Mistranslation</u>.",
+                "mqm_target": [
+                    {
+                        "start_i": 8,
+                        "end_i": 21,
+                        "severity": "major"
+                    }
+                ]
+            },
+            "payload": []
+        },
+        "documentID": "ende-tutorial1",
+        "sourceID": "ende-tutorial1",
+        "targetID": "ende-tutorial1",
+        "itemType": "TGT",
+        "sourceText": "Der Hund ist rausgerannt.",
+        "targetText": "The dog stayed inside.",
+        "itemID": 1000002
+    },
+    {
+        "mqm": {
+            "tutorial": {
+                "instruction": "While the translation is technically correct, it does not sound very natural. Mark the word <u>\"erfuhren\"</u> with <u>minor</u> error of the type <u>Style > Awkward style</u>.",
+                "mqm_target": [
+                    {
+                        "start_i": 55,
+                        "end_i": 63,
+                        "severity": "minor"
+                    }
+                ]
+            },
+            "payload": []
+        },
+        "documentID": "ende-tutorial2",
+        "sourceID": "ende-tutorial2",
+        "targetID": "ende-tutorial2",
+        "itemType": "TGT",
+        "sourceText": "Although the cats stayed outside overnight, they were not cold.",
+        "targetText": "Obwohl die Katzen die Nacht über im Freien verharrten, erfuhren sie keine Kälte.",
+        "itemID": 1000003
+    },
+    {
+        "mqm": {
+            "tutorial": {
+                "instruction": "The word <u>\"Hund\" (dog)</u> is not present in the translation. Mark the <u>[MISSING]</u> text with major severity. The error type should be <u>Accuracy > Omission</u>.",
+                "mqm_target": [
+                    {
+                        "start_i": "missing",
+                        "end_i": "missing",
+                        "severity": "major"
+                    }
+                ]
+            },
+            "payload": []
+        },
+        "documentID": "ende-tutorial2",
+        "sourceID": "ende-tutorial2",
+        "targetID": "ende-tutorial2",
+        "itemType": "TGT",
+        "sourceText": "Der Hund ist rausgerannt.",
+        "targetText": "The walked outside.",
+        "itemID": 1000004
+    },
+    {
+        "mqm": {
+            "tutorial": {
+                "instruction": "The word <u>\"ran\"</u> is mistakenly marked as incorrect. Fix it by removing it according to the instructions.",
+                "mqm_target": [
+                ]
+            },
+            "payload": [
+                {
+                    "start_i": 8,
+                    "end_i": 11,
+                    "severity": "minor"
+                }]
+        },
+        "documentID": "ende-tutorial2",
+        "sourceID": "ende-tutorial2",
+        "targetID": "ende-tutorial2",
+        "itemType": "TGT",
+        "sourceText": "Der Hund ist rausgerannt.",
+        "targetText": "The dog ran outside.",
+        "itemID": 1000005
+    }
+]

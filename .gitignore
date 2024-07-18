@@ -17,6 +17,7 @@ preparation/data/
 data/mt-metrics-eval-v2
 data/campaign-ruction-rc5/*.pkl
 data/campaign-ruction-rc5/data/batches_wmt23_en-de_esa_gemba.json
+data/wmt24_general
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

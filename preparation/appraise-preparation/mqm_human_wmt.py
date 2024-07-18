@@ -33,7 +33,7 @@ def find_file(filename):
 
 
 if args.sec_tutorial:
-    sec_tutorial = json.load(open(f"data/extra/tutorial-{args.sec_tutorial}.json", "r"))
+    sec_tutorial = json.load(open(f"data/tutorial/{args.sec_tutorial}.json", "r"))
 else:
     sec_tutorial = []
 

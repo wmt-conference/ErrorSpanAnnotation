@@ -27,7 +27,7 @@ class Protocol:
 
     def _append_human_ids(self):
         if "login" in self.df.columns:
-            annotator_mapping = pd.read_csv("data/Annotators_mapping.csv")
+            annotator_mapping = pd.read_csv("data/campaignruction-rc5/Annotators_mapping.csv")
             annotator_mapping = annotator_mapping[["AnnotatorID", "login"]]
             annotator_mapping["AnnotatorID"] = "Human_" + annotator_mapping["AnnotatorID"].astype(str)
 
