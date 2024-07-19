@@ -8,6 +8,17 @@ import itertools
 import copy
 import quality_control
 
+
+LANG_2_TO_3 = {
+    "en": "eng",
+    "de": "deu",
+    "cs": "ces",
+    "hr": "hrv",
+    "pl": "plk",
+    "ru": "rus",
+    "zh": "zho",
+}
+
 args = argparse.ArgumentParser()
 args.add_argument("--langs", default="en-de")
 args.add_argument("--wave", type=int, default=0)
@@ -28,7 +39,7 @@ def load_tsv(filename: str, tsv_index: None | int = None):
 
     data = [x.strip("\n") for x in data]
 
-    if tsv_index:
+    if tsv_index is not None:
         data = [x.split("\t")[tsv_index] for x in data]
 
     return data
@@ -140,15 +151,15 @@ while docs_queue:
                     "sourceText": line_src,
                     "targetText": line_tgt,
                     "itemType": "TGT",
-                    "TODO": "TODO other keys",
+                    "sourceID": f"{line_i}#{args.langs}",
+                    "targetID": f"{line_i}#{system}",
+                    "itemID": line_i,
+                    "_is_speech": lines_domain[lines_i[0]] == "speech", # will pop
                 }
-                for line_src, line_tgt in zip(item_lines_src, item_lines_tgt)
+                for line_i, line_src, line_tgt in zip(lines_i, item_lines_src, item_lines_tgt)
             ][:100-BAD_COUNT-task_docs_len()])
             # end the filling phase
             break
-        
-
-        # TODO: handle multimodal (speech domain) differently
 
         doc, system = docs_queue.pop(0)
         lines_i = [i for i, line in enumerate(lines_doc) if line == doc]
@@ -160,9 +171,12 @@ while docs_queue:
                 "sourceText": line_src,
                 "targetText": line_tgt,
                 "itemType": "TGT",
-                "TODO": "TODO other keys",
+                "sourceID": f"{line_i}#{args.langs}",
+                "targetID": f"{line_i}#{system}",
+                "itemID": line_i,
+                "_is_speech": lines_domain[lines_i[0]] == "speech", # will pop
             }
-            for line_src, line_tgt in zip(item_lines_src, item_lines_tgt)
+            for line_i, line_src, line_tgt in zip(lines_i, item_lines_src, item_lines_tgt)
         ])
 
     # add quality control
@@ -174,20 +188,50 @@ while docs_queue:
     # final shuffle all docs except for tutorial
     task_docs = [task_docs[0]]+R_DOC_SHUFFLING.sample(task_docs[1:], len(task_docs[1:]))
 
-    tasks.append([x for l in task_docs for x in l])
+    items = []
+    for item in [x for l in task_docs for x in l]:
+        if "_is_speech" in item and item.pop("_is_speech"):
+            filename = item["documentID"].replace("#dup", "").replace("#incomplete", "").replace("#bad", "")
+            filename = "_".join(filename.split("_")[1:])
+            item["sourceText"] = f"""
+                <video
+                    src="https://vilda.net/s/wmt24/{filename}.mp4"
+                    controls
+                    disablepictureinpicture
+                    preload="auto"
+                    controlslist="nodownload"
+                ></video>
+            """
+        item["mqm"] = []
+        item["_item"] = ""
+        item["isCompleteDocument"] = False
+
+        items.append(item)
+
+    tasks.append({
+        "items": items,
+        "task": {
+            "batchNo": len(tasks)+1,
+            "randomSeed": 0,
+            "requiredAnnotations": 1,
+            "sourceLanguage": LANG_2_TO_3[args.langs.split("-")[0]],
+            "targetLanguage": LANG_2_TO_3[args.langs.split("-")[1]],
+        }
+    })
 
 print("\n".join([
     f"Task {task_i:>3}: "
-    f"{len(set([x['documentID'] for x in task])):>4} docs, "
-    f"{len(task):>6} lines, "
-    f"{sum([len([x for x in task if x['documentID'].endswith('#bad')])]):>6} BAD lines, "
-    f"{sum([len([x for x in task if x['documentID'].endswith('#incomplete')])]):>6} incomplete doc lines, "
-    f"{sum([len([x for x in task if x['itemType'] == 'TGT' and '#dup' not in x['documentID']])]):>6} unique TGT lines, "
-    f"{sum([len(x['sourceText'].split()) for x in task]):>6} words"
+    f"{len(set([x['documentID'] for x in task['items']])):>4} docs, "
+    f"{len(task['items']):>6} lines, "
+    f"{sum([len([x for x in task['items'] if x['documentID'].endswith('#bad')])]):>6} BAD lines, "
+    f"{sum([len([x for x in task['items'] if x['documentID'].endswith('#incomplete')])]):>6} incomplete doc lines, "
+    f"{sum([len([x for x in task['items'] if x['itemType'] == 'TGT' and '#dup' not in x['documentID']])]):>6} unique TGT lines, "
+    f"{sum([len(x['sourceText'].split()) for x in task['items']]):>6} words"
     for task_i, task in enumerate(tasks)
 ]))
 
 json.dump(
     tasks,
-    open(f"data/wmt24_general/batches_wave{args.wave}.{args.langs}.json", "w")
+    open(f"data/wmt24_general/batches_wave{args.wave}.{args.langs}.json", "w"),
+    indent=2,
 )

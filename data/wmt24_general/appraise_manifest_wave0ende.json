@@ -1,0 +1,14 @@
+{
+    "CAMPAIGN_URL": "http://127.0.0.1:8000/dashboard/sso/",
+    "CAMPAIGN_NAME": "wmt",
+    "CAMPAIGN_KEY": "wmt24wave0ende",
+    "CAMPAIGN_NO": 1,
+    "REDUNDANCY": 1,
+
+    "TASKS_TO_ANNOTATORS": [
+        ["eng", "deu", "uniform",  130, 130]
+    ],
+
+    "TASK_TYPE": "Document",
+    "TASK_OPTIONS": "ESA;StaticContext"
+}

@@ -1,15 +1,6 @@
 import random
 import copy
 
-LANG_2_TO_3 = {
-    "en": "eng",
-    "de": "deu",
-    "cs": "ces",
-    "hr": "hrv",
-    "pl": "plk",
-    "ru": "rus",
-    "zh": "zho",
-}
 
 RANDOM_SAMPLE_BAD = random.Random(0)
 
@@ -22,7 +13,7 @@ def create_bad_document(data_docs):
 
     docs_available = [
         doc for doc in data_docs
-        if not doc[0]["documentID"].endswith("#dup") and doc[0]["itemType"] != "BAD"
+        if "#dup" not in doc[0]["documentID"] and "#bad" not in doc[0]["documentID"]
     ]
     doc_bad = copy.deepcopy(RANDOM_SAMPLE_BAD.choice(docs_available))
 
