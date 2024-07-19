@@ -147,6 +147,7 @@ while docs_queue:
             item_lines_tgt = [lines_systems[system][i] for i in lines_i]
             task_docs.append([
                 {
+                    "mqm": [],
                     "documentID": doc + "#incomplete",
                     "sourceText": line_src,
                     "targetText": line_tgt,
@@ -167,6 +168,7 @@ while docs_queue:
         item_lines_tgt = [lines_systems[system][i] for i in lines_i]
         task_docs.append([
             {
+                "mqm": [],
                 "documentID": doc,
                 "sourceText": line_src,
                 "targetText": line_tgt,
@@ -202,7 +204,6 @@ while docs_queue:
                     controlslist="nodownload"
                 ></video>
             """
-        item["mqm"] = []
         item["_item"] = ""
         item["isCompleteDocument"] = False
 
