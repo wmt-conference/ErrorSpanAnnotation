@@ -8,6 +8,7 @@ import itertools
 import copy
 import numpy as np
 import quality_control
+import itertools
 
 
 LANG_2_TO_3 = {
@@ -123,18 +124,22 @@ print(
 # try to balance document lengths (words)
 sys_docs = list(itertools.product(docs, SYSTEMS))
 sys_docs.sort(key=lambda x: doc_word_count[x[0]])
-sys_docs_long = sys_docs[:len(sys_docs)//2]
-sys_docs_short = sys_docs[len(sys_docs)//2:]
+# this creates almost equally-sized chunks each of different document lengths
+sys_docs_chunks = np.array_split(sys_docs, 20)
 # shuffle only within the length bucket
-r = random.Random(0)
-r.shuffle(sys_docs_long)
-r.shuffle(sys_docs_short)
+R_DOC_CHUNK_SHUFFLING = random.Random(0)
+
+for l_i, l in enumerate(sys_docs_chunks):
+    l = l.tolist()
+    R_DOC_CHUNK_SHUFFLING.shuffle(l)
+    sys_docs_chunks[l_i] = l
 
 # intervewave the documents
 # should be one short, one long, etc..
-docs_queue = sys_docs_short + sys_docs_long
-docs_queue[0::2] = sys_docs_short
-docs_queue[1::2] = sys_docs_long
+docs_queue = []
+for l in itertools.zip_longest(*sys_docs_chunks, fillvalue=None):
+    l = [x for x in l if x is not None]
+    docs_queue.extend(l)
 
 print(sorted(list(doc_line_count.values())))
 
@@ -261,16 +266,22 @@ while docs_queue:
         }
     })
 
-print("\n".join([
-    f"Task {task_i:>3}: "
-    f"{len(set([x['documentID'] for x in task['items']])):>4} docs, "
-    f"{len(task['items']):>6} lines, "
-    f"{sum([len([x for x in task['items'] if x['documentID'].endswith('#bad')])]):>6} BAD lines, "
-    f"{sum([len([x for x in task['items'] if x['documentID'].endswith('#incomplete')])]):>6} incomplete doc lines, "
-    f"{sum([len([x for x in task['items'] if x['itemType'] == 'TGT' and '#dup' not in x['documentID']])]):>6} unique TGT lines, "
-    f"{100*np.average([len(x['sourceText'].split()) for x in task['items'] if '</video>' not in x['sourceText']]):>6.0f} words"
-    for task_i, task in enumerate(tasks)
-]))
+word_counts = []
+for task_i, task in enumerate(tasks):
+    word_count = 100*np.average([len(x['sourceText'].split()) for x in task['items'] if '</video>' not in x['sourceText']])
+    word_counts.append(word_count)
+    print(
+        f"Task {task_i:>3}: "
+        f"{len(set([x['documentID'] for x in task['items']])):>4} docs, "
+        f"{len(task['items']):>6} lines, "
+        f"{sum([len([x for x in task['items'] if x['documentID'].endswith('#bad')])]):>6} BAD lines, "
+        f"{sum([len([x for x in task['items'] if x['documentID'].endswith('#incomplete')])]):>6} incomplete doc lines, "
+        f"{sum([len([x for x in task['items'] if x['documentID'].endswith('#dup')])]):>6} duplicate doc lines, "
+        f"{word_count:>6.0f} words"
+    )
+word_counts_avg = np.average(word_counts)
+print(f"\nAVG word count: {word_counts_avg:.0f}")
+print(f"MAE from avg word count: {np.average([abs(x-word_counts_avg) for x in word_counts]):.0f}")
 
 json.dump(
     tasks,
