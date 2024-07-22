@@ -51,6 +51,13 @@ lines_doc = load_tsv(
 lines_domain = load_tsv(
     f"data/wmt24_general/documents/{args.langs}.docs", tsv_index=0)
 
+# trim documents to first 10
+doc_counter = collections.Counter()
+for line_i, line in enumerate(lines_doc):
+    if doc_counter[line] >= 10:
+        lines_doc[line_i] = None
+    doc_counter[line] += 1
+
 # Python supports this!
 assert len(lines_src) == len(lines_doc) == len(lines_domain)
 
@@ -74,7 +81,9 @@ del references
 assert all(len(lines_systems[system]) == len(lines_src) for system in SYSTEMS)
 
 # we need stable ordering of docs
-docs = list(set(lines_doc))
+docs = set(lines_doc)
+docs.remove(None)
+docs = list(docs)
 docs.sort()
 random.Random(0).shuffle(docs)
 
@@ -84,6 +93,7 @@ doc_word_count = collections.Counter()
 for doc, line_src in zip(lines_doc, lines_src):
     doc_word_count[doc] += len(line_src.split())
 doc_line_count = collections.Counter(lines_doc)
+doc_line_count.pop(None)
 
 print(f"DOCS ({len(docs)}, {sum([doc_line_count[doc] for doc in docs])} lines) in wave {args.wave}:", docs)
 
@@ -103,8 +113,10 @@ docs_queue = sys_docs_short + sys_docs_long
 docs_queue[0::2] = sys_docs_short
 docs_queue[1::2] = sys_docs_long
 
+print(sorted(list(doc_line_count.values())))
+
 print(f"SYSTEMS ({len(SYSTEMS)})")
-print(f"DOC+SYSTEMS ({len(docs_queue)}, {sum([doc_line_count[doc] for doc, sys in docs_queue if doc in docs])} lines)")
+print(f"DOC+SYSTEMS ({len(docs_queue)} sysdocs, {sum([doc_line_count[doc] for doc, sys in docs_queue if doc in docs])} total lines)")
 
 tasks = []
 R_DOC_FILLING = random.Random(0)
