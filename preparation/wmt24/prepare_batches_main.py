@@ -26,7 +26,10 @@ args = args.parse_args()
 
 SEC_TUTORIAL = json.load(open(f"data/tutorial/de-en.esa.json", "r"))
 SYSTEMS = json.load(open(f"data/wmt24_general/systems.json", "r"))[args.langs]
-SYSTEMS = [sys.replace("IOL-Research", "IOL_Research") for sys in SYSTEMS if sys != "tutorial"]
+SYSTEMS = [
+    sys.replace("IOL-Research", "IOL_Research")
+    for sys in SYSTEMS if sys != "tutorial"
+]
 BAD_COUNT = 12
 
 
@@ -47,9 +50,13 @@ def load_tsv(filename: str, tsv_index: None | int = None):
 
 lines_src = load_tsv(f"data/wmt24_general/sources/{args.langs}.txt")
 lines_doc = load_tsv(
-    f"data/wmt24_general/documents/{args.langs}.docs", tsv_index=1)
+    f"data/wmt24_general/documents/{args.langs}.docs",
+    tsv_index=1
+)
 lines_domain = load_tsv(
-    f"data/wmt24_general/documents/{args.langs}.docs", tsv_index=0)
+    f"data/wmt24_general/documents/{args.langs}.docs",
+    tsv_index=0
+)
 
 # trim documents to first 10
 doc_counter = collections.Counter()
@@ -87,15 +94,25 @@ docs = list(docs)
 docs.sort()
 random.Random(0).shuffle(docs)
 
-# take first or second part based on the wave
-docs = docs[args.wave*len(docs)//2:(args.wave+1)*len(docs)//2]
-doc_word_count = collections.Counter()
-for doc, line_src in zip(lines_doc, lines_src):
-    doc_word_count[doc] += len(line_src.split())
 doc_line_count = collections.Counter(lines_doc)
 doc_line_count.pop(None)
 
-print(f"DOCS ({len(docs)}, {sum([doc_line_count[doc] for doc in docs])} lines) in wave {args.wave}:", docs)
+# take first or second part based on the wave
+docs = docs[args.wave*len(docs)//2:(args.wave+1)*len(docs)//2]
+docs = list(set(docs))
+docs.sort()
+random.Random(0).shuffle(docs)
+
+# count words/lines in documents
+doc_word_count = collections.Counter()
+for doc, line_src in zip(lines_doc, lines_src):
+    doc_word_count[doc] += len(line_src.split())
+
+print(
+    f"DOCS ({len(docs)}, "
+    f"{sum([doc_line_count[doc] for doc in docs])} lines) in wave {args.wave}:",
+    docs
+)
 
 # try to balance document lengths (words)
 sys_docs = list(itertools.product(docs, SYSTEMS))
@@ -116,7 +133,10 @@ docs_queue[1::2] = sys_docs_long
 print(sorted(list(doc_line_count.values())))
 
 print(f"SYSTEMS ({len(SYSTEMS)})")
-print(f"DOC+SYSTEMS ({len(docs_queue)} sysdocs, {sum([doc_line_count[doc] for doc, sys in docs_queue if doc in docs])} total lines)")
+print(
+    f"DOC+SYSTEMS ({len(docs_queue)} sysdocs, "
+    f"{sum([doc_line_count[doc] for doc, sys in docs_queue if doc in docs])} total lines)"
+)
 
 tasks = []
 R_DOC_FILLING = random.Random(0)
@@ -124,7 +144,9 @@ R_DOC_SHUFFLING = random.Random(0)
 while docs_queue:
     task_docs = [copy.deepcopy(SEC_TUTORIAL)]
     def task_docs_len(): return sum([len(l) for l in task_docs])
-    def task_qc_len(): return sum([len([x for x in l if x["itemType"] == "BAD"]) for l in task_docs])
+
+    def task_qc_len(): return sum(
+        [len([x for x in l if x["itemType"] == "BAD"]) for l in task_docs])
 
     while task_docs_len() < 100 - BAD_COUNT:
         # we ran out of documents to distribute
@@ -150,7 +172,7 @@ while docs_queue:
 
             # end the filling phase
             break
-        
+
         # if the next document would be too much then just trim it
         if doc_line_count[docs_queue[0][0]] + task_docs_len() > 100 - BAD_COUNT:
             doc, system = docs_queue[0]
@@ -167,7 +189,8 @@ while docs_queue:
                     "sourceID": f"{line_i}#{args.langs}",
                     "targetID": f"{line_i}#{system}",
                     "itemID": line_i,
-                    "_is_speech": lines_domain[lines_i[0]] == "speech", # will pop
+                    # will pop
+                    "_is_speech": lines_domain[lines_i[0]] == "speech",
                 }
                 for line_i, line_src, line_tgt in zip(lines_i, item_lines_src, item_lines_tgt)
             ][:100-BAD_COUNT-task_docs_len()])
@@ -188,7 +211,7 @@ while docs_queue:
                 "sourceID": f"{line_i}#{args.langs}",
                 "targetID": f"{line_i}#{system}",
                 "itemID": line_i,
-                "_is_speech": lines_domain[lines_i[0]] == "speech", # will pop
+                "_is_speech": lines_domain[lines_i[0]] == "speech",  # will pop
             }
             for line_i, line_src, line_tgt in zip(lines_i, item_lines_src, item_lines_tgt)
         ])
@@ -200,12 +223,14 @@ while docs_queue:
     task_docs[-1] = task_docs[-1][:100 - (task_docs_len()-len(task_docs[-1]))]
 
     # final shuffle all docs except for tutorial
-    task_docs = [task_docs[0]]+R_DOC_SHUFFLING.sample(task_docs[1:], len(task_docs[1:]))
+    task_docs = [task_docs[0]] + \
+        R_DOC_SHUFFLING.sample(task_docs[1:], len(task_docs[1:]))
 
     items = []
     for item in [x for l in task_docs for x in l]:
         if "_is_speech" in item and item.pop("_is_speech"):
-            filename = item["documentID"].replace("#dup", "").replace("#incomplete", "").replace("#bad", "")
+            filename = item["documentID"].replace("#dup", "").replace(
+                "#incomplete", "").replace("#bad", "")
             filename = "_".join(filename.split("_")[1:])
             item["sourceText"] = f"""
                 <video
