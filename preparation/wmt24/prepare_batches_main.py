@@ -107,6 +107,11 @@ random.Random(0).shuffle(docs)
 doc_word_count = collections.Counter()
 for doc, line_src in zip(lines_doc, lines_src):
     doc_word_count[doc] += len(line_src.split())
+# normalize by number of lines
+doc_word_count = {
+    doc: doc_word_count[doc]/doc_line_count[doc]
+    for doc in doc_line_count.keys()
+}
 
 print(
     f"DOCS ({len(docs)}, "
