@@ -6,6 +6,7 @@ import collections
 import random
 import itertools
 import copy
+import numpy as np
 import quality_control
 
 
@@ -156,7 +157,6 @@ while docs_queue:
     while task_docs_len() < 100 - BAD_COUNT:
         # we ran out of documents to distribute
         if not docs_queue:
-            duplicate_i = 0
 
             # sample new doc (not tutorial, not QC --- can't be because they're added later)
             # blocks the same doc from being dupped twice?
@@ -169,7 +169,6 @@ while docs_queue:
                 doc_new = doc_new[:100 - BAD_COUNT - task_docs_len()]
                 for line in doc_new:
                     line["documentID"] = f"{line['documentID']}#dup"
-                duplicate_i += 1
                 task_docs.append(doc_new)
                 # could happen that we need to duplicate a duplication
                 # luckily the document ID would now be #dup#dup
@@ -269,7 +268,7 @@ print("\n".join([
     f"{sum([len([x for x in task['items'] if x['documentID'].endswith('#bad')])]):>6} BAD lines, "
     f"{sum([len([x for x in task['items'] if x['documentID'].endswith('#incomplete')])]):>6} incomplete doc lines, "
     f"{sum([len([x for x in task['items'] if x['itemType'] == 'TGT' and '#dup' not in x['documentID']])]):>6} unique TGT lines, "
-    f"{sum([len(x['sourceText'].split()) for x in task['items']]):>6} words"
+    f"{100*np.average([len(x['sourceText'].split()) for x in task['items'] if '</video>' not in x['sourceText']]):>6.0f} words"
     for task_i, task in enumerate(tasks)
 ]))
 
