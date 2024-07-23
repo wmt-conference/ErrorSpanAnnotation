@@ -28,10 +28,6 @@ args = args.parse_args()
 
 SEC_TUTORIAL = json.load(open(f"data/tutorial/de-en.esa.json", "r"))
 SYSTEMS = json.load(open(f"data/wmt24_general/systems.json", "r"))[args.langs]
-SYSTEMS = [
-    sys.replace("IOL-Research", "IOL_Research")
-    for sys in SYSTEMS if sys != "tutorial"
-]
 BAD_COUNT = 12
 
 
