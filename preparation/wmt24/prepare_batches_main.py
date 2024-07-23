@@ -19,6 +19,11 @@ LANG_2_TO_3 = {
     "pl": "plk",
     "ru": "rus",
     "zh": "zho",
+    "uk": "ukr",
+    "is": "isl",
+    "hi": "hin",
+    "ja": "jpn",
+    "es": "spa",
 }
 
 args = argparse.ArgumentParser()
@@ -137,7 +142,6 @@ for l in itertools.zip_longest(*sys_docs_chunks, fillvalue=None):
     l = [x for x in l if x is not None]
     docs_queue.extend(l)
 
-print(sorted(list(doc_line_count.values())))
 
 print(f"SYSTEMS ({len(SYSTEMS)})")
 print(
@@ -281,6 +285,6 @@ print(f"MAE from avg word count: {np.average([abs(x-word_counts_avg) for x in wo
 
 json.dump(
     tasks,
-    open(f"data/wmt24_general/batches_wave{args.wave}.{args.langs}.json", "w"),
+    open(f"data/wmt24_general/batches/wave{args.wave}.{args.langs}.json", "w"),
     indent=2,
 )
