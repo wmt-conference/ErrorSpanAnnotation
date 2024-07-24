@@ -6,7 +6,7 @@
     "REDUNDANCY": 1,
 
     "TASKS_TO_ANNOTATORS": [
-        ["eng", "deu", "uniform",  130, 130]
+        ["eng", "deu", "uniform",  71, 71]
     ],
 
     "TASK_TYPE": "Document",

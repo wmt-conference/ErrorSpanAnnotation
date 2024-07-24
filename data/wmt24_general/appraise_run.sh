@@ -8,7 +8,7 @@ python3 manage.py collectstatic --no-post-process;
 
 
 python3 manage.py StartNewCampaign /home/vilda/ErrorSpanAnnotations/data/wmt24_general/appraise_manifest_wave0ende.json \
-    --batches-json /home/vilda/ErrorSpanAnnotations/data/wmt24_general/batches_wave0.en-de.json \
+    --batches-json /home/vilda/ErrorSpanAnnotations/data/wmt24_general/batches/wave0.en-de.json \
     --csv-output /home/vilda/ErrorSpanAnnotations/data/wmt24_general/appraise_credentials.csv;
 
 # TODO: export

@@ -243,7 +243,7 @@ while docs_queue:
             filename = "_".join(filename.split("_")[1:])
             item["sourceText"] = f"""
                 <video
-                    src="https://vilda.net/s/wmt24/{filename}.mp4"
+                    src="https://rogrundk.appraise.cf/static/assets/wmt24/{filename}.mp4"
                     controls
                     disablepictureinpicture
                     preload="auto"
