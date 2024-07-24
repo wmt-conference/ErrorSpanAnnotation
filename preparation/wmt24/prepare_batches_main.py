@@ -227,7 +227,7 @@ while docs_queue:
 
     # add quality control
     while task_docs_len() < 100:
-        task_docs.append(quality_control.create_bad_document(task_docs))
+        task_docs.append(quality_control.create_bad_document(task_docs, args.langs))
     # trim the last doc to 100
     task_docs[-1] = task_docs[-1][:100 - (task_docs_len()-len(task_docs[-1]))]
 

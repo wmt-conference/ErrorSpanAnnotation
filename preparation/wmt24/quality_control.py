@@ -5,11 +5,12 @@ import copy
 RANDOM_SAMPLE_BAD = random.Random(0)
 
 
-def create_bad_document(data_docs):
+def create_bad_document(data_docs, langs):
     """
     Randomly sample a document from a list and corrupt it.
     """
     all_tgt = [x["targetText"] for l in data_docs for x in l]
+    character_based = langs.split("-")[1] in {"zh", "ja", "ko"}
 
     docs_available = [
         doc for doc in data_docs
@@ -18,19 +19,15 @@ def create_bad_document(data_docs):
     doc_bad = copy.deepcopy(RANDOM_SAMPLE_BAD.choice(docs_available))
 
     for obj in doc_bad:
-        sents = []
-        for sent in obj["targetText"].split(". "):
-            # don't corrupt if it's short sentence (could be a non-sentences)
-            if len(sent.split()) < 5:
-                sents.append(sent)
-            else:
-                corrupted, start_i, end_i = corrupt_text_by_mixing(
-                    obj["targetText"],
-                    RANDOM_SAMPLE_BAD.choice(all_tgt),
-                    character_based=False
-                )
-                sents.append(corrupted)
-        obj["targetText"] = ". ".join(sents)
+        text = obj["targetText"]
+        SENT_COUNT = text.count(". ") + text.count("。") + 1
+        for _ in range(SENT_COUNT):
+            text, start_i, end_i = corrupt_text_by_mixing(
+                text,
+                RANDOM_SAMPLE_BAD.choice(all_tgt),
+                character_based=character_based
+            )
+        obj["targetText"] = text
         obj["itemType"] = "BAD"
         # no need to add a unique identifier because there's at most one bad document per good one
         obj["documentID"] = obj["documentID"] + f"#bad"
@@ -39,6 +36,7 @@ def create_bad_document(data_docs):
 
 
 RANDOM_GEN_BAD = random.Random(0)
+RANDOM_GEN_BAD_LEN = random.Random(0)
 
 
 def corrupt_text_by_mixing(seg_orig: str, seg_inject: str, character_based: bool = False) -> str:
@@ -68,37 +66,7 @@ def corrupt_text_by_mixing(seg_orig: str, seg_inject: str, character_based: bool
 
     seg_len = len(seg_data)
     ref_len = len(ref_data)
-
-    # Determine length of bad phrase, relative to segment length.
-    _seg_to_bad_mapping = {
-        (None, 1): 2,
-        (1, 5): 2,
-        (5, 8): 3,
-        (8, 15): 4,
-        (15, 20): 5,
-        (20, None): 6,
-    }
-
-    bad_len = 0
-    for seg_pair in _seg_to_bad_mapping:
-        left, right = seg_pair
-
-        # seg_len == right; left edge case
-        if not left:
-            if seg_len == right:
-                bad_len = _seg_to_bad_mapping[seg_pair]
-                break
-
-        # left < seg_len; right edge case
-        elif not right:
-            if left < seg_len:
-                bad_len = _seg_to_bad_mapping[seg_pair]
-                break
-
-        # left < seg_len <= right; middle cases
-        elif left < seg_len <= right:
-            bad_len = _seg_to_bad_mapping[seg_pair]
-            break
+    bad_len = RANDOM_GEN_BAD_LEN.choice([2, 3, 4, 5, 6])
 
     # Double length of bad phrase for character-based languages.
     if character_based:
