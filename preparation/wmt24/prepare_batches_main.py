@@ -288,3 +288,10 @@ json.dump(
     open(f"data/wmt24_general/batches/wave{args.wave}.{args.langs}.json", "w"),
     indent=2,
 )
+
+lang1, lang2 = args.langs.split("-")
+
+print(
+    "TASK_TO_ANNOTATORS:",
+    f'["{LANG_2_TO_3[lang1]}", "{LANG_2_TO_3[lang2]}", "uniform",  {len(tasks)}, {len(tasks)}]'
+)
