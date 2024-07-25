@@ -8,15 +8,16 @@ RANDOM_SAMPLE_BAD = random.Random(0)
 def create_bad_document(data_docs, langs):
     """
     Randomly sample a document from a list and corrupt it.
+    Modifies data_docs so thatthe documents aren't re-used.
     """
     all_tgt = [x["targetText"] for l in data_docs for x in l]
     character_based = langs.split("-")[1] in {"zh", "ja", "ko"}
 
     docs_available = [
-        doc for doc in data_docs
+        doc_i for doc_i, doc in enumerate(data_docs)
         if "#dup" not in doc[0]["documentID"] and "#bad" not in doc[0]["documentID"]
     ]
-    doc_bad = copy.deepcopy(RANDOM_SAMPLE_BAD.choice(docs_available))
+    doc_bad = copy.deepcopy(data_docs.pop(RANDOM_SAMPLE_BAD.choice(docs_available)))
 
     for obj in doc_bad:
         text = obj["targetText"]
