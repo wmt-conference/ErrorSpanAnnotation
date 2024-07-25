@@ -6,8 +6,8 @@ python3 manage.py migrate;
 DJANGO_SUPERUSER_USERNAME=test DJANGO_SUPERUSER_PASSWORD=test python3 manage.py createsuperuser --noinput --email "test@test.test";
 python3 manage.py collectstatic --no-post-process;
 
-ROOT="/home/vilda/ErrorSpanAnnotations";
-ROOT="../";
+export ROOT="/home/vilda/ErrorSpanAnnotations";
+export ROOT="../";
 
 # just WAVE0 EN-DE
 python3 manage.py StartNewCampaign ${ROOT}/data/wmt24_general/appraise/manifest_wave0ende.json \

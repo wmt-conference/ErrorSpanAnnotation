@@ -12,3 +12,5 @@ for LANGS in "cs-uk" "en-cs" "en-de" "en-es" "en-hi" "en-is" "en-ja" "en-ru" "en
             >> data/wmt24_general/appraise/manifest_wave${WAVE}.jsonl;
     done
 done
+
+zip -r retral-rc4.zip data/wmt24_general/appraise/manifest_wave0.json data/wmt24_general/batches/

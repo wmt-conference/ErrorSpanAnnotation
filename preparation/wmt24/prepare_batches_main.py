@@ -195,8 +195,8 @@ while docs_queue:
                     "sourceText": line_src,
                     "targetText": line_tgt,
                     "itemType": "TGT",
-                    "sourceID": f"{line_i}#{args.langs}",
-                    "targetID": f"{line_i}#{system}",
+                    "sourceID": args.langs,
+                    "targetID": system,
                     "itemID": line_i,
                     # will pop
                     "_is_speech": lines_domain[lines_i[0]] == "speech",
@@ -217,8 +217,8 @@ while docs_queue:
                 "sourceText": line_src,
                 "targetText": line_tgt,
                 "itemType": "TGT",
-                "sourceID": f"{line_i}#{args.langs}",
-                "targetID": f"{line_i}#{system}",
+                "sourceID": args.langs,
+                "targetID": system,
                 "itemID": line_i,
                 "_is_speech": lines_domain[lines_i[0]] == "speech",  # will pop
             }
