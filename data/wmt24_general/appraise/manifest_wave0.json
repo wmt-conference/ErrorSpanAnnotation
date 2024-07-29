@@ -1,0 +1,25 @@
+{
+    "CAMPAIGN_URL": "http://172.211.57.127:80/dashboard/sso/",
+    "CAMPAIGN_NAME": "wmt24wave0",
+    "CAMPAIGN_KEY": "wmt24wave0",
+    "CAMPAIGN_NO": 1,
+    "REDUNDANCY": 1,
+
+    "TASKS_TO_ANNOTATORS": [
+        ["ces", "ukr", "uniform",  147, 147],
+        ["eng", "ces", "uniform",  71, 71],
+        ["eng", "deu", "uniform",  71, 71],
+        ["eng", "spa", "uniform",  58, 58],
+        ["eng", "hin", "uniform",  49, 49],
+        ["eng", "isl", "uniform",  45, 45],
+        ["eng", "jpn", "uniform",  58, 58],
+        ["eng", "rus", "uniform",  63, 63],
+        ["eng", "ukr", "uniform",  49, 49],
+        ["eng", "zho", "uniform",  58, 58],
+        ["jpn", "zho", "uniform",  47, 47]
+        
+    ],
+
+    "TASK_TYPE": "Document",
+    "TASK_OPTIONS": "ESA;StaticContext"
+}

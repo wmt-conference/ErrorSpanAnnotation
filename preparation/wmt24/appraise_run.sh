@@ -15,7 +15,7 @@ python3 manage.py StartNewCampaign ${ROOT}/data/wmt24_general/appraise/manifest_
     --csv-output ${ROOT}/data/wmt24_general/appraise/credentials_wave0ende.csv;
 
 # just WAVE0 EN-CS
-python3 manage.py StartNewCampaign ${ROOT}/data/wmt24_general/appraise/manifest_wave0ende.json \
+python3 manage.py StartNewCampaign ${ROOT}/data/wmt24_general/appraise/manifest_wave0encs.json \
     --batches-json ${ROOT}/data/wmt24_general/batches/wave0.en-cs.json \
     --csv-output ${ROOT}/data/wmt24_general/appraise/credentials_wave0encs.csv;
 
