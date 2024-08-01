@@ -9,15 +9,14 @@
         ["ces", "ukr", "uniform",  147, 147],
         ["eng", "ces", "uniform",  71, 71],
         ["eng", "deu", "uniform",  71, 71],
-        ["eng", "spa", "uniform",  58, 58],
+        ["eng", "spa", "uniform",  63, 63],
         ["eng", "hin", "uniform",  49, 49],
-        ["eng", "isl", "uniform",  45, 45],
+        ["eng", "isl", "uniform",  49, 49],
         ["eng", "jpn", "uniform",  58, 58],
         ["eng", "rus", "uniform",  63, 63],
         ["eng", "ukr", "uniform",  49, 49],
         ["eng", "zho", "uniform",  58, 58],
-        ["jpn", "zho", "uniform",  47, 47]
-        
+        ["jpn", "zho", "uniform",  50, 50]
     ],
 
     "TASK_TYPE": "Document",

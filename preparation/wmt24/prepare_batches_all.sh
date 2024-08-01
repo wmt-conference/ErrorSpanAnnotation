@@ -13,5 +13,5 @@ for LANGS in "cs-uk" "en-cs" "en-de" "en-es" "en-hi" "en-is" "en-ja" "en-ru" "en
     done
 done
 
-zip -r retral-wave0-rc5.zip data/wmt24_general/appraise/manifest_wave0.json data/wmt24_general/batches/wave0.*
-zip -r retral-wave1-rc5.zip data/wmt24_general/appraise/manifest_wave1.json data/wmt24_general/batches/wave1.*
+zip -r retral-wave0-rc6.zip data/wmt24_general/appraise/manifest_wave0.json data/wmt24_general/batches/wave0.*
+zip -r retral-wave1-rc6.zip data/wmt24_general/appraise/manifest_wave1.json data/wmt24_general/batches/wave1.*

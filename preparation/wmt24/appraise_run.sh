@@ -24,6 +24,11 @@ python3 manage.py StartNewCampaign ${ROOT}/data/wmt24_general/appraise/manifest_
     --batches-json ${ROOT}/data/wmt24_general/batches/wave0.*.json \
     --csv-output ${ROOT}/data/wmt24_general/appraise/credentials_wave0.csv;
 
+# whole WAVE1
+python3 manage.py StartNewCampaign ${ROOT}/data/wmt24_general/appraise/manifest_wave1.json \
+    --batches-json ${ROOT}/data/wmt24_general/batches/wave1.*.json \
+    --csv-output ${ROOT}/data/wmt24_general/appraise/credentials_wave1.csv;
+
 
 # start
 python3 manage.py runserver;

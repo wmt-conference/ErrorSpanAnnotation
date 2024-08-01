@@ -11,6 +11,8 @@ def get_item_len(item, langs):
 
 
 for f in glob.glob("data/wmt24_general/batches/*.json"):
+    if "wave0." not in f:
+        continue
     langs = f.split("/")[-1].removeprefix("wave0.").removesuffix(".json")
     data = json.load(open(f, "r"))
 
