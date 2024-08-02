@@ -37,5 +37,6 @@ python3 manage.py runserver;
 python3 manage.py ExportSystemScoresToCSV wmt24wave0
 
 # for testing VM
+sudo setcap CAP_NET_BIND_SERVICE=+eip $(realpath $(which python3))
 export APPRAISE_ALLOWED_HOSTS="127.0.0.1,172.211.57.127"
 nohup python3 manage.py runserver 0.0.0.0:80 &
