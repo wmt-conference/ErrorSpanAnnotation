@@ -50,7 +50,7 @@ import ESA.figutils as figutils
 import matplotlib.pyplot as plt
 
 figutils.matplotlib_default()
-plt.figure(figsize=(2, 1.4))
+plt.figure(figsize=(2, 2.4))
 
 xticks = list(np.arange(10, 210+1, 15))
 DISPLAY_POS = [10, 40, 115, 190]
@@ -87,10 +87,10 @@ def evaluate_scoring(scoring: str, color="black", linestyle="-"):
 		linestyle=linestyle,
 	)
 	plt.text(
-		170,
-		0.87-tick_i*0.035,
+		167,
+		0.835-tick_i*0.018,
 		f"{np.average(acc):.1%}",
-		fontsize=8
+		fontsize=9
 	)
 	tick_i+=1
 
@@ -107,12 +107,11 @@ plt.legend(
 	handlelength=1.5,
 	labelspacing=0.07 if args.group == "1" else 0.3,
 	framealpha=0,
-	loc=(0.12 if args.group == "1" else 0.21, 0),
+	loc=(0.08 if args.group == "1" else 0.17, 0),
 	markerfirst=False, handletextpad=0.2,
 )
-# plt.xticks(list(range(10, 210, 50))+[206])
-plt.xticks([10, 207])
-plt.xlabel("Subset size", labelpad=-5)
+plt.xticks(list(range(10, 210, 50))+[207])
+plt.xlabel("Subset size")
 
 plt.ylim(0.79, None)
 plt.yticks(

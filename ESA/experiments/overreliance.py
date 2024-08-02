@@ -35,7 +35,7 @@ per_progress = [
     for x_v in per_progress.values()
 ]
 
-plt.figure(figsize=(4, 1.2))
+plt.figure(figsize=(4, 2.2))
 
 plt.bar(
     range(len(per_progress)),
@@ -63,10 +63,10 @@ plt.bar(
 )
 
 plt.xticks(
-    [0, 20, 80, 100],
-    ["0%", "20%", "80%", "100%"],
+    [0, 20, 40, 60, 80, 100],
+    ["0%", "20%", "40%", "60%", "80%", "100%"],
 )
-plt.xlabel("Annotation progress", labelpad=-8)
+plt.xlabel("Annotation progress (start to finish)")
 plt.yticks([-1, 0, 1], ["+1", "0", "+1"])
 plt.ylabel("Segments")
 

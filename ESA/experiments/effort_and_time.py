@@ -68,7 +68,7 @@ print(
 )
 
 def plot_complex(to_average_users, scheme):
-    fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(2.5, 2), height_ratios=[1.5, 1])
+    fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(2.5, 3.5), height_ratios=[1.5, 1])
     to_average_users.sort(key=lambda x: x["time"])
 
     if scheme == "ESAAI":

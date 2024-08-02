@@ -70,7 +70,7 @@ system_colors_filter = ["black" if sys not in systems_mismatch_filter else ESA.f
 print(f"average score when 0 gemba errors: {np.average(scores_for_no_gemba_errors):.1f}")
 print(f"average score when 0 esaai errors: {np.average(scores_for_no_esaai_errors):.1f}")
 
-plt.figure(figsize=(2, 1.1))
+plt.figure(figsize=(2, 1.9))
 plt.scatter(
     system_scores_sub,
     system_scores_base,
@@ -87,7 +87,7 @@ plt.tight_layout(pad=0.1)
 plt.savefig("PAPER_ESAAI/generated_plots/filtering_with_gemba_sub.pdf")
 plt.show()
 
-plt.figure(figsize=(2, 1.1))
+plt.figure(figsize=(2, 1.9))
 plt.scatter(
     system_scores_filter,
     system_scores_base,
