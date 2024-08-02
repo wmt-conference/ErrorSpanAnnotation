@@ -43,4 +43,3 @@ for protocol in ["ESA", "ESAAI"]:
         f"{corr:.3f}",
         sep=" & ", end=" \\\\\n"
 	)
-    

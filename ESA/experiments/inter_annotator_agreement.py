@@ -57,7 +57,8 @@ def severity_matches(error, error2):
 
 
 def mqm_categories(df, protocol1, protocol2):
-    subdf = df[[f'{protocol1}_error_spans', f'{protocol2}_error_spans']].dropna()
+    subdf = df[[f'{protocol1}_error_spans',
+                f'{protocol2}_error_spans']].dropna()
     total = 0
     agreed_subcategories = 0
     overlapping_subcategories = 0
@@ -146,14 +147,19 @@ def mqm_categories(df, protocol1, protocol2):
 
 
 def get_iaa(df):
-    kendall = scipy.stats.kendalltau(df['score'], df['score_iaa'], variant="c")[0]
+    kendall = scipy.stats.kendalltau(
+        df['score'], df['score_iaa'], variant="c")[0]
     pearson = scipy.stats.pearsonr(df['score'], df['score_iaa'])[0]
     # Next calculate how frequently does the annotator agree if there is error or there is none
 
-    df[f'minor'] = df['error_spans'].apply(lambda x: len([xx for xx in x if xx['severity']=="minor"]) > 0)
-    df[f'IAA_minor'] = df['error_spans_iaa'].apply(lambda x: len([xx for xx in x if xx['severity']=="minor"]) > 0)
-    df[f'major'] = df['error_spans'].apply(lambda x: len([xx for xx in x if xx['severity']=="major"]) > 0)
-    df[f'IAA_major'] = df['error_spans_iaa'].apply(lambda x: len([xx for xx in x if xx['severity']=="major"]) > 0)
+    df[f'minor'] = df['error_spans'].apply(lambda x: len(
+        [xx for xx in x if xx['severity'] == "minor"]) > 0)
+    df[f'IAA_minor'] = df['error_spans_iaa'].apply(
+        lambda x: len([xx for xx in x if xx['severity'] == "minor"]) > 0)
+    df[f'major'] = df['error_spans'].apply(lambda x: len(
+        [xx for xx in x if xx['severity'] == "major"]) > 0)
+    df[f'IAA_major'] = df['error_spans_iaa'].apply(
+        lambda x: len([xx for xx in x if xx['severity'] == "major"]) > 0)
     df['error_spans'] = df['error_spans'].apply(lambda x: len(x) > 0)
     df['error_spans_iaa'] = df['error_spans_iaa'].apply(lambda x: len(x) > 0)
 
@@ -168,15 +174,12 @@ def get_iaa(df):
     return kendall, pearson, recall, recallmin, recallmaj
 
 
-def get_df_scores(df, protocoltype, iaa_type):
+def get_df_scores(df, protocoltype):
     protocol = protocoltype.replace("-mqm", "")
-    if iaa_type == "Intra AA":
-        iaa_protocol = f"{protocol}-IAA"
+    if protocol == "MQM":
+        iaa_protocol = "WMT-MQM"
     else:
-        if protocol == "MQM":
-            iaa_protocol = "WMT-MQM"
-        else:
-            iaa_protocol = f"{protocol}-2"
+        iaa_protocol = f"{protocol}-2"
     if protocol.endswith("-mqm"):
         subdf = df[[
             f'{protocol}-1_score_mqm',
@@ -185,13 +188,17 @@ def get_df_scores(df, protocoltype, iaa_type):
             f'{iaa_protocol}_error_spans',
         ]].dropna()
     else:
-        subdf = df[[f'{protocol}-1_score',
-                    f'{iaa_protocol}_score',
-                    f'{protocol}-1_error_spans',
-                    f'{iaa_protocol}_error_spans']].dropna()
+        subdf = df[[
+            f'{protocol}-1_score',
+            f'{iaa_protocol}_score',
+            f'{protocol}-1_error_spans',
+            f'{iaa_protocol}_error_spans'
+        ]].dropna()
 
     # rename columns to score vs score_iaa
-    subdf.columns = [f'score', f'score_iaa', f'error_spans', f'error_spans_iaa']
+    subdf.columns = [
+        f'score', f'score_iaa', f'error_spans', f'error_spans_iaa'
+    ]
     return subdf
 
 
@@ -201,55 +208,58 @@ def plot_confusion_plot(df, protocols):
     fig, axs = plt.subplots(1, columns, figsize=(2.3 * columns, 2.3))
     axs = axs.flatten()
     scores = {}
-    for iaa in ["Intra AA", "Inter AA"]:
-        for i, protocoltype in enumerate(protocols):
-            protocolname = protocoltype
-            scores[(iaa, protocolname)] = {}
+    for i, protocoltype in enumerate(protocols):
+        protocolname = protocoltype
+        scores[protocolname] = {}
 
-            subdf = get_df_scores(df, protocoltype, iaa)
+        subdf = get_df_scores(df, protocoltype)
 
-            kendall, pearson, recall, recall_minor, recall_major = get_iaa(subdf)
+        kendall, pearson, recall, recall_minor, recall_major = get_iaa(subdf)
 
-            scores[(iaa, protocolname)]["Kendall's Tau-c"] = f"{kendall:.3f}"
-            scores[(iaa, protocolname)]["Pearson"] = f"{pearson:.3f}"
-            scores[(iaa, protocolname)]["Error recall"] = f"{recall:.1f}\%"
-            scores[(iaa, protocolname)]["Minor e. recall"] = f"{recall_minor:.1f}\%"
-            scores[(iaa, protocolname)]["Major e. recall"] = f"{recall_major:.1f}\%"
+        scores[protocolname]["Kendall's Tau-c"] = f"{kendall:.3f}"
+        scores[protocolname]["Pearson"] = f"{pearson:.3f}"
+        scores[protocolname]["Error recall"] = f"{recall:.1f}\%"
+        scores[protocolname]["Minor e. recall"] = f"{recall_minor:.1f}\%"
+        scores[protocolname]["Major e. recall"] = f"{recall_major:.1f}\%"
 
-            if iaa == "Inter AA":
-                continue
+        subdf.plot.scatter(
+            x=f'score', y=f'score_iaa',
+            ax=axs[i], color="black", s=1
+        )
+        # axs[i].set_xlabel("")
+        axs[i].set_ylabel("")
+        axs[i].set_xlabel(protocolname.replace("ESAAI", r"ESA$^\mathrm{AI}$"))
 
-            subdf.plot.scatter(x=f'score', y=f'score_iaa', ax=axs[i], color="black", s=1)
-            # axs[i].set_xlabel("")
-            axs[i].set_ylabel("")
-            axs[i].set_xlabel(protocolname.replace("ESAAI", r"ESA$^\mathrm{AI}$"))
+        axs[i].add_patch(
+            Rectangle(
+                (0.04, 0.05), 0.7, 0.2,
+                facecolor='#ccca',
+                fill=True,
+                linewidth=0,
+                transform=axs[i].transAxes,
+            ))
 
-            axs[i].add_patch(
-                Rectangle(
-                    (0.04, 0.05), 0.7, 0.2,
-                    facecolor='#ccca',
-                    fill=True,
-                    linewidth=0,
-                    transform=axs[i].transAxes,
-                ))
+        axs[i].text(0.05, 0.05, f"Kendall={kendall:.3f}\nPearson={pearson:.3f}",
+                    transform=axs[i].transAxes, ha='left', va='bottom', weight='bold')
 
-            axs[i].text(0.05, 0.05, f"Kendall={kendall:.3f}\nPearson={pearson:.3f}", transform=axs[i].transAxes, ha='left', va='bottom', weight='bold')
-
-    plt.suptitle("Intra-annotator agreement")
+    plt.suptitle("Inter-annotator agreement")
     plt.tight_layout(pad=0.1)
     df = pd.DataFrame(scores)
 
+
     # save the plot
     if "ESAAI" in protocols:
-        plt.savefig("PAPER_ESAAI/generated_plots/intra_annotator_agreement.pdf")
-        df.to_latex("PAPER_ESAAI/generated_plots/intra_annotator_agreement.tex", escape=False, multicolumn=True, column_format="l|ll|ll")
+        plt.savefig("PAPER_ESAAI/generated_plots/inter_annotator_agreement.pdf")
+        df.to_latex("PAPER_ESAAI/generated_plots/inter_annotator_agreement.tex",
+                    escape=False, multicolumn=True, column_format="l|ll|ll")
     else:
-        plt.savefig("PAPER_ESA/generated_plots/intra_annotator_agreement.pdf")
-        df.to_latex("PAPER_ESA/generated_plots/intra_annotator_agreement.tex", escape=False, multicolumn=True, column_format="l|ll|ll")
+        plt.savefig("PAPER_ESA/generated_plots/inter_annotator_agreement.pdf")
+        df.to_latex("PAPER_ESA/generated_plots/inter_annotator_agreement.tex",
+                    escape=False, multicolumn=True, column_format="l|ll|ll")
     plt.show()
 
 
-def IntraAnnotatorAgreement(annotations):
+def InterAnnotatorAgreement(annotations):
     ESA.figutils.matplotlib_default()
     df = annotations.get_view(only_overlap=True).dropna()
 
@@ -257,12 +267,6 @@ def IntraAnnotatorAgreement(annotations):
     plot_confusion_plot(df, ["ESA", "ESAAI", "MQM"])
 
 
-    a = mqm_categories(df, "MQM-1", "MQM-IAA")
-    c = mqm_categories(df, "MQM-1", "WMT-MQM")
-
-    df = pd.DataFrame([a, c], index=["Intra AA", "Inter AA"]).transpose()
-    df.to_latex("PAPER_ESA/generated_plots/mqm_categories.tex", escape=False)
-
 if __name__ == "__main__":
     from ESA.annotation_loader import AnnotationLoader
-    IntraAnnotatorAgreement(AnnotationLoader(refresh_cache=False))
+    InterAnnotatorAgreement(AnnotationLoader(refresh_cache=False))
