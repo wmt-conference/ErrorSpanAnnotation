@@ -19,6 +19,11 @@ python3 manage.py StartNewCampaign ${ROOT}/data/wmt24_general/appraise/manifest_
     --batches-json ${ROOT}/data/wmt24_general/batches/wave0.en-cs.json \
     --csv-output ${ROOT}/data/wmt24_general/appraise/credentials_wave0encs.csv;
 
+# just WAVE0 EN-JA
+python3 manage.py StartNewCampaign ${ROOT}/data/wmt24_general/appraise/manifest_wave0enja.json \
+    --batches-json ${ROOT}/data/wmt24_general/batches/wave0.en-ja.json \
+    --csv-output ${ROOT}/data/wmt24_general/appraise/credentials_wave0enja.csv;
+
 # whole WAVE0
 python3 manage.py StartNewCampaign ${ROOT}/data/wmt24_general/appraise/manifest_wave0.json \
     --batches-json ${ROOT}/data/wmt24_general/batches/wave0.*.json \
@@ -29,6 +34,11 @@ python3 manage.py StartNewCampaign ${ROOT}/data/wmt24_general/appraise/manifest_
     --batches-json ${ROOT}/data/wmt24_general/batches/wave1.*.json \
     --csv-output ${ROOT}/data/wmt24_general/appraise/credentials_wave1.csv;
 
+
+python3 manage.py StartNewCampaign ${ROOT}/data/wmt24_general/appraise/manifest_wave0.json \
+    --batches-json ${ROOT}/data/wmt24_general/batches/wave0.*.json \
+    --csv-output ${ROOT}/data/wmt24_general/appraise/credentials_wave0_codes.csv \
+    --task-confirmation-tokens;
 
 # start
 python3 manage.py runserver;
