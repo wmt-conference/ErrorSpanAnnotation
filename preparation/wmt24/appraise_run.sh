@@ -19,6 +19,11 @@ python3 manage.py StartNewCampaign ${ROOT}/data/wmt24_general/appraise/manifest_
     --batches-json ${ROOT}/data/wmt24_general/batches/wave0.en-cs.json \
     --csv-output ${ROOT}/data/wmt24_general/appraise/credentials_wave0encs.csv;
 
+# just WAVE2 EN-CS
+python3 manage.py StartNewCampaign ${ROOT}/data/wmt24_general/appraise/manifest_wave2encs.json \
+    --batches-json ${ROOT}/data/wmt24_general/batches/wave2.en-cs.json \
+    --csv-output ${ROOT}/data/wmt24_general/appraise/credentials_wave2encs.csv;
+
 # just WAVE0 EN-JA
 python3 manage.py StartNewCampaign ${ROOT}/data/wmt24_general/appraise/manifest_wave0enja.json \
     --batches-json ${ROOT}/data/wmt24_general/batches/wave0.en-ja.json \

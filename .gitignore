@@ -1,6 +1,7 @@
 .pactera_mapping.csv
 cache_protocols*
 .history*
+retral-wave*.zip
 
 # added by zouharvi
 demo.ipynb

@@ -31,6 +31,10 @@ args.add_argument("--langs", default="en-de")
 args.add_argument("--wave", type=int, default=0)
 args = args.parse_args()
 
+# it's either the first or the second wave
+# use the rest for seeding
+doc_seed = args.wave // 2
+
 SEC_TUTORIAL = json.load(open(f"data/tutorial/de-en.esa.json", "r"))
 SYSTEMS = json.load(open(f"data/wmt24_general/systems.json", "r"))[args.langs]
 BAD_COUNT = 12
@@ -95,14 +99,15 @@ docs = set(lines_doc)
 docs.remove(None)
 docs = list(docs)
 docs.sort()
-random.Random(0).shuffle(docs)
+random.Random(doc_seed).shuffle(docs)
 
 doc_line_count = collections.Counter(lines_doc)
 doc_line_count.pop(None)
 
 # take first or second part based on the wave
-docs = docs[args.wave*len(docs)//2:(args.wave+1)*len(docs)//2]
+docs = docs[(args.wave % 2)*len(docs)//2:((args.wave % 2)+1)*len(docs)//2]
 docs = list(set(docs))
+# stable ordering
 docs.sort()
 random.Random(0).shuffle(docs)
 
@@ -228,8 +233,9 @@ while docs_queue:
     # add quality control
     task_docs_available = copy.deepcopy(task_docs[1:])
     while task_docs_len() < 100:
-        task_docs.append(quality_control.create_bad_document(task_docs_available, args.langs))
-        
+        task_docs.append(quality_control.create_bad_document(
+            task_docs_available, args.langs))
+
     # trim the last doc to 100
     task_docs[-1] = task_docs[-1][:100 - (task_docs_len()-len(task_docs[-1]))]
 
@@ -270,7 +276,8 @@ while docs_queue:
 
 word_counts = []
 for task_i, task in enumerate(tasks):
-    word_count = 100*np.average([len(x['sourceText'].split()) for x in task['items'] if '</video>' not in x['sourceText']])
+    word_count = 100*np.average([len(x['sourceText'].split())
+                                for x in task['items'] if '</video>' not in x['sourceText']])
     word_counts.append(word_count)
     print(
         f"Task {task_i:>3}: "
@@ -283,7 +290,8 @@ for task_i, task in enumerate(tasks):
     )
 word_counts_avg = np.average(word_counts)
 print(f"\nAVG word count: {word_counts_avg:.0f}")
-print(f"MAE from avg word count: {np.average([abs(x-word_counts_avg) for x in word_counts]):.0f}")
+print(
+    f"MAE from avg word count: {np.average([abs(x-word_counts_avg) for x in word_counts]):.0f}")
 
 json.dump(
     tasks,
