@@ -120,6 +120,7 @@ for langs in LANGS:
     else:
         pass
 
+print(f"Average segment time: {np.average(list(doc_times.values())):.1f}s")
 
 plt.figure(figsize=(4, 2))
 times_all = np.array(list(doc_times.values()))
