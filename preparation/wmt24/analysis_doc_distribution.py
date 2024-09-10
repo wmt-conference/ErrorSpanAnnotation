@@ -98,18 +98,21 @@ for langs in LANGS:
     lang1 = LANG_2_TO_NATURAL[lang1]
     lang2 = LANG_2_TO_NATURAL[lang2]
 
-    print(
-        r"\tto{" + lang1 + r"}{" + lang2 + r"}",
-        OUTPUT_LINECOUNT_NEW,
-        len(doc_counter),
-        len(SYSTEMS),
-        "TODO",
-        "TODO",
-        "TODO",
-        "TODO",
-        sep=" & ",
-        end=r" \\"+"\n"
-    )
+    if langs not in {"en-de", "ja-zh"}:
+        print(
+            r"\tto{" + lang1 + r"}{" + lang2 + r"}",
+            OUTPUT_LINECOUNT_NEW,
+            len(doc_counter),
+            len(SYSTEMS),
+            "TODO",
+            "TODO",
+            "TODO",
+            "TODO",
+            sep=" & ",
+            end=r" \\"+"\n"
+        )
+    else:
+        pass
 
 for k, v in OUTPUT_TO_AVG.items():
     print(f"{k:>20}", f"{np.average(v):.2f}", f"({np.min(v):.2f}, {np.max(v):.2f})",)
