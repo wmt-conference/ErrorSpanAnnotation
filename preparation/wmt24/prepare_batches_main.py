@@ -70,6 +70,8 @@ doc_counter = collections.Counter()
 for line_i, line in enumerate(lines_doc):
     if doc_counter[line] >= 10:
         lines_doc[line_i] = None
+    # NOTE: are we counting the extra lines here even when we overflow?
+    # hopefully we don't use doc_counter later on!
     doc_counter[line] += 1
 
 # Python supports this!
