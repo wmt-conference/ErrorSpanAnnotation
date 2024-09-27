@@ -58,7 +58,7 @@ data_zhen_clusters = {
 
 
 # generate scatter plot for each set of languages, make each plot exactly square
-fig, ax = plt.subplots(1, 2, figsize=(9, 3))
+fig, ax = plt.subplots(2, 1, figsize=(4.5, 6))
 
 df_zhen = pd.DataFrame(data_zhen)
 df_ende = pd.DataFrame(data_ende)
@@ -82,6 +82,6 @@ for cluster in data_zhen_clusters["DA+SQM"]:
     ax[0].axvline(cluster, color="#bc272d", linestyle="--")
 for cluster in data_zhen_clusters["MQM"]:
     ax[0].axhline(cluster, color="#0000a2", linestyle="--")
-# save the plot into "generated_plots/wmt23_mqm_vs_dasqm.pdf" folder into pdf format
+# save the plot into "PAPER_ESA/generated_plots/wmt23_mqm_vs_dasqm.pdf" folder into pdf format
 plt.tight_layout()
-plt.savefig("generated_plots/wmt23_mqm_vs_dasqm.pdf")
+plt.savefig("PAPER_ESA/generated_plots/wmt23_mqm_vs_dasqm.pdf")
