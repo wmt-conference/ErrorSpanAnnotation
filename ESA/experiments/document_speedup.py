@@ -65,13 +65,13 @@ for times_user in times_users:
 
 
 plt.gca().add_patch(patches.Rectangle(
-    (0, 10), 20, 200,
+    (0, 10), 15, 200,
     linewidth=0, edgecolor=None,
     facecolor='#8d8a')
 )
 plt.text(
-    10, 105,
-    s="learning",
+    7.5, 105,
+    s="learn",
     color="#050",
     ha="center",
     fontsize=9,
@@ -91,7 +91,7 @@ plt.plot(
 
 plt.ylim(10, 120)
 
-plt.title(f"{args.scheme.replace('ESAAI', ESA.utils.PROTOCOL_DEFINITIONS['ESAAI']['name'])}  ({slope:.2f}s per segment)")
+plt.title(f"{args.scheme.replace('ESAAI', ESA.utils.PROTOCOL_DEFINITIONS['ESAAI']['name'])}  ({slope_init:.2f}s per segment)")
 plt.ylabel("Segment time (s)", labelpad=-2)
 plt.xticks(
     [0, 20, 80, 100],

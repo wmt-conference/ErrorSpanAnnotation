@@ -11,7 +11,7 @@ In order to run the scripts, you need to "install" the package with:
 pip3 install -e .
 ```
 
-Alternatively you can just run scripts from `main.py`.
+Alternatively you can just run scripts from `scripts/`.
 Further instructions WIP.
 
 ## Cite
