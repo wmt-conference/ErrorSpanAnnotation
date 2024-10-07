@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 data_all = [
     {**line, "wave": wave}
-    for wave in range(1, 4)
+    for wave in [0, 1, 2, 3, 5, 8]
     for line in list(csv.DictReader(
         open(f"data/wmt24_general/humeval/wave{wave}.csv", "r"),
         fieldnames=["uid", "system", "itemID", "type", "lang1", "lang2", "score", "doc", "unk", "esa", "time_start", "time_end"]

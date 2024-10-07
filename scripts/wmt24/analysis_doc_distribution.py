@@ -49,7 +49,7 @@ data_all = [
 ]
 data_all = [
     line for line in data_all
-    if "tutorial" not in line["doc"]
+    if "tutorial" not in line["doc"] and "#dup" not in line["doc"] and "#incomplete" not in line["doc"]
 ]
 print("TOTAL ANNOTATIONS", len(data_all))
 
