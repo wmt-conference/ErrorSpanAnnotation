@@ -44,3 +44,5 @@ and
       url={https://arxiv.org/abs/2406.12419}, 
 }
 ```
+
+<img src="misc/poster_ESA.png" width="900wv">
