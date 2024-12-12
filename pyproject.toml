@@ -1,5 +1,5 @@
 [project]
-name = "ErrorSpanAnnotations"
+name = "ErrorSpanAnnotation"
 version = "0.0.0"
 dependencies = [
     "matplotlib",

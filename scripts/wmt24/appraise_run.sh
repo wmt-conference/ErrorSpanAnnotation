@@ -6,7 +6,7 @@ python3 manage.py migrate;
 DJANGO_SUPERUSER_USERNAME=test DJANGO_SUPERUSER_PASSWORD=test python3 manage.py createsuperuser --noinput --email "test@test.test";
 python3 manage.py collectstatic --no-post-process;
 
-export ROOT="/home/vilda/ErrorSpanAnnotations";
+export ROOT="/home/vilda/ErrorSpanAnnotation";
 export ROOT="../";
 
 # just WAVE0 EN-DE
