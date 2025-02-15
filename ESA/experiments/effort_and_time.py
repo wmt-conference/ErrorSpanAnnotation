@@ -1,5 +1,5 @@
 from ESA.annotation_loader import AnnotationLoader
-df = AnnotationLoader(refresh_cache=False).get_view(["LLM", "ESA-1", "ESAAI-1", "ESA-2", "ESAAI-2"], only_overlap=False).dropna()
+df = AnnotationLoader(refresh_cache=False).get_view(["LLM", "MQM-1", "ESA-1", "ESAAI-1", "ESA-2", "ESAAI-2"], only_overlap=False).dropna()
 import numpy as np
 import collections
 import matplotlib.pyplot as plt
@@ -39,6 +39,7 @@ def get_averages(protocol):
 
 data_esaai = get_averages("ESAAI-1") + get_averages("ESAAI-2")
 data_esa = get_averages("ESA-1") + get_averages("ESA-2")
+data_mqm = get_averages("MQM-1")
 
 user = {k:np.average([x[k] for x in data_esaai]) for k in data_esaai[0].keys()}
 print(
@@ -56,6 +57,19 @@ print(
 user = {k:np.average([x[k] for x in data_esa]) for k in data_esa[0].keys()}
 print(
     "ESA  ",
+    f"{user['time']:.1f}s",
+    f"{user['time']/user['span_final']:.1f}s/span",
+    f"{user['span_gemba']:.1f}",
+    f"{user['span_kept']:.1f}",
+    f"{user['span_removed']:.1f}",
+    f"{user['span_added']:.1f}",
+    f"{user['span_final']:.1f}",
+    sep = " & ",
+    end=" \\\\\n"
+)
+user = {k:np.average([x[k] for x in data_mqm]) for k in data_mqm[0].keys()}
+print(
+    "MQM  ",
     f"{user['time']:.1f}s",
     f"{user['time']/user['span_final']:.1f}s/span",
     f"{user['span_gemba']:.1f}",
