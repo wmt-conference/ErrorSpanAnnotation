@@ -4,6 +4,8 @@
 [![Paper ESA](https://img.shields.io/badge/📜%20paper_ESA-481.svg)](https://aclanthology.org/2024.wmt-1.131/)
 &nbsp;
 [![Paper ESAAI](https://img.shields.io/badge/📜%20paper_ESAAI-481.svg)](https://arxiv.org/abs/2406.12419)
+&nbsp;
+[![YouTube video](https://img.shields.io/badge/🎥%20YouTube%20video-F00.svg)](https://www.youtube.com/watch?v=995GDufPBw8)
 
 This repository contains the analysis of Error Span Annotations (ESA) and ESA<super>AI</super> which are human protocols for machine translation evaluation.
 The protocols themselves are implemented in [Appraise](https://github.com/AppraiseDev/Appraise).
