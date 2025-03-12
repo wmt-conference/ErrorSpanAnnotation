@@ -73,6 +73,7 @@ and
 ```
 
 <img src="misc/poster_ESA.png" width="900wv">
+<img src="misc/poster_ESAAI.png" width="900wv">
 
 
 ## Running the ESA/ESA<super>AI</super> interface
