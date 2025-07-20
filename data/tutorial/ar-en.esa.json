@@ -1,0 +1,122 @@
+[
+  {
+    "mqm": {
+      "tutorial": {
+        "instruction": "This translation seems to be all correct. Please use the slider to set the quality to 100%.",
+        "score_target": 100
+      },
+      "payload": []
+    },
+    "documentID": "ar-en-tutorial1",
+    "sourceID": "ar-en-tutorial1",
+    "targetID": "ar-en-tutorial1",
+    "itemType": "TGT",
+    "sourceText": "ركض الكلب إلى الخارج.",
+    "targetText": "The dog ran outside.",
+    "itemID": 1000000
+  },
+  {
+    "mqm": {
+      "tutorial": {
+        "instruction": "The word <u>\"walked\"</u> is incorrect. Mark it minor error (light pink) using the instructions above and move the slider to 80%.",
+        "mqm_target": [
+          {
+            "start_i": 8,
+            "end_i": 14,
+            "severity": "minor"
+          }
+        ]
+      },
+      "payload": []
+    },
+    "documentID": "ar-en-tutorial1",
+    "sourceID": "ar-en-tutorial1",
+    "targetID": "ar-en-tutorial1",
+    "itemType": "TGT",
+    "sourceText": "ركض الكلب إلى الخارج.",
+    "targetText": "The dog walked outside.",
+    "itemID": 1000001
+  },
+  {
+    "mqm": {
+      "tutorial": {
+        "instruction": "The words <u>\"stayed inside\"</u> are very wrong. Mark them using the instructions and raise its severity to <u>major</u>. Then move the slider to 20%.",
+        "mqm_target": [
+          {
+            "start_i": 8,
+            "end_i": 21,
+            "severity": "major"
+          }
+        ]
+      },
+      "payload": []
+    },
+    "documentID": "ar-en-tutorial1",
+    "sourceID": "ar-en-tutorial1",
+    "targetID": "ar-en-tutorial1",
+    "itemType": "TGT",
+    "sourceText": "ركض الكلب إلى الخارج.",
+    "targetText": "The dog stayed inside.",
+    "itemID": 1000002
+  },
+  {
+    "mqm": {
+      "tutorial": {
+        "instruction": "While the translation is technically correct, it does not sound very natural. Don't mark any erroneous words but at the end, use the slider to evaluate the overall translation quality as around 70%.",
+        "score_target": 70
+      },
+      "payload": []
+    },
+    "documentID": "ar-en-tutorial2",
+    "sourceID": "ar-en-tutorial2",
+    "targetID": "ar-en-tutorial2",
+    "itemType": "TGT",
+    "sourceText": "على الرغم من أن القطط بقيت في الخارج طوال الليل، إلا أنها لم تكن تشعر بالبرد.",
+    "targetText": "Although the cats were outside over the night, they did not get cold.",
+    "itemID": 1000003
+  },
+  {
+    "mqm": {
+      "tutorial": {
+        "instruction": "The word for <u>dog</u> is not present in the translation. Mark the <u>[MISSING]</u> text with major severity. Move the slider to 5%.",
+        "mqm_target": [
+          {
+            "start_i": "missing",
+            "end_i": "missing",
+            "severity": "major"
+          }
+        ]
+      },
+      "payload": []
+    },
+    "documentID": "ar-en-tutorial2",
+    "sourceID": "ar-en-tutorial2",
+    "targetID": "ar-en-tutorial2",
+    "itemType": "TGT",
+    "sourceText": "ركض الكلب إلى الخارج.",
+    "targetText": "The walked outside.",
+    "itemID": 1000004
+  },
+  {
+    "mqm": {
+      "tutorial": {
+        "instruction": "The word <u>\"ran\"</u> is mistakenly marked as incorrect. Fix it by removing it according to the instructions. Move the slider to 100%.",
+        "mqm_target": []
+      },
+      "payload": [
+        {
+          "start_i": 8,
+          "end_i": 11,
+          "severity": "minor"
+        }
+      ]
+    },
+    "documentID": "ar-en-tutorial2",
+    "sourceID": "ar-en-tutorial2",
+    "targetID": "ar-en-tutorial2",
+    "itemType": "TGT",
+    "sourceText": "ركض الكلب إلى الخارج.",
+    "targetText": "The dog ran outside.",
+    "itemID": 1000005
+  }
+]

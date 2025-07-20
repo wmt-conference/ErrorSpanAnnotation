@@ -7,9 +7,9 @@
             },
             "payload": []
         },
-        "documentID": "ende-tutorial1",
-        "sourceID": "ende-tutorial1",
-        "targetID": "ende-tutorial1",
+        "documentID": "de-en-tutorial1",
+        "sourceID": "de-en-tutorial1",
+        "targetID": "de-en-tutorial1",
         "itemType": "TGT",
         "sourceText": "Der Hund ist rausgerannt.",
         "targetText": "The dog ran outside.",
@@ -29,9 +29,9 @@
             },
             "payload": []
         },
-        "documentID": "ende-tutorial1",
-        "sourceID": "ende-tutorial1",
-        "targetID": "ende-tutorial1",
+        "documentID": "de-en-tutorial1",
+        "sourceID": "de-en-tutorial1",
+        "targetID": "de-en-tutorial1",
         "itemType": "TGT",
         "sourceText": "Der Hund ist rausgerannt.",
         "targetText": "The dog walked outside.",
@@ -51,9 +51,9 @@
             },
             "payload": []
         },
-        "documentID": "ende-tutorial1",
-        "sourceID": "ende-tutorial1",
-        "targetID": "ende-tutorial1",
+        "documentID": "de-en-tutorial1",
+        "sourceID": "de-en-tutorial1",
+        "targetID": "de-en-tutorial1",
         "itemType": "TGT",
         "sourceText": "Der Hund ist rausgerannt.",
         "targetText": "The dog stayed inside.",
@@ -67,18 +67,18 @@
             },
             "payload": []
         },
-        "documentID": "ende-tutorial2",
-        "sourceID": "ende-tutorial2",
-        "targetID": "ende-tutorial2",
+        "documentID": "de-en-tutorial2",
+        "sourceID": "de-en-tutorial2",
+        "targetID": "de-en-tutorial2",
         "itemType": "TGT",
-        "sourceText": "Although the cats stayed outside overnight, they were not cold.",
-        "targetText": "Obwohl die Katzen die Nacht über im Freien verharrten, erfuhren sie keine Kälte.",
+        "sourceText": "Obwohl die Katzen die Nacht draußen verbrachten, war ihnen nicht kalt.",
+        "targetText": "Although the cats were outside over the night, they did not get cold.",
         "itemID": 1000003
     },
     {
         "mqm": {
             "tutorial": {
-                "instruction": "The word <u>\"Hund\" (dog)</u> is not present in the translation. Mark the <u>[MISSING]</u> text with major severity. Move the slider to 5%.",
+                "instruction": "The word for <u>dog</u> is not present in the translation. Mark the <u>[MISSING]</u> text with major severity. Move the slider to 5%.",
                 "mqm_target": [
                     {
                         "start_i": "missing",
@@ -89,9 +89,9 @@
             },
             "payload": []
         },
-        "documentID": "ende-tutorial2",
-        "sourceID": "ende-tutorial2",
-        "targetID": "ende-tutorial2",
+        "documentID": "de-en-tutorial2",
+        "sourceID": "de-en-tutorial2",
+        "targetID": "de-en-tutorial2",
         "itemType": "TGT",
         "sourceText": "Der Hund ist rausgerannt.",
         "targetText": "The walked outside.",
@@ -111,9 +111,9 @@
                     "severity": "minor"
                 }]
         },
-        "documentID": "ende-tutorial2",
-        "sourceID": "ende-tutorial2",
-        "targetID": "ende-tutorial2",
+        "documentID": "de-en-tutorial2",
+        "sourceID": "de-en-tutorial2",
+        "targetID": "de-en-tutorial2",
         "itemType": "TGT",
         "sourceText": "Der Hund ist rausgerannt.",
         "targetText": "The dog ran outside.",
