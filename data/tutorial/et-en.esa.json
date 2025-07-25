@@ -40,7 +40,7 @@
   {
     "mqm": {
       "tutorial": {
-        "instruction": "The words <u>\"stayed inside\"</u> are very wrong. Mark them using the instructions and raise its severity to <u>major</u>. Then move the slider to 20%.",
+        "instruction": "The words <u>\"stayed inside\"</u> are very wrong. Mark them using the instructions and raise its severity to <u>major</u>. Then move the slider to 10%.",
         "mqm_target": [
           {
             "start_i": 8,
